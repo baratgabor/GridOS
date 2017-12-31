@@ -83,7 +83,8 @@ public Program()
         new GridOSDisplay(new CommandMenu())
     );
 
-    // for showing command menu. optional.
+    // for showing command menu; optional
+    // you can register multiple textpanels, but currently all of them will show the same content
     gridOS.RegisterTextPanel(gridOSDisplay);
 
     ExampleModule exampleModule = new ExampleModule();
