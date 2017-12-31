@@ -1,7 +1,7 @@
 # GridOS
 Modular multitasking and command handling ingame script for Space Engineers. This script provides a framework for creating separate code modules to run on a single Programmable Block.
 
-Experimental version, frequent changes. Primarily made for my own use.
+Experimental version; frequent, breaking changes. Primarily made for my own use.
 
 Initial documentation; will be expanded later.
 
