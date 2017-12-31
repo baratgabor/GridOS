@@ -61,3 +61,32 @@ public class ExampleModule : IModule, ICommandPublisher, IUpdateSubscriber
     }
 }
 ```
+
+## Instantiating the framework
+The following example shows the current instantiation chain of the framework. **Note that this is very temporary, and included here only for the sake of completeness.** Most of the dependency instantiation will be moved inside the class to make it easier to use.
+
+```csharp
+private GridOS gridOS;
+
+public Program()
+{
+    Func<UpdateFrequency> _updateFrequencyGetter = () => Runtime.UpdateFrequency;
+    Action<UpdateFrequency> _updateFrequencySetter = (x) => Runtime.UpdateFrequency = x;
+
+    IMyTextPanel gridOSDisplay = GridTerminalSystem.GetBlockWithName("GridOSDisplay") as IMyTextPanel;
+
+    gridOS = new GridOS(
+        Echo,
+        Runtime,
+        new UpdateDispatcherAndController1(Echo, _updateFrequencyGetter, _updateFrequencySetter),
+        new CommandDispatcher(),
+        new GridOSDisplay(new CommandMenu())
+    );
+
+    // for showing command menu. optional.
+    gridOS.RegisterTextPanel(gridOSDisplay);
+
+    ExampleModule exampleModule = new ExampleModule();
+    gridOS.RegisterModule(exampleModule);
+}
+```
