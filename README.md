@@ -62,8 +62,8 @@ public class ExampleModule : IModule, ICommandPublisher, IUpdateSubscriber
 }
 ```
 
-## Instantiating the framework
-The following example shows the current instantiation chain of the framework. **Note that this is very temporary, and included here only for the sake of completeness.** Most of the dependency instantiation will be moved inside the class to make it easier to use.
+## Instantiating the framework and registering a module
+The following example shows the current instantiation chain of the framework, along with the registration of a single module. **Note that this is very temporary, and included here only for the sake of completeness.** Most of the dependency instantiation will be moved inside the class to make it easier to use.
 
 ```csharp
 private GridOS gridOS;
