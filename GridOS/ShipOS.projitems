@@ -6,7 +6,7 @@
     <SharedGUID>1ec535ae-8123-4319-8921-b9cf5e62559e</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>ShipOS</Import_RootNamespace>
+    <Import_RootNamespace>GridOS</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ObservableUpdateFrequency.cs" />
