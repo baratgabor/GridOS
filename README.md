@@ -1,7 +1,7 @@
 # GridOS
 Modular multitasking and command handling ingame script for Space Engineers. This script provides a framework for creating separate code modules to run on a single Programmable Block.
 
-Experimental version, frequent changes. Primarily made for my own use.
+Experimental version; frequent, breaking changes. Primarily made for my own use.
 
 Initial documentation; will be expanded later.
 
@@ -59,5 +59,35 @@ public class ExampleModule : IModule, ICommandPublisher, IUpdateSubscriber
     {
         // Do something when command is called
     }
+}
+```
+
+## Instantiating the framework and registering a module
+The following example shows the current instantiation chain of the framework, along with the registration of a single module. **Note that this is very temporary, and included here only for the sake of completeness.** Most of the dependency instantiation will be moved inside the class to make it easier to use.
+
+```csharp
+private GridOS gridOS;
+
+public Program()
+{
+    Func<UpdateFrequency> _updateFrequencyGetter = () => Runtime.UpdateFrequency;
+    Action<UpdateFrequency> _updateFrequencySetter = (x) => Runtime.UpdateFrequency = x;
+
+    IMyTextPanel gridOSDisplay = GridTerminalSystem.GetBlockWithName("GridOSDisplay") as IMyTextPanel;
+
+    gridOS = new GridOS(
+        Echo,
+        Runtime,
+        new UpdateDispatcherAndController1(Echo, _updateFrequencyGetter, _updateFrequencySetter),
+        new CommandDispatcher(),
+        new GridOSDisplay(new CommandMenu())
+    );
+
+    // for showing command menu; optional
+    // you can register multiple textpanels, but currently all of them will show the same content
+    gridOS.RegisterTextPanel(gridOSDisplay);
+
+    ExampleModule exampleModule = new ExampleModule();
+    gridOS.RegisterModule(exampleModule);
 }
 ```
