@@ -36,7 +36,12 @@ namespace IngameScript
             private int _selectedDisplayComponentIndex = 0;
             private IDisplayComponent _activeDisplayComponent => _displayComponents[_selectedDisplayComponentIndex];
             private List<IMyTextPanel> _textPanels = new List<IMyTextPanel>();
-            private Dictionary<int, DisplayCommand> _numericalCommandToDisplayCommand = new Dictionary<int, DisplayCommand>();
+            private Dictionary<int, DisplayCommand> _numericalCommandToDisplayCommand = new Dictionary<int, DisplayCommand>()
+            {
+                { 2, DisplayCommand.Up },
+                { 3, DisplayCommand.Down },
+                { 4, DisplayCommand.Select }
+            };
 
             public GridOSDisplay(CommandMenu commandMenu)
             {
@@ -83,6 +88,9 @@ namespace IngameScript
 
             public void ProcessCommand(int numericalCommand)
             {
+                if (!_numericalCommandToDisplayCommand.ContainsKey(numericalCommand))
+                    return;
+
                 _activeDisplayComponent.ProcessCommand(_numericalCommandToDisplayCommand[numericalCommand]);
             }
 
