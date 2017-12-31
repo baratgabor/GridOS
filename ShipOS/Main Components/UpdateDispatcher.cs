@@ -18,8 +18,13 @@ namespace IngameScript
 {
     partial class Program
     {
-        class UpdateDispatcherAndController : IUpdateDispatcherAndController
+        /// <summary>
+        /// Your friendly class responsible for executing the appropriate modules at each update cycle. Also handles modules' UpdateFrequency changes, and establishes and sets the base UpdateFrequency for the Programmable Block.
+        /// This is Strategy1, optimized for efficiently running large number of components with the same UpdateFrequency. Modules' UpdateFrequency changes are relatively expensive with this strategy.
+        /// </summary>
+        class UpdateDispatcherAndController1 : IUpdateDispatcherAndController
         {
+            // TODO: replace dictionary with List<KeyValuePair>, since we're iterating it now
             private Dictionary<UpdateType, List<IUpdateSubscriber>> _moduleLists = new Dictionary<UpdateType, List<IUpdateSubscriber>>();
             private List<UpdateFrequency> _allUpdateFrequencies = new List<UpdateFrequency>
             {
@@ -35,7 +40,7 @@ namespace IngameScript
             private Action<string> _echo;
             private ProgressIndicator _progress = new ProgressIndicator();
 
-            public UpdateDispatcherAndController(Action<string> echo, Func<UpdateFrequency> updateFrequencyGetter, Action<UpdateFrequency> updateFrequencySetter)
+            public UpdateDispatcherAndController1(Action<string> echo, Func<UpdateFrequency> updateFrequencyGetter, Action<UpdateFrequency> updateFrequencySetter)
             {
                 _echo = echo;
                 _updateFrequencyGetter = updateFrequencyGetter;
@@ -132,32 +137,22 @@ namespace IngameScript
 
             private void HandleModuleUpdateFrequencyChanges(ObservableUpdateFrequency obsUpdFreqOfModule, UpdateFrequency oldUpdateFrequency, UpdateFrequency newUpdateFrequency)
             {
-                _echo("!Module requesting UpdateFrequency change.");
-                // Remember that ObservableUpdateFrequency "identifies" the modules; provided you saved the modules in a dictionary where ObservableUpdateFrequency is the key.
-                // Not sure if this is a good way to go... Need to think about it.
-
-                _echo("- Step #1");
+                // TODO: Make sure the logic is correct here, and executes per expectations in all scenarios...
 
                 // Get module's old UpdateType from its old UpdateFrequency
                 UpdateType oldUpdateType = ConvertUpdateFrequency(oldUpdateFrequency);
+
                 // Find module based on its UpdateFrequency property (which is an object)
                 IUpdateSubscriber module = _moduleLists[oldUpdateType].Find((x) => x.UpdateFrequency == obsUpdFreqOfModule);
-
-                _echo("- Step #2");
-
+                
                 // Remove module from the old update tier list, and remove the list too if it became empty
                 Remove(module, _moduleLists[oldUpdateType], oldUpdateType);
-
-                _echo("- Step #3");
-
+                
                 // Re-add module to new update tier list (basically register again), using the new setting inside its UpdateFrequency property
                 Add(module);
-
-                _echo("- Step #4");
-
+                
+                // Recalculate master update freq.
                 UpdateMasterUpdateFrequency();
-
-                _echo("!UpdateFrequency change processed.");
             }
 
             private UpdateType ConvertUpdateFrequency(UpdateFrequency updateFrequency)
@@ -178,8 +173,8 @@ namespace IngameScript
         }
 
         /// <summary>
-        /// Your friendly class responsible for executing the appropriate modules at each update cycle.
-        /// Also handles modules' UpdateFrequency changes, and establishes and sets the base UpdateFrequency for the Programmable Block.
+        /// Your friendly class responsible for executing the appropriate modules at each update cycle. Also handles modules' UpdateFrequency changes, and establishes and sets the base UpdateFrequency for the Programmable Block.
+        /// This is Strategy2, with simplified, flat storage, runs marginally slower, but difference is negligible with low number of modules. Modules' UpdateFrequency changes are cheap with this strategy.
         /// </summary>
         class UpdateDispatcherAndController2 : IUpdateDispatcherAndController
         {
@@ -247,6 +242,7 @@ namespace IngameScript
 
             private void HandleModuleUpdateFrequencyChanges(ObservableUpdateFrequency obsUpdFreqOfModule, UpdateFrequency oldUpdateFrequency, UpdateFrequency newUpdateFrequency)
             {
+                // Yep, we don't need any of the passed data here.
                 UpdateMasterUpdateFrequency();
             }
         }

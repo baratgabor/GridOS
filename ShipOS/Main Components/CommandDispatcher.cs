@@ -18,6 +18,9 @@ namespace IngameScript
 {
     partial class Program
     {
+        /// <summary>
+        /// Responsible for registering lists of commands, and executing the appropriate method based on the command name supplied.
+        /// </summary>
         class CommandDispatcher : ICommandDispatcher
         {
             private Dictionary<string, CommandItem> _commands = new Dictionary<string, CommandItem>();

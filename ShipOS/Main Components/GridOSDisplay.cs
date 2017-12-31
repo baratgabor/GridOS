@@ -18,7 +18,11 @@ namespace IngameScript
 {
     partial class Program
     {
-        class ShipSystemDisplay
+        /// <summary>
+        /// Main display component of GridOS, responsible for abstracting display content by registering various displayable components, and maintaining state about which one is displayed.
+        /// Currently limited, only supports CommandMenu component.
+        /// </summary>
+        class GridOSDisplay
         {
             // Has a CommandMenu, or possibly multiple
             // Has a TextPanel, or possibly multiple, for showing actual system screen content
@@ -31,7 +35,7 @@ namespace IngameScript
             private CommandMenu _commandMenu;
             private List<IMyTextPanel> _textPanels = new List<IMyTextPanel>();
 
-            public ShipSystemDisplay(CommandMenu commandMenu)
+            public GridOSDisplay(CommandMenu commandMenu)
             {
                 _commandMenu = commandMenu;
                 _commandMenu.MenuUpdateAction = UpdateScreens;

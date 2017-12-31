@@ -48,10 +48,5 @@ namespace IngameScript
             bool TryDispatch(string commandName);
         }
 
-        interface ICommandMenu
-        { }
-
-        interface ISystemDisplay
-        { }
     }
 }

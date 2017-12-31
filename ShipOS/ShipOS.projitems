@@ -11,11 +11,11 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ObservableUpdateFrequency.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\ScrollableTextPanel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\ShipSystemDisplay.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\GridOSDisplay.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\CommandMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\CommandDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\UpdateDispatcher.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\ShipSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\GridOS.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\CommandItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Interfaces.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\ConverterMethods.cs" />

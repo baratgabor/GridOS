@@ -18,16 +18,11 @@ namespace IngameScript
 {
     partial class Program
     {
-
-        static class Configuration
-        {
-            public static readonly string Setting1 = "value";
-            public static readonly string Setting2 = "value";
-        }
-
-        public string Bla = "1";
-
-        class ShipOS
+        /// <summary>
+        /// Modular multitasking and command handling system that can register and run multiple code modules.
+        /// Individual modules can contain components (via implementing the appropriate interface) for publishing commands and/or subscribing to recurring automatic execusion.
+        /// </summary>
+        class GridOS
         {
             private Action<string> _echo;
             private IMyGridProgramRuntimeInfo _runtime;
@@ -46,7 +41,7 @@ namespace IngameScript
             // Main module storage
             private List<IModule> _moduleList = new List<IModule>();
 
-            public ShipOS(Action<string> echo, IMyGridProgramRuntimeInfo runtime, IUpdateDispatcherAndController updateDispatcherAndController, ICommandDispatcher commandDispatcher, ShipSystemDisplay shipSystemDisplay)
+            public GridOS(Action<string> echo, IMyGridProgramRuntimeInfo runtime, IUpdateDispatcherAndController updateDispatcherAndController, ICommandDispatcher commandDispatcher, ShipSystemDisplay shipSystemDisplay)
             {
                 _echo = echo;
                 _runtime = runtime;
@@ -131,6 +126,7 @@ namespace IngameScript
                     _echo("CommandDispatcher.TryDispatch called.");
                     _commandDispatcher.TryDispatch(argument.Trim());
 
+                    // TODO: proper argument parsing
                     /*
                     string[] stringParams = argument.Trim().Split(' ');
                     for (int x = 0; x == stringParams.Length; x++)

@@ -20,7 +20,6 @@ namespace IngameScript
     {
         /// <summary>
         /// Represents a menu that displays only commands, and accepts menu navigation and menu item selection commands.
-        /// Item selection execution is carried out by CommandDispatcher
         /// </summary>
         class CommandMenu
         {
