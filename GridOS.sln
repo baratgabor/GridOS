@@ -7,7 +7,7 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "GridOS", "GridOS\GridOS.shp
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		GridOS\ShipOS.projitems*{1ec535ae-8123-4319-8921-b9cf5e62559e}*SharedItemsImports = 13
+		GridOS\GridOS.projitems*{1ec535ae-8123-4319-8921-b9cf5e62559e}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

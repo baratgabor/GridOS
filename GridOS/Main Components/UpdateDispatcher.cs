@@ -81,7 +81,7 @@ namespace IngameScript
                 if (moduleList.Count == 0)
                     _moduleLists.Remove(moduleListKey);
 
-                // TODO: If module is permanently remove, NEED TO PROPERLY DISPOSE ALL MODULE AND MODULE MEMBER REFERENCES FROM MENU SYSTEM TOO
+                // TODO: If module is permanently removed, NEED TO PROPERLY DISPOSE ALL MODULE AND MODULE MEMBER REFERENCES FROM MENU SYSTEM TOO
                 UpdateMasterUpdateFrequency();
             }
 

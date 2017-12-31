@@ -21,13 +21,14 @@ namespace IngameScript
         /// <summary>
         /// Represents a menu that displays only commands, and accepts menu navigation and menu item selection commands.
         /// </summary>
-        class CommandMenu
+        class CommandMenu : IDisplayComponent
         {
-            private string CommandMenuString;
-            public Action<string> MenuUpdateAction;
+            public string Content => _content;
+            private string _content = "";
+            public event Action<IDisplayComponent> ContentChanged;
 
             private List<CommandItem> _commands = new List<CommandItem>();
-            private Dictionary<int, Action> _navigationCommands = new Dictionary<int, Action>();
+            private Dictionary<DisplayCommand, Action> _navigationCommands = new Dictionary<DisplayCommand, Action>();
             private int _selectedCommandIndex = 0;
 
             private const string _menuTitle = "Command Menu";
@@ -46,10 +47,9 @@ namespace IngameScript
             {
                 _navigationActionHook = navigationActionHook;
 
-                // hardcoding the menu nav. commands for now
-                _navigationCommands[2] = MoveSelectionUp;
-                _navigationCommands[3] = MoveSelectionDown;
-                _navigationCommands[4] = ExecuteSelection;
+                _navigationCommands[DisplayCommand.Up] = MoveSelectionUp;
+                _navigationCommands[DisplayCommand.Down] = MoveSelectionDown;
+                _navigationCommands[DisplayCommand.Select] = ExecuteSelection;
             }
 
             /// <summary>
@@ -74,7 +74,7 @@ namespace IngameScript
             /// Handles incoming menu nagivation commands, e.g. moving selection and executing selected item.
             /// </summary>
             /// <param name="command">Numerical ID of command to execute.</param>
-            public void ProcessNagivationCommand(int command)
+            public void ProcessCommand(DisplayCommand command)
             {
                 if (_navigationCommands.ContainsKey(command))
                 {
@@ -141,8 +141,13 @@ namespace IngameScript
                     sb.AppendLine(c.MenuDisplayName);
                 }
 
-                CommandMenuString = sb.ToString();
-                MenuUpdateAction?.Invoke(CommandMenuString);
+                _content = sb.ToString();
+                ContentChanged?.Invoke(this);
+            }
+
+            public void RefreshContent()
+            {
+                RenderMenu();
             }
 
             /// <summary>

@@ -18,14 +18,13 @@ namespace IngameScript
 {
     partial class Program
     {
-        class ScrollableTextPanel
+        enum DisplayCommand
         {
-
-            public ScrollableTextPanel()
-            {
-                throw new NotImplementedException();
-            }
-
+            Up,
+            Down,
+            Left,
+            Right,
+            Select
         }
     }
 }

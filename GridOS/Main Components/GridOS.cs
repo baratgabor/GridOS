@@ -24,13 +24,15 @@ namespace IngameScript
         /// </summary>
         class GridOS
         {
+            // TODO: implement proper logging with a cross cutting concern pattern; same with try...catch on components and modules
+
             private Action<string> _echo;
             private IMyGridProgramRuntimeInfo _runtime;
 
             private IUpdateDispatcherAndController _updateDispatcherAndController;
             // TODO: Need to make sure that registered Commands are unique, unless we want to allow executing multiple Modules with the same command name
             private ICommandDispatcher _commandDispatcher;
-            private ShipSystemDisplay _shipSystemDisplay;
+            private GridOSDisplay _gridOSDisplay;
 
             private const string _systemName = "ShipOS 0.8 Experimental";
             private double _totalExecTime = 0;
@@ -41,13 +43,13 @@ namespace IngameScript
             // Main module storage
             private List<IModule> _moduleList = new List<IModule>();
 
-            public GridOS(Action<string> echo, IMyGridProgramRuntimeInfo runtime, IUpdateDispatcherAndController updateDispatcherAndController, ICommandDispatcher commandDispatcher, ShipSystemDisplay shipSystemDisplay)
+            public GridOS(Action<string> echo, IMyGridProgramRuntimeInfo runtime, IUpdateDispatcherAndController updateDispatcherAndController, ICommandDispatcher commandDispatcher, GridOSDisplay gridOSDisplay)
             {
                 _echo = echo;
                 _runtime = runtime;
                 _updateDispatcherAndController = updateDispatcherAndController;
                 _commandDispatcher = commandDispatcher;
-                _shipSystemDisplay = shipSystemDisplay;
+                _gridOSDisplay = gridOSDisplay;
             }
 
             /// <summary>
@@ -72,7 +74,7 @@ namespace IngameScript
                 {
                     // TODO: here too, we maintain the list of commands in two places :/ better solution needed.
                     _commandDispatcher.AddCommands((module as ICommandPublisher).Commands);
-                    _shipSystemDisplay.AddCommands((module as ICommandPublisher).Commands);
+                    _gridOSDisplay.AddCommands((module as ICommandPublisher).Commands);
                 }
 
                 return true;
@@ -119,14 +121,15 @@ namespace IngameScript
                 if (Int32.TryParse(argument, out numericalParam))
                 {
                     _echo("ProcessDisplayCommand called.");
-                    _shipSystemDisplay.ProcessDisplayCommand(numericalParam);
+                    _gridOSDisplay.ProcessCommand(numericalParam);
                 }
                 else
                 {
                     _echo("CommandDispatcher.TryDispatch called.");
                     _commandDispatcher.TryDispatch(argument.Trim());
 
-                    // TODO: proper argument parsing
+                    // TODO: add proper argument parsing. but HALT for now, since SE might soon include one by default
+
                     /*
                     string[] stringParams = argument.Trim().Split(' ');
                     for (int x = 0; x == stringParams.Length; x++)
@@ -139,7 +142,7 @@ namespace IngameScript
 
             public void RegisterTextPanel(IMyTextPanel textPanel)
             {
-                _shipSystemDisplay.RegisterTextPanel(textPanel);
+                _gridOSDisplay.RegisterTextPanel(textPanel);
             }
         }
     }

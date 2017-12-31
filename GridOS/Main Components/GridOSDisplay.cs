@@ -32,25 +32,29 @@ namespace IngameScript
             // and these need to be sent to this class to ascertain the context of the commands (e.g. what's shown on screen),
             // and send the commands to the proper place
 
-            private CommandMenu _commandMenu;
+            private List<IDisplayComponent> _displayComponents = new List<IDisplayComponent>();
+            private int _selectedDisplayComponentIndex = 0;
+            private IDisplayComponent _activeDisplayComponent => _displayComponents[_selectedDisplayComponentIndex];
             private List<IMyTextPanel> _textPanels = new List<IMyTextPanel>();
+            private Dictionary<int, DisplayCommand> _numericalCommandToDisplayCommand = new Dictionary<int, DisplayCommand>();
 
             public GridOSDisplay(CommandMenu commandMenu)
             {
-                _commandMenu = commandMenu;
-                _commandMenu.MenuUpdateAction = UpdateScreens;
+                _displayComponents.Add(commandMenu);
+                _displayComponents[0].ContentChanged += UpdateScreens;
             }
 
-            public void UpdateScreens(string menuContent)
+            public void UpdateScreens(IDisplayComponent component)
             {
                 if (_textPanels.Count == 0)
                     return;
 
                 for (int x = 0; x < _textPanels.Count; x++)
                 {
+                    // TODO: Move this try-catch to upcoming cross cutting concern class
                     try
                     {
-                        _textPanels[x].WritePublicText(menuContent);
+                        _textPanels[x].WritePublicText(component.Content);
                     }
                     catch
                     {
@@ -66,8 +70,7 @@ namespace IngameScript
                     return;
 
                 _textPanels.Add(textPanel);
-                _commandMenu.RenderMenu();
-
+                _activeDisplayComponent.RefreshContent();
             }
 
             public void UnregisterTextPanel(IMyTextPanel textPanel)
@@ -78,14 +81,15 @@ namespace IngameScript
                 _textPanels.Remove(textPanel);
             }
 
-            public void ProcessDisplayCommand(int numericalCommand)
+            public void ProcessCommand(int numericalCommand)
             {
-                _commandMenu.ProcessNagivationCommand(numericalCommand);
+                _activeDisplayComponent.ProcessCommand(_numericalCommandToDisplayCommand[numericalCommand]);
             }
 
             public void AddCommands(List<CommandItem> commands)
             {
-                _commandMenu.AddCommands(commands);
+                // TODO: HORRIBLE. Somehow route the command list registration properly, with respect to the new IDisplayComponent based component handling
+                (_activeDisplayComponent as CommandMenu).AddCommands(commands);
             }
         }
     }

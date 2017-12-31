@@ -23,6 +23,7 @@ namespace IngameScript
         /// </summary>
         class CommandDispatcher : ICommandDispatcher
         {
+            // TODO: This class is extremely similar to the CommandMenu class... see if it's possible to structure them better to avoid repetitious behavior implementation
             private Dictionary<string, CommandItem> _commands = new Dictionary<string, CommandItem>();
 
             public void AddCommands(List<CommandItem> commands)

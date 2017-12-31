@@ -48,5 +48,12 @@ namespace IngameScript
             bool TryDispatch(string commandName);
         }
 
+        interface IDisplayComponent
+        {
+            string Content { get; }
+            void ProcessCommand(DisplayCommand command);
+            void RefreshContent();
+            event Action<IDisplayComponent> ContentChanged;
+        }
     }
 }

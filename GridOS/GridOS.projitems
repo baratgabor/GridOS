@@ -10,7 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ObservableUpdateFrequency.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\ScrollableTextPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\Enums.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\GuiBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\GridOSDisplay.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\CommandMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\CommandDispatcher.cs" />
