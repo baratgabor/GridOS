@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ShipOS", "ShipOS\ShipOS.shproj", "{1EC535AE-8123-4319-8921-B9CF5E62559E}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ShipOS\ShipOS.projitems*{1ec535ae-8123-4319-8921-b9cf5e62559e}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FA4D8A5D-CB11-4E11-B409-2D93AEAE098C}
+	EndGlobalSection
+EndGlobal

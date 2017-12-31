@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>1ec535ae-8123-4319-8921-b9cf5e62559e</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ShipOS</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ObservableUpdateFrequency.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\ScrollableTextPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\ShipSystemDisplay.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\CommandMenu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\CommandDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\UpdateDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\ShipSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Data Objects\CommandItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Interfaces.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\ConverterMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\ProgressIndicator.cs" />
+  </ItemGroup>
+</Project>
