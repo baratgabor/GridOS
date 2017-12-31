@@ -37,15 +37,16 @@ namespace IngameScript
             private const string _menuCommandSelectedPrefix = "-> ";
 
             // quick and dirty way to execute something on menu actions, e.g. playing a soundblock for adding a sound effect
-            private Action _navigationActionHook;
+            // private Action _navigationActionHook;
+            // TODO: Add proper registration for soundblock, and route it here
 
             /// <summary>
             /// Creates new CommandMenu instance.
             /// </summary>
             /// <param name="navigationActionHook">An arbitrary method to call at each menu action, e.g. SoundBlock.Play() to add sound effects to the menu.</param>
-            public CommandMenu(Action navigationActionHook)
+            public CommandMenu()
             {
-                _navigationActionHook = navigationActionHook;
+                //_navigationActionHook = navigationActionHook;
 
                 _navigationCommands[DisplayCommand.Up] = MoveSelectionUp;
                 _navigationCommands[DisplayCommand.Down] = MoveSelectionDown;
@@ -78,7 +79,7 @@ namespace IngameScript
             {
                 if (_navigationCommands.ContainsKey(command))
                 {
-                    _navigationActionHook?.Invoke();
+                    //_navigationActionHook?.Invoke();
                     // TODO: probably (?) it would be neater not to execute here, but to send the command name to CommandDispatcher...
                     // (In that case this class doesn'T even need to store full command objects, possibly? Look into that)
                     // Although not sure adding that dependency here worth it; need to think about it
