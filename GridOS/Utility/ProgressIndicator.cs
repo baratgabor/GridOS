@@ -7,32 +7,22 @@ namespace IngameScript
     partial class Program
     {
         /// <summary>
-        /// Quick and dirty progress indicator that changes to next phase each time you fetch it, creating "moving" effect.
+        /// Simple progress indicator that returns next phase each time you read it.
         /// </summary>
         public class ProgressIndicator
         {
-            private int _progressIndicatorCounter = 0;
+            private int _counter = 0;
 
             public string Get()
             {
-                if (_progressIndicatorCounter == 0)
+                _counter++;
+                switch (_counter % 4)
                 {
-                    _progressIndicatorCounter = 1;
-                    return "-";
-                }
-                if (_progressIndicatorCounter == 1)
-                {
-                    _progressIndicatorCounter = 2;
-                    return "\\";
-                }
-                if (_progressIndicatorCounter == 2)
-                {
-                    _progressIndicatorCounter = 0;
-                    return "/";
-                }
-                else
-                {
-                    return "";
+                    case 0: return ("/");
+                    case 1: return ("-");
+                    case 2: return ("\\");
+                    case 3: return ("|");
+                    default: return "";
                 }
             }
         }
