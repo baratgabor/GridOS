@@ -32,6 +32,11 @@ namespace IngameScript
             // and these need to be sent to this class to ascertain the context of the commands (e.g. what's shown on screen),
             // and send the commands to the proper place
 
+            // TODO: Ax this IDisplayComponent approach, and switch to composite patterns by using IDisplayElement in the following manner:
+            // All IDisplayElements can have child IDisplayElements, creating a flexible tree structure, originating from a root IDisplayElement.
+            // Instead of tracking active IDisplayComponent, track active IDisplayElement, and display all of its child elements on screen.
+            // Consider giving each modules the ability to define their own display element structure, to create fully custom menu trees (or just flat menu items if they want).
+            // When/if exposing this feature to modules, it should be simplified, e.g. they could define levels by using simple ">", ">>", ">>>" syntax in front of strings.
             private List<IDisplayComponent> _displayComponents = new List<IDisplayComponent>();
             private int _selectedDisplayComponentIndex = 0;
             private IDisplayComponent _activeDisplayComponent => _displayComponents[_selectedDisplayComponentIndex];
