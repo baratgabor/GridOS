@@ -30,34 +30,50 @@ The class below, after instantiating it, and registering it in the `GridOS` inst
 Additionally, the `ExecuteDummyCommand()` method will execute whenever the Programmable Block is invoked with the `"DummyCommand"` argument, plus the same command will be selectable from the GridOS's command menu.
 
 ```csharp
-public class ExampleModule : IModule, ICommandPublisher, IUpdateSubscriber
+public class ExampleModule : IModule, ICommandPublisher, IUpdateSubscriber, IDisplayElementPublisher
 {
     public string ModuleDisplayName { get; } = "Example Module";
 
-    public ObservableUpdateFrequency UpdateFrequency { get; } = new ObservableUpdateFrequency(Sandbox.ModAPI.Ingame.UpdateFrequency.Update100);
+    public ObservableUpdateFrequency Frequency { get; } = new ObservableUpdateFrequency(UpdateFrequency.Update100);
 
     public List<CommandItem> Commands => _commands;
     private List<CommandItem> _commands = new List<CommandItem>();
 
+    public IDisplayElement DisplayElement => _displayElement;
+    private DisplayGroup _displayElement = new DisplayGroup("Menu Group");
+    private DisplayCommand _myDisplayCommand;
+
+    // Inject your dependencies through the constructor
     public ExampleModule()
     {
         _commands.Add(new CommandItem(
-            CommandName: "DummyCommand",
-            MenuDisplayName: "Dummy Command",
-            MenuDisplayPriority: 1,
-            FunctionalityName: ModuleDisplayName,
-            Execute: ExecuteDummyCommand
+            CommandName: "SomeCommand",
+            Execute: ExecuteSomeCommand
         ));
+
+        _displayElement.AddChild(new DisplayElement("This can be any information"));
+        // Save refence if you want to modify it later
+        _myDisplayCommand = new DisplayCommand("Do something", DoSomething);
+        _displayElement.AddChild(_myDisplayCommand);
     }
 
     public void Update(UpdateType updateType)
     {
-        // Do something at each update cycle
+        // Do something at each update cycle, call other methods, etc.
+        // Modify UpdateFrequency any time if needed
+        Frequency.Set(UpdateFrequency.Update10);
     }
 
-    private void ExecuteDummyCommand()
+    private void ExecuteSomeCommand()
     {
-        // Do something when command is called
+        // Do something when command is called via argument
+    }
+
+    private void DoSomething()
+    {
+        // Do something when display command is selected
+        _myDisplayCommand.Label = "This will update on the display";
+        _displayElement.AddChild(new DisplayElement("This is some new information, dynamically added."));
     }
 }
 ```
