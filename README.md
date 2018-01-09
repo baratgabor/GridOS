@@ -99,8 +99,11 @@ public Program()
         new DisplayOrchestrator()
     );
 
-    // for showing command menu; optional
-    // you can register multiple textpanels, but currently all of them will show the same content
+    // For using display capabilities.
+    // You can register multiple textpanels, but currently only the first will be accessible with commands.
+    // The implementation of driving multiple displays with separate state is almost ready.
+    // NOTE that currently you simply have to bind 2, 3, and 4 numerical argument on the hotbar to
+    // issue Up, Down, and Select commands, respectively. Will be customizable soon.
     gridOS.RegisterTextPanel(gridOSDisplay);
 
     ExampleModule exampleModule = new ExampleModule();
