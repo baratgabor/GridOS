@@ -52,7 +52,7 @@ public class ExampleModule : IModule, ICommandPublisher, IUpdateSubscriber, IDis
         ));
 
         _displayElement.AddChild(new DisplayElement("This can be any information"));
-        // Save refence if you want to modify it later
+        // Save reference if you want to modify it later
         _myDisplayCommand = new DisplayCommand("Do something", DoSomething);
         _displayElement.AddChild(_myDisplayCommand);
     }
