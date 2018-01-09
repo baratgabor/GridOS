@@ -32,7 +32,7 @@ namespace IngameScript
             private IUpdateDispatcherAndController _updateDispatcherAndController;
             // TODO: Need to make sure that registered Commands are unique, unless we want to allow executing multiple Modules with the same command name
             private ICommandDispatcher _commandDispatcher;
-            private DisplayOrchestrator _gridOSDisplay;
+            private DisplayOrchestrator _displayOrchestrator;
 
             private const string _systemName = "ShipOS 0.8 Experimental";
             private double _totalExecTime = 0;
@@ -43,13 +43,13 @@ namespace IngameScript
             // Main module storage
             private List<IModule> _moduleList = new List<IModule>();
 
-            public GridOS(Action<string> echo, IMyGridProgramRuntimeInfo runtime, IUpdateDispatcherAndController updateDispatcherAndController, ICommandDispatcher commandDispatcher, DisplayOrchestrator gridOSDisplay)
+            public GridOS(Action<string> echo, IMyGridProgramRuntimeInfo runtime, IUpdateDispatcherAndController updateDispatcherAndController, ICommandDispatcher commandDispatcher, DisplayOrchestrator displayOrchestrator)
             {
                 _echo = echo;
                 _runtime = runtime;
                 _updateDispatcherAndController = updateDispatcherAndController;
                 _commandDispatcher = commandDispatcher;
-                _gridOSDisplay = gridOSDisplay;
+                _displayOrchestrator = displayOrchestrator;
             }
 
             /// <summary>
@@ -72,14 +72,12 @@ namespace IngameScript
 
                 if (module is ICommandPublisher)
                 {
-                    // TODO: here too, we maintain the list of commands in two places :/ better solution needed.
                     _commandDispatcher.AddCommands((module as ICommandPublisher).Commands);
-                    //_gridOSDisplay.AddCommands((module as ICommandPublisher).Commands);
                 }
 
                 if (module is IDisplayElementPublisher)
                 {
-                    AddDisplayElement((module as IDisplayElementPublisher).DisplayElement);
+                    _displayOrchestrator.RegisterDisplayElement((module as IDisplayElementPublisher).DisplayElement);
                 }
 
                 return true;
@@ -126,7 +124,7 @@ namespace IngameScript
                 if (Int32.TryParse(argument, out numericalParam))
                 {
                     _echo("ProcessDisplayCommand called.");
-                    _gridOSDisplay.ProcessCommand(numericalParam);
+                    _displayOrchestrator.ProcessCommand(numericalParam);
                 }
                 else
                 {
@@ -134,25 +132,12 @@ namespace IngameScript
                     _commandDispatcher.TryDispatch(argument.Trim());
 
                     // TODO: add proper argument parsing. but HALT for now, since SE might soon include one by default
-
-                    /*
-                    string[] stringParams = argument.Trim().Split(' ');
-                    for (int x = 0; x == stringParams.Length; x++)
-                    {
-                        _commandDispatcher.TryDispatch(stringParams[x]);
-                    }
-                    */
                 }
             }
 
             public void RegisterTextPanel(IMyTextPanel textPanel)
             {
-                _gridOSDisplay.RegisterTextPanel(textPanel);
-            }
-
-            public void AddDisplayElement(IDisplayElement element)
-            {
-                _gridOSDisplay.RegisterDisplayElement(element);
+                _displayOrchestrator.RegisterTextPanel(textPanel);
             }
         }
     }
