@@ -25,7 +25,7 @@ namespace IngameScript
 
         interface IUpdateSubscriber
         {
-            ObservableUpdateFrequency UpdateFrequency { get; }
+            ObservableUpdateFrequency Frequency { get; }
             void Update(UpdateType updateType);
         }
 
