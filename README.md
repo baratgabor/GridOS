@@ -25,7 +25,7 @@ Initial documentation; will be expanded later.
 - **Persistent storage for modules:** At the moment no persistent storage access is available to modules.
 - **Exception handling for each module:** The main system will be protected by module exceptions. Either by discarding the malfunctioning module, or by forcing the modules to implement a Reset() method for resetting themselves.
 
-## Example module class with both update subscription and command publishing
+## Example module class with all interfaces implemented
 
 The class below, after instantiating it, and registering it in the `GridOS` instance, will have its `Update()` cycle called according to its `UpdateFrequency` setting.
 
