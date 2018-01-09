@@ -98,7 +98,7 @@ public Program()
         Runtime,
         new UpdateDispatcherAndController1(Echo, _updateFrequencyGetter, _updateFrequencySetter),
         new CommandDispatcher(),
-        new GridOSDisplay(new CommandMenu())
+        new DisplayOrchestrator()
     );
 
     // for showing command menu; optional
@@ -107,5 +107,11 @@ public Program()
 
     ExampleModule exampleModule = new ExampleModule();
     gridOS.RegisterModule(exampleModule);
+}
+
+public void Main(string argument, UpdateType UpdateType)
+{
+    // Simply transfer control to the system, passing all parameters
+    gridOS.ExecuteCycle(argument, UpdateType);
 }
 ```
