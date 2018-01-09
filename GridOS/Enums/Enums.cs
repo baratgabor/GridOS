@@ -18,7 +18,7 @@ namespace IngameScript
 {
     partial class Program
     {
-        enum DisplayCommand
+        enum NavigationCommand
         {
             Up,
             Down,

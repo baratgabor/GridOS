@@ -51,9 +51,45 @@ namespace IngameScript
         interface IDisplayComponent
         {
             string Content { get; }
-            void ProcessCommand(DisplayCommand command);
+            void ProcessCommand(NavigationCommand command);
             void RefreshContent();
             event Action<IDisplayComponent> ContentChanged;
+        }
+
+        public interface IDisplayElement
+        {
+            string Label { get; set; }
+            event Action<IDisplayElement> LabelChanged;
+        }
+
+        interface IDisplayCommand : IDisplayElement
+        {
+            event Action<IDisplayCommand> Executed;
+            event Action<IDisplayCommand> BeforeExecute;
+            void Execute();
+        }
+
+        interface IDisplayGroup : IDisplayElement
+        {
+            void AddChild(IDisplayElement element);
+            void RemoveChild(IDisplayElement element);
+            List<IDisplayElement> GetChildren();
+            event Action<IDisplayGroup> ChildrenChanged;
+
+            void Open();
+            event Action<IDisplayGroup> BeforeOpen;
+            event Action<IDisplayGroup> Opened;
+           
+            void Close();
+            event Action<IDisplayGroup> BeforeClose;
+            event Action<IDisplayGroup> Closed;
+
+            bool IsOpen { get; }
+        }
+
+        interface IDisplayElementPublisher
+        {
+            IDisplayElement DisplayElement { get; }
         }
     }
 }

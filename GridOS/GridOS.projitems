@@ -12,9 +12,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ObservableT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ObservableUpdateFrequency.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Enums.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\GuiBuilder.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\GridOSDisplay.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\CommandMenu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\DisplayController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\DisplayView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\DisplayViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\DisplayElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\DisplayCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\DisplayGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\DisplayOrchestrator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\CommandDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\UpdateDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\GridOS.cs" />
@@ -22,5 +26,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Interfaces.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\ConverterMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\ProgressIndicator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Main Components\Display Model\" />
   </ItemGroup>
 </Project>
