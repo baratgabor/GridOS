@@ -49,12 +49,12 @@ namespace IngameScript
 
             public void Add(IUpdateSubscriber module)
             {
-                UpdateType updateType = ConvertUpdateFrequency(module.UpdateFrequency.Get());
+                UpdateType updateType = ConvertUpdateFrequency(module.Frequency.Get());
                 var TargetModuleList = GetOrCreateModuleList(updateType);
 
                 if (!TargetModuleList.Contains(module))
                 {
-                    module.UpdateFrequency.UpdateFrequencyChanged += HandleModuleUpdateFrequencyChanges;
+                    module.Frequency.UpdateFrequencyChanged += HandleModuleUpdateFrequencyChanges;
                     TargetModuleList.Add(module);
 
                     UpdateMasterUpdateFrequency();
@@ -74,7 +74,7 @@ namespace IngameScript
 
             public void Remove(IUpdateSubscriber module, List<IUpdateSubscriber> moduleList, UpdateType moduleListKey)
             {
-                module.UpdateFrequency.UpdateFrequencyChanged -= HandleModuleUpdateFrequencyChanges;
+                module.Frequency.UpdateFrequencyChanged -= HandleModuleUpdateFrequencyChanges;
                 moduleList.Remove(module);
 
                 // Remove module list for given update type, if list became empty
@@ -143,7 +143,7 @@ namespace IngameScript
                 UpdateType oldUpdateType = ConvertUpdateFrequency(oldUpdateFrequency);
 
                 // Find module based on its UpdateFrequency property (which is an object)
-                IUpdateSubscriber module = _moduleLists[oldUpdateType].Find((x) => x.UpdateFrequency == obsUpdFreqOfModule);
+                IUpdateSubscriber module = _moduleLists[oldUpdateType].Find((x) => x.Frequency == obsUpdFreqOfModule);
                 
                 // Remove module from the old update tier list, and remove the list too if it became empty
                 Remove(module, _moduleLists[oldUpdateType], oldUpdateType);
@@ -199,7 +199,7 @@ namespace IngameScript
                 if (_moduleList.Contains(module))
                     return;
 
-                module.UpdateFrequency.UpdateFrequencyChanged += HandleModuleUpdateFrequencyChanges;
+                module.Frequency.UpdateFrequencyChanged += HandleModuleUpdateFrequencyChanges;
                 _moduleList.Add(module);
                 UpdateMasterUpdateFrequency();
             }
@@ -209,7 +209,7 @@ namespace IngameScript
                 if (!_moduleList.Contains(module))
                     return;
 
-                module.UpdateFrequency.UpdateFrequencyChanged -= HandleModuleUpdateFrequencyChanges;
+                module.Frequency.UpdateFrequencyChanged -= HandleModuleUpdateFrequencyChanges;
                 _moduleList.Remove(module);
                 UpdateMasterUpdateFrequency();
             }
@@ -221,7 +221,7 @@ namespace IngameScript
 
                 foreach (var m in _moduleList)
                 {
-                    if ((updateType & m.UpdateFrequency.UpdateTypeEquivalent) != 0)
+                    if ((updateType & m.Frequency.UpdateTypeEquivalent) != 0)
                     {
                         m.Update(updateType);
                     }
@@ -234,7 +234,7 @@ namespace IngameScript
 
                 foreach (var m in _moduleList)
                 {
-                    NewUpdateFrequency |= m.UpdateFrequency.Get();
+                    NewUpdateFrequency |= m.Frequency.Get();
                 }
 
                 _updateFrequencySetter(NewUpdateFrequency);
