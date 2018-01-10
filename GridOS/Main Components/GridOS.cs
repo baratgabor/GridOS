@@ -26,6 +26,7 @@ namespace IngameScript
         {
             // TODO: implement proper logging with a cross cutting concern pattern; same with try...catch on components and modules
 
+            private MyGridProgram _p;
             private Action<string> _echo;
             private IMyGridProgramRuntimeInfo _runtime;
 
@@ -43,13 +44,18 @@ namespace IngameScript
             // Main module storage
             private List<IModule> _moduleList = new List<IModule>();
 
-            public GridOS(Action<string> echo, IMyGridProgramRuntimeInfo runtime, IUpdateDispatcherAndController updateDispatcherAndController, ICommandDispatcher commandDispatcher, DisplayOrchestrator displayOrchestrator)
+            public GridOS(MyGridProgram p)
             {
-                _echo = echo;
-                _runtime = runtime;
-                _updateDispatcherAndController = updateDispatcherAndController;
-                _commandDispatcher = commandDispatcher;
-                _displayOrchestrator = displayOrchestrator;
+                _p = p;
+                _echo = _p.Echo;
+                _runtime = _p.Runtime;
+
+                Func<UpdateFrequency> _updateFrequencyGetter = () => _runtime.UpdateFrequency;
+                Action<UpdateFrequency> _updateFrequencySetter = (x) => _runtime.UpdateFrequency = x;
+
+                _commandDispatcher = new CommandDispatcher();
+                _updateDispatcherAndController = new UpdateDispatcherAndController1(_echo, _updateFrequencyGetter, _updateFrequencySetter);
+                _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher);
             }
 
             /// <summary>
