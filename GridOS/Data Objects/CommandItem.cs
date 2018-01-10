@@ -25,11 +25,15 @@ namespace IngameScript
         {
             public string CommandName => _commandName;
             private string _commandName;
+            public delegate void CommandEventHandler(
+                CommandItem sender,
+                string parameter
+            );
 
-            public Action<CommandItem> Execute => _execute;
-            private Action<CommandItem> _execute;
+            public CommandEventHandler Execute => _execute;
+            private CommandEventHandler _execute;
 
-            public CommandItem(string CommandName, Action<CommandItem> Execute)
+            public CommandItem(string CommandName, CommandEventHandler Execute)
             {
                 _commandName = CommandName;
                 _execute = Execute;
