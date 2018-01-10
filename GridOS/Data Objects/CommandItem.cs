@@ -26,10 +26,10 @@ namespace IngameScript
             public string CommandName => _commandName;
             private string _commandName;
 
-            public Action Execute => _execute;
-            private Action _execute;
+            public Action<CommandItem> Execute => _execute;
+            private Action<CommandItem> _execute;
 
-            public CommandItem(string commandName, Action execute)
+            public CommandItem(string CommandName, Action<CommandItem> Execute)
             {
                 _commandName = CommandName;
                 _execute = Execute;
