@@ -7,57 +7,73 @@ Initial documentation; will be expanded later.
 
 ## How does it work
 
-- Each module is a separate class that implements the `IModule` interface. Implementing this interface is what makes you able to register the module in the `GridOS` instance.
+- Each module is a separate class that implements the `IModule` interface. Implementing this interface is what makes you able to register the module in the `GridOS` instance. But `IModule` alone doesn't do anything; you need to indicate which features you want to use, by implementing any/all of the following interfaces:
 
-- Each module can choose to implement an additional `IUpdateSubscriber` interface for subscribing to recurring automatic execusion, which simply requires setting an `UpdateFrequency` and declaring an `Update()` method.
+  - `IUpdateSubscriber`: With this interface you can subscribe to recurring automatic execution, which simply requires setting an `UpdateFrequency` and declaring an `Update()` method. You can modify this frequency any time, and the system will adjust. The system dynamically changes the main frequency of the programmable block too, so it runs only when it is actually requested by at least one module.
 
-- Each module can choose to implement an additional `ICommandPublisher` interface for publishing commands, which can be executed both from argument, and from a command menu that this framework provides.
+  - `ICommandPublisher`: With this interface you can publish a list of commands. The methods linked to the commands will be executed when the programmable block receives the commands as an argument.
+  
+  - `IDisplayElementPublisher`: With this interface you can specify a display element to be shown in GridOS's display system. The display element can be a simple `DisplayElement`, for displaying non-interactive textual information; `DisplayCommand`, for displaying executable commands; and `DisplayGroup`, for creating a node that contains other nodes. This system is extremely flexible; you can create a fully custom hierarchy, and even change it during runtime, since most changes are designed to propage to the screen automatically. The `DisplayGroup` node type lets you subscribe to multiple events, e.g. `BeforeOpen`, so you can be notified when the group is about to be opened (for e.g. refreshing the information elements or command labels).
 
 ## Planned Features
 
 - **Expanded selection of update frequencies:** E.g. 200 ticks, 1-2 minutes, etc. Currently the code modules can set only the vanilla update frequencies (`Update1`, `Update10`, `Update100`, and `None`).
 - **Load balancing:** Currently, if e.g. 10 modules are registered for the `Update100` tier, all of them will execute in the same Programmable Block invocation (in the same tick). I'm planning to introduce load-balancing, which will offset each module's running cycle. The tradeoff will be a higher base frequency of the Programmable Block itself. This feature will probably be switchable.
-- **Built-in support for menu commands with non-static title:** Currently, if you want to change the display title of a menu command, you have to directly change the property of the `CommandItem` instance, and then a "property changed" event built into the `CommandItem` class takes care of notifying the menu to update. But this can get messy pretty fast if you have to manage the title updates of multiple commands.
-- **More screens to display, including a configuration screen:** Currently, GridOS' display capability is limited to displaying the menu of the registered commands. I'm planning to introduce multiple screens, for example a configuration or a status screen, or possibly giving the ability for each module to publish their own information/configuration screen.
+- **Built-in support for menu commands with non-static title:** <s>Currently, if you want to change the display title of a menu command, you have to directly change the property of the `CommandItem` instance, and then a "property changed" event built into the `CommandItem` class takes care of notifying the menu to update. But this can get messy pretty fast if you have to manage the title updates of multiple commands.</s>
+- **More screens to display, including a configuration screen:** Currently, GridOS' display capability is limited to displaying <s>the menu of the registered commands</s> a hierarchical menu. I'm planning to introduce multiple screens, for example a configuration or a status screen, or possibly giving the ability for each module to publish their own information/configuration screen.
 - **Communication and data sharing between modules:** Currently, the modules are completely separated, but I want to add built-in options for inter-module communication. E.g. a message bus, in which modules can subscribe to topics, and publish payloads on topics.
 - **Persistent storage for modules:** At the moment no persistent storage access is available to modules.
 - **Exception handling for each module:** The main system will be protected by module exceptions. Either by discarding the malfunctioning module, or by forcing the modules to implement a Reset() method for resetting themselves.
 
-## Example module class with both update subscription and command publishing
+## Example module class with all interfaces implemented
 
-The class below, after instantiating it, and registering it in the `GridOS` instance, will have its `Update()` cycle called according to its `UpdateFrequency` setting.
-
-Additionally, the `ExecuteDummyCommand()` method will execute whenever the Programmable Block is invoked with the `"DummyCommand"` argument, plus the same command will be selectable from the GridOS's command menu.
+The class below, after instantiating it, and registering it in the `GridOS` instance, will have its `Update()` cycle called according to its `UpdateFrequency` setting. The specified `CommandItem` will be executable from argument, and the specified `DisplayElements` will appear on the system's display.
 
 ```csharp
-public class ExampleModule : IModule, ICommandPublisher, IUpdateSubscriber
+public class ExampleModule : IModule, ICommandPublisher, IUpdateSubscriber, IDisplayElementPublisher
 {
     public string ModuleDisplayName { get; } = "Example Module";
 
-    public ObservableUpdateFrequency UpdateFrequency { get; } = new ObservableUpdateFrequency(Sandbox.ModAPI.Ingame.UpdateFrequency.Update100);
+    public ObservableUpdateFrequency Frequency { get; } = new ObservableUpdateFrequency(UpdateFrequency.Update100);
 
     public List<CommandItem> Commands => _commands;
     private List<CommandItem> _commands = new List<CommandItem>();
 
+    public IDisplayElement DisplayElement => _displayElement;
+    private DisplayGroup _displayElement = new DisplayGroup("Menu Group");
+    private DisplayCommand _myDisplayCommand;
+
+    // Inject your dependencies through the constructor
     public ExampleModule()
     {
         _commands.Add(new CommandItem(
-            CommandName: "DummyCommand",
-            MenuDisplayName: "Dummy Command",
-            MenuDisplayPriority: 1,
-            FunctionalityName: ModuleDisplayName,
-            Execute: ExecuteDummyCommand
+            CommandName: "SomeCommand",
+            Execute: ExecuteSomeCommand
         ));
+
+        _displayElement.AddChild(new DisplayElement("This can be any information"));
+        // Save reference if you want to modify it later
+        _myDisplayCommand = new DisplayCommand("Do something", DoSomething);
+        _displayElement.AddChild(_myDisplayCommand);
     }
 
     public void Update(UpdateType updateType)
     {
-        // Do something at each update cycle
+        // Do something at each update cycle, call other methods, etc.
+        // Modify UpdateFrequency any time if needed
+        Frequency.Set(UpdateFrequency.Update10);
     }
 
-    private void ExecuteDummyCommand()
+    private void ExecuteSomeCommand()
     {
-        // Do something when command is called
+        // Do something when command is called via argument
+    }
+
+    private void DoSomething()
+    {
+        // Do something when display command is selected
+        _myDisplayCommand.Label = "This will update on the display";
+        _displayElement.AddChild(new DisplayElement("This is some new information, dynamically added."));
     }
 }
 ```
@@ -80,14 +96,23 @@ public Program()
         Runtime,
         new UpdateDispatcherAndController1(Echo, _updateFrequencyGetter, _updateFrequencySetter),
         new CommandDispatcher(),
-        new GridOSDisplay(new CommandMenu())
+        new DisplayOrchestrator()
     );
 
-    // for showing command menu; optional
-    // you can register multiple textpanels, but currently all of them will show the same content
+    // For using display capabilities.
+    // You can register multiple textpanels, but currently only the first will be accessible with commands.
+    // The implementation of driving multiple displays with separate state is almost ready.
+    // NOTE that currently you simply have to bind 2, 3, and 4 numerical argument on the hotbar to
+    // issue Up, Down, and Select commands, respectively. Will be customizable soon.
     gridOS.RegisterTextPanel(gridOSDisplay);
 
     ExampleModule exampleModule = new ExampleModule();
     gridOS.RegisterModule(exampleModule);
+}
+
+public void Main(string argument, UpdateType UpdateType)
+{
+    // Simply transfer control to the system, passing all parameters
+    gridOS.ExecuteCycle(argument, UpdateType);
 }
 ```
