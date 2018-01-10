@@ -56,6 +56,8 @@ namespace IngameScript
                 _commandDispatcher = new CommandDispatcher();
                 _updateDispatcherAndController = new UpdateDispatcherAndController1(_echo, _updateFrequencyGetter, _updateFrequencySetter);
                 _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher);
+
+                _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
             }
 
             /// <summary>
@@ -125,6 +127,15 @@ namespace IngameScript
             public void RegisterTextPanel(IMyTextPanel textPanel)
             {
                 _displayOrchestrator.RegisterTextPanel(textPanel);
+            }
+
+            private void CommandHandler_AddLcd(CommandItem sender, string param)
+            {
+                IMyTerminalBlock textpanel = _p.GridTerminalSystem.GetBlockWithName(param);
+                if ((textpanel == null) || !(textpanel is IMyTextPanel))
+                    return;
+
+                RegisterTextPanel(textpanel as IMyTextPanel);
             }
         }
     }

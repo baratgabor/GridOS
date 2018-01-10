@@ -43,6 +43,7 @@ namespace IngameScript
 
         interface ICommandDispatcher
         {
+            void AddCommand(CommandItem command);
             void AddCommands(List<CommandItem> commands);
             void AddCommands_OverwriteExisting(List<CommandItem> commands);
             void RemoveCommands(List<CommandItem> commands);

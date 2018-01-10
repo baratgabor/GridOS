@@ -25,14 +25,19 @@ namespace IngameScript
         {
             private Dictionary<string, CommandItem> _commands = new Dictionary<string, CommandItem>();
 
+            public void AddCommand(CommandItem command)
+            {
+                if (!_commands.ContainsValue(command))
+                {
+                    _commands.Add(command.CommandName, command);
+                }
+            }
+
             public void AddCommands(List<CommandItem> commands)
             {
                 foreach (CommandItem c in commands)
                 {
-                    if (!_commands.ContainsValue(c))
-                    {
-                        _commands.Add(c.CommandName, c);
-                    }
+                    AddCommand(c);
                 }
             }
 

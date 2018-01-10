@@ -39,7 +39,7 @@ namespace IngameScript
                 _view = view;
                 _viewModel = viewModel;
                 _viewModel.ContentChanged += _view.Handle_ContentChanged;
-                //_viewModel.UpdateStringRepresentation();
+                _viewModel.UpdateStringRepresentation();
 
                 _navCommands = new List<CommandItem>()
                 {
@@ -48,7 +48,7 @@ namespace IngameScript
                     new CommandItem($"{_name}Select", _viewModel.Select)
                 };
 
-                _commandDispatcher.AddCommands(_navCommands);
+                _commandDispatcher.AddCommands_OverwriteExisting(_navCommands);
             }
 
             // TODO: Support command configurationc changes in some way?
