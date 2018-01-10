@@ -24,26 +24,31 @@ namespace IngameScript
         /// </summary>
         class DisplayController
         {
+            public string Name => _name;
+            private string _name;
             private DisplayView _view;
             private DisplayViewModel _viewModel;
-            private Dictionary<NavigationCommand, Action> _commandMap = new Dictionary<Program.NavigationCommand, Action>();
+            private List<CommandItem> _navCommands;
+            private ICommandDispatcher _commandDispatcher;
 
-            public DisplayController(DisplayView view, DisplayViewModel viewModel)
+            public DisplayController(string name, ICommandDispatcher commandDispatcher, DisplayView view, DisplayViewModel viewModel)
             {
+                _name = name;
+                _commandDispatcher = commandDispatcher;
+
                 _view = view;
                 _viewModel = viewModel;
                 _viewModel.ContentChanged += _view.Handle_ContentChanged;
                 //_viewModel.UpdateStringRepresentation();
 
-                _commandMap.Add(NavigationCommand.Up, _viewModel.MoveUp);
-                _commandMap.Add(NavigationCommand.Down, _viewModel.MoveDown);
-                _commandMap.Add(NavigationCommand.Select, _viewModel.Select);
-            }
+                _navCommands = new List<CommandItem>()
+                {
+                    new CommandItem($"{_name}Up", _viewModel.MoveUp),
+                    new CommandItem($"{_name}Down", _viewModel.MoveDown),
+                    new CommandItem($"{_name}Select", _viewModel.Select)
+                };
 
-            public void ProcessCommand(NavigationCommand command)
-            {
-                if (_commandMap.ContainsKey(command))
-                    _commandMap[command].Invoke();
+                _commandDispatcher.AddCommands(_navCommands);
             }
 
             // TODO: Support command configurationc changes in some way?

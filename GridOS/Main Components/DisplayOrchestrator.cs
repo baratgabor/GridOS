@@ -31,19 +31,15 @@ namespace IngameScript
             private IDisplayGroup _displayRoot = new DisplayGroup("Main Menu");
 
             private List<IMyTextPanel> _registeredTextPanels = new List<IMyTextPanel>();
-            private Dictionary<string, DisplayController> _namedControllers = new Dictionary<string, DisplayController>();
+            private List<DisplayController> _controllers = new List<DisplayController>();
+            private const string _controllerNameTemplate = "Display";
+            private int _controllerCounter = 0;
 
-            // TODO: Totally redo command handling, get rid of multiple lookups in different classes
-            private Dictionary<int, NavigationCommand> _commandMap = new Dictionary<int, NavigationCommand>()
-            {
-                { 2, NavigationCommand.Up },
-                { 3, NavigationCommand.Down },
-                { 4, NavigationCommand.Select }
-            };
+            private ICommandDispatcher _commandDispatcher;
 
-            public DisplayOrchestrator()
+            public DisplayOrchestrator(ICommandDispatcher commandDispatcher)
             {
-                // Nothing to do here now
+                _commandDispatcher = commandDispatcher;
             }
 
             public void RegisterTextPanel(IMyTextPanel textPanel)
@@ -51,8 +47,15 @@ namespace IngameScript
                 if (_registeredTextPanels.Contains(textPanel))
                     return;
 
+                _controllers.Add(
+                    new DisplayController(
+                        NextControllerName(),
+                        _commandDispatcher,
+                        new DisplayView(textPanel),
+                        new DisplayViewModel(_displayRoot))
+                );
+
                 _registeredTextPanels.Add(textPanel);
-                _namedControllers.Add("Display1", new DisplayController(new DisplayView(textPanel), new DisplayViewModel(_displayRoot)));
             }
 
             public void UnregisterTextPanel(IMyTextPanel textPanel)
@@ -60,26 +63,22 @@ namespace IngameScript
                 if (!_registeredTextPanels.Contains(textPanel))
                     return;
 
-                // TODO: Get rid of this hack, create proper removal infrastructure. CHECK REFERENCING to see if disposal is needed.
+                // TODO: Create proper removal infrastructure. CHECK REFERENCING to see if disposal is needed.
                 int sharedIndex = _registeredTextPanels.IndexOf(textPanel);
-                _namedControllers.Remove(_namedControllers.ElementAt(sharedIndex).Key);
+                _controllers.Remove(_controllers[sharedIndex]);
 
                 _registeredTextPanels.Remove(textPanel);
-            }
-
-            public void ProcessCommand(int numericalCommand)
-            {
-                if (!_commandMap.ContainsKey(numericalCommand))
-                    return;
-
-                // TODO: Currently doesn't support multiple controllers. Implement that functionality by changing the commanding structure too (nav. commands needs to be prefixed by controller name).
-                _namedControllers.First().Value.ProcessCommand(_commandMap[numericalCommand]);
             }
 
             // TODO: Totally not good... move the responsibility of dealing with display elements directly into this class
             public void RegisterDisplayElement(IDisplayElement element)
             {
                 _displayRoot.AddChild(element);
+            }
+
+            private string NextControllerName()
+            {
+                return $"{_controllerNameTemplate}{++_controllerCounter}";
             }
         }
     }

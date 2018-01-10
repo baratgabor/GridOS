@@ -105,10 +105,11 @@ namespace IngameScript
 
             private void ChildrenChangedHandler(IDisplayGroup displayGroup)
             {
+                // TODO: Adjust selection index if needed, e.g. if change was child removal, and selection index might be out of bounds
                 UpdateStringRepresentation();
             }
 
-            public void MoveUp()
+            public void MoveUp(CommandItem sender, string param)
             {
                 if (_selectedIndex <= 0)
                     return;
@@ -118,7 +119,7 @@ namespace IngameScript
                 UpdateStringRepresentation();
             }
 
-            public void MoveDown()
+            public void MoveDown(CommandItem sender, string param)
             {
                 if (_selectedIndex >= _activeDisplayGroup.GetChildren().Count - 1)
                     return;
@@ -128,7 +129,7 @@ namespace IngameScript
                 UpdateStringRepresentation();
             }
 
-            public void Select()
+            public void Select(CommandItem sender, string param)
             {
                 var selectedElement = _activeDisplayGroup.GetChildren().ElementAtOrDefault((int)_selectedIndex);
                 if (selectedElement == null)

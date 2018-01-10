@@ -110,29 +110,10 @@ namespace IngameScript
 
                 if (argument != "")
                 {
-                    ArgumentInterpreter(argument);
+                    _commandDispatcher.TryDispatch(argument);
                 }
 
                 _lastInstrCount = _runtime.CurrentInstructionCount;
-            }
-
-            private void ArgumentInterpreter(string argument)
-            {
-                _echo("ArgumentInterpreter invoked.");
-
-                int numericalParam = 0;
-                if (Int32.TryParse(argument, out numericalParam))
-                {
-                    _echo("ProcessDisplayCommand called.");
-                    _displayOrchestrator.ProcessCommand(numericalParam);
-                }
-                else
-                {
-                    _echo("CommandDispatcher.TryDispatch called.");
-                    _commandDispatcher.TryDispatch(argument.Trim());
-
-                    // TODO: add proper argument parsing. but HALT for now, since SE might soon include one by default
-                }
             }
 
             public void RegisterTextPanel(IMyTextPanel textPanel)

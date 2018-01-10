@@ -44,8 +44,9 @@ namespace IngameScript
         interface ICommandDispatcher
         {
             void AddCommands(List<CommandItem> commands);
+            void AddCommands_OverwriteExisting(List<CommandItem> commands);
             void RemoveCommands(List<CommandItem> commands);
-            bool TryDispatch(string commandName);
+            void TryDispatch(string commandName);
         }
 
         interface IDisplayComponent

@@ -23,7 +23,6 @@ namespace IngameScript
         /// </summary>
         class CommandDispatcher : ICommandDispatcher
         {
-            // TODO: This class is extremely similar to the CommandMenu class... see if it's possible to structure them better to avoid repetitious behavior implementation
             private Dictionary<string, CommandItem> _commands = new Dictionary<string, CommandItem>();
 
             public void AddCommands(List<CommandItem> commands)
@@ -33,8 +32,15 @@ namespace IngameScript
                     if (!_commands.ContainsValue(c))
                     {
                         _commands.Add(c.CommandName, c);
-                        //c.PropertyChanged += HandleCommandPropertyChanges;
                     }
+                }
+            }
+
+            public void AddCommands_OverwriteExisting(List<CommandItem> commands)
+            {
+                foreach (CommandItem c in commands)
+                {
+                    _commands[c.CommandName] = c;
                 }
             }
 
@@ -44,19 +50,27 @@ namespace IngameScript
                 {
                     if (_commands.ContainsValue(c))
                     {
-                        //c.PropertyChanged -= HandleCommandPropertyChanges;
                         _commands.Remove(c.CommandName);
                     }
                 }
             }
 
-            public bool TryDispatch(string commandName)
+            public void TryDispatch(string argument)
             {
-                if (!_commands.ContainsKey(commandName))
-                    return false;
+                // Isolate first word as command; return if not successful
+                int commandEnd = argument.Trim().IndexOf(" ");
+                if (commandEnd == -1)
+                    return;
 
-                _commands[commandName].Execute();
-                return true;
+                // Use first word as command, and the rest as parameter
+                string commandName = argument.Substring(0, commandEnd);
+                string parameter = argument.Substring(commandEnd).Trim();
+
+                CommandItem command;
+                if (_commands.TryGetValue(commandName, out command))
+                {
+                    command.Execute(command, parameter);
+                }
             }
         }
     }
