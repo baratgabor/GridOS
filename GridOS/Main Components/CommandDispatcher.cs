@@ -44,6 +44,16 @@ namespace IngameScript
                 }
             }
 
+            public string ListCommands()
+            {
+                string s = "";
+                foreach (var c in _commands)
+                {
+                    s += c.Key + Environment.NewLine;
+                }
+                return s;
+            }
+
             public void RemoveCommands(List<CommandItem> commands)
             {
                 foreach (CommandItem c in commands)
@@ -57,14 +67,23 @@ namespace IngameScript
 
             public void TryDispatch(string argument)
             {
-                // Isolate first word as command; return if not successful
-                int commandEnd = argument.Trim().IndexOf(" ");
-                if (commandEnd == -1)
-                    return;
+                string commandName = "";
+                string parameter = "";
 
-                // Use first word as command, and the rest as parameter
-                string commandName = argument.Substring(0, commandEnd);
-                string parameter = argument.Substring(commandEnd).Trim();
+                int commandEnd = argument.IndexOf(" ");
+
+                // Single-word - only command
+                if (commandEnd == -1)
+                {
+                    commandName = argument;
+                    parameter = "";
+                }
+                // Multi-word - first word command, rest is parameter
+                else
+                {
+                    commandName = argument.Substring(0, commandEnd);
+                    parameter = argument.Substring(commandEnd).Trim();
+                }
 
                 CommandItem command;
                 if (_commands.TryGetValue(commandName, out command))

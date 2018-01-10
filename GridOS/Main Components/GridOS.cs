@@ -110,7 +110,7 @@ namespace IngameScript
 
                 if (argument != "")
                 {
-                    _commandDispatcher.TryDispatch(argument);
+                    _commandDispatcher.TryDispatch(argument.Trim());
                 }
 
                 _lastInstrCount = _runtime.CurrentInstructionCount;
