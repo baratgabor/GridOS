@@ -31,11 +31,10 @@ namespace IngameScript
             private IMyGridProgramRuntimeInfo _runtime;
 
             private IUpdateDispatcherAndController _updateDispatcherAndController;
-            // TODO: Need to make sure that registered Commands are unique, unless we want to allow executing multiple Modules with the same command name
             private ICommandDispatcher _commandDispatcher;
             private DisplayOrchestrator _displayOrchestrator;
 
-            private const string _systemName = "ShipOS 0.8 Experimental";
+            private const string _systemName = "GridOS Experimental";
             private double _totalExecTime = 0;
             private int _numOfExec = 0;
             private int _lastInstrCount = 0;
@@ -92,12 +91,13 @@ namespace IngameScript
             }
 
             /// <summary>
-            /// The main entry point for each update cycle. Call it from Main().
+            /// Entry point for each update cycle. Call it from Main().
             /// </summary>
             /// <param name="updateType">The UpdateType received in Main().</param>
             /// <param name="argument">The argument received in Main().</param>
-            public void ExecuteCycle(string argument, UpdateType updateType)
+            public void Main(string argument, UpdateType updateType)
             {
+                // TODO: Get rid of this ad-hoc diagnostics, move it somewhere sane
                 _totalExecTime += _runtime.LastRunTimeMs;
                 _numOfExec++;
                 double _avgExecTime = _totalExecTime / _numOfExec;
@@ -109,9 +109,9 @@ namespace IngameScript
                     _initialPeriodExceeded = true;
                 }
 
-                _echo("ExecuteCycle invoked.");
+                //_echo("ExecuteCycle invoked.");
                 _echo($"Last Instr. Count: {_lastInstrCount}");
-                _echo($"Last Execusion Time: {_runtime.LastRunTimeMs:G3}");
+                //_echo($"Last Execusion Time: {_runtime.LastRunTimeMs:G3}");
                 _echo($"Average Execusion Time: {_avgExecTime:G3}");
 
                 _updateDispatcherAndController.Dispatch(updateType);
@@ -122,6 +122,14 @@ namespace IngameScript
                 }
 
                 _lastInstrCount = _runtime.CurrentInstructionCount;
+            }
+
+            /// <summary>
+            /// Entry point for saving. Call it from Save().
+            /// </summary>
+            public void Save()
+            {
+                // TODO: Implement saving and exiting functionality
             }
 
             public void RegisterTextPanel(IMyTextPanel textPanel)
