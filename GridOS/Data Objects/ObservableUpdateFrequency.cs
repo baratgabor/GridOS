@@ -46,7 +46,7 @@ namespace IngameScript
                 UpdateFrequency oldUpdateFrequency = _updateFrequency;
                 _updateFrequency = newUpdateFrequency;
                 UpdateTypeEquivalent = ConvertUpdateFrequency(_updateFrequency);
-                UpdateFrequencyChanged.Invoke(this, oldUpdateFrequency, newUpdateFrequency);
+                UpdateFrequencyChanged?.Invoke(this, oldUpdateFrequency, newUpdateFrequency);
             }
 
             private UpdateType ConvertUpdateFrequency(UpdateFrequency updateFrequency)
