@@ -64,7 +64,7 @@ public class ExampleModule : IModule, ICommandPublisher, IUpdateSubscriber, IDis
         Frequency.Set(UpdateFrequency.Update10);
     }
 
-    private void ExecuteSomeCommand()
+    private void ExecuteSomeCommand(CommandItem sender, string param)
     {
         // Do something when command is called via argument
     }
@@ -79,31 +79,23 @@ public class ExampleModule : IModule, ICommandPublisher, IUpdateSubscriber, IDis
 ```
 
 ## Instantiating the framework and registering a module
-The following example shows the current instantiation chain of the framework, along with the registration of a single module. **Note that this is very temporary, and included here only for the sake of completeness.** Most of the dependency instantiation will be moved inside the class to make it easier to use.
+The following example shows the current, simplified instantiation of the framework, along with the registration of a single module. The framework uses multiple components as dependencies, but the instantiation of these happens internally, to facilitate ease of use.
 
 ```csharp
 private GridOS gridOS;
 
 public Program()
 {
-    Func<UpdateFrequency> _updateFrequencyGetter = () => Runtime.UpdateFrequency;
-    Action<UpdateFrequency> _updateFrequencySetter = (x) => Runtime.UpdateFrequency = x;
-
     IMyTextPanel gridOSDisplay = GridTerminalSystem.GetBlockWithName("GridOSDisplay") as IMyTextPanel;
 
-    gridOS = new GridOS(
-        Echo,
-        Runtime,
-        new UpdateDispatcherAndController1(Echo, _updateFrequencyGetter, _updateFrequencySetter),
-        new CommandDispatcher(),
-        new DisplayOrchestrator()
-    );
+    gridOS = new GridOS(this);
 
-    // For using display capabilities.
-    // You can register multiple textpanels, but currently only the first will be accessible with commands.
-    // The implementation of driving multiple displays with separate state is almost ready.
-    // NOTE that currently you simply have to bind 2, 3, and 4 numerical argument on the hotbar to
-    // issue Up, Down, and Select commands, respectively. Will be customizable soon.
+    // For using display capabilities (optional).
+    // Multi-display supported: Multiple textpanels can be registered.
+    // Each display has their own view state of the same hierarchical menu system.
+    // Each display creates its own unique navigation commands in the internal command registry.
+    // Currently the commands for the first registered display are: Display1Up, Display1Down, and Display1Select.
+    // Additonal displays added use an incremented version of these commands (e.g. Display2Up, etc.).
     gridOS.RegisterTextPanel(gridOSDisplay);
 
     ExampleModule exampleModule = new ExampleModule();
@@ -113,6 +105,6 @@ public Program()
 public void Main(string argument, UpdateType UpdateType)
 {
     // Simply transfer control to the system, passing all parameters
-    gridOS.ExecuteCycle(argument, UpdateType);
+    gridOS.Main(argument, UpdateType);
 }
 ```
