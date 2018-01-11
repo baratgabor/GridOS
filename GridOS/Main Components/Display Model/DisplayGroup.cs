@@ -24,9 +24,9 @@ namespace IngameScript
         class DisplayGroup : DisplayElement, IDisplayGroup
         {
             public bool IsOpen => _isOpen;
-            private bool _isOpen = false;
+            protected bool _isOpen = false;
 
-            private List<IDisplayElement> _children = new List<IDisplayElement>();
+            protected List<IDisplayElement> _children = new List<IDisplayElement>();
 
             public event Action<IDisplayGroup> ChildrenChanged;
             public event Action<IDisplayGroup> BeforeOpen;
@@ -82,7 +82,7 @@ namespace IngameScript
                 return _children;
             }
 
-            private void HandleChildrenLabelChanges(IDisplayElement element)
+            protected void HandleChildrenLabelChanges(IDisplayElement element)
             {
                 if (!_isOpen)
                     return;

@@ -26,7 +26,7 @@ namespace IngameScript
             public event Action<IDisplayCommand> Executed;
             public event Action<IDisplayCommand> BeforeExecute;
 
-            private Action _command;
+            protected Action _command;
 
             public DisplayCommand(string label, Action action) : base(label)
             {

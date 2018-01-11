@@ -38,7 +38,7 @@ namespace IngameScript
                 _label = label;
             }
 
-            private void SetAndNotify<T>(ref T field, T value)
+            protected void SetAndNotify<T>(ref T field, T value)
             {
                 if (EqualityComparer<T>.Default.Equals(field, value))
                     return;
