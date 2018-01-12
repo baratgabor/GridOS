@@ -27,12 +27,10 @@ namespace IngameScript
             private IDisplayGroup _rootDisplayGroup;
             private IDisplayGroup _activeDisplayGroup;
             private int? _selectedIndex;
-            private string _contentString;
             private StringBuilder _builder = new StringBuilder();
-
-            public string Content => _contentString;
+            public List<string> Content { get; private set; }  = new List<string>();
             public int? CursorPosition => _selectedIndex;
-            public event Action<string, int?> ContentChanged;
+            public event Action<List<string>, int?> ContentChanged;
 
             // Navigation route of user, to support backwards traversal
             private Stack<IDisplayGroup> _navigationStack = new Stack<IDisplayGroup>();
@@ -80,27 +78,16 @@ namespace IngameScript
                 if (selectedElement == null)
                     return;
 
-                // TODO: Don't hard-code the marker. Also don't hardcode the prefixing whitespaces below. These are presentation details; need to be injected at least.
-                string marker = ">";
-                _builder.Clear();
-
+                Content.Clear();
+                int i = 0;
                 foreach (var e in groupContent)
                 {
-                    if (e == selectedElement)
-                        _builder.Append($" {marker} ");
-                    else
-                        _builder.Append($"    ");
+                    Content.Add((e is IDisplayGroup) ? e.Label + " >>" : e.Label);
 
-                    _builder.Append(e.Label);
-
-                    if (e is IDisplayGroup)
-                        _builder.Append(" >>");
-
-                    _builder.AppendLine();
+                    i++;
                 }
 
-                _contentString = _builder.ToString();
-                ContentChanged?.Invoke(_contentString, CursorPosition);
+                ContentChanged?.Invoke(Content, CursorPosition);
             }
 
             private void ChildrenChangedHandler(IDisplayGroup displayGroup)
