@@ -18,6 +18,23 @@ namespace IngameScript
 {
     partial class Program
     {
+
+        interface IModuleRegistrator
+        {
+            bool TryRegisterModule();
+        }
+
+        interface IRunHandler
+        {
+            void Execute(UpdateType updateType, string argument);
+        } // connect this to a private event? essentially make them subscribe?
+
+        class Diagnostics
+        {
+            TimeSpan ElapsedGameTime = new TimeSpan();
+
+        }
+
         /// <summary>
         /// Modular multitasking and command handling system that can register and run multiple code modules.
         /// Individual modules can contain components (via implementing the appropriate interface) for publishing commands and/or subscribing to recurring automatic execusion.

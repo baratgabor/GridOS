@@ -28,7 +28,7 @@ namespace IngameScript
             // What to do if non-empty element is removed? Remove all children, or put them somewhere else? How to react if we're displaying elements below a group node that is removed?
 
             // Root group displayed by default, parent of all other groups
-            private IDisplayGroup _displayRoot = new DisplayGroup("Main Menu");
+            private IDisplayGroup _displayRoot = new DisplayGroup("Main");
 
             private List<IMyTextPanel> _registeredTextPanels = new List<IMyTextPanel>();
             private List<DisplayController> _controllers = new List<DisplayController>();

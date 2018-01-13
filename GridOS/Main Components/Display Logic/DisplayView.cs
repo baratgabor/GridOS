@@ -24,22 +24,37 @@ namespace IngameScript
         class DisplayView
         {
             private IMyTextPanel _target;
+            private string _targetFont = "Debug";
+            private float _targetFontSize = 1.3f;
             private List<string> _content;
-            private int? _cursorPosition;
+            private string _path = _pathPrefix;
+            private int _cursorPosition;
             private int _maxLineWidth;
             public string DisplayHeader { get; set; }
-            private ProgressIndicator _spinner = new ProgressIndicator();
+            private ProgressIndicator2 _spinner = new ProgressIndicator2();
             private StringBuilder _builder = new StringBuilder();
 
-            private const string _linePrefixSelected = " > ";
-            private const string _linePrefixDefault = "    ";
-            private const string _linePrefixMultiline = "     ";
+            private const string _linePrefixSelected = " • ";
+            private const string _linePrefixDefault = " · ";
+            private const string _linePrefixMultiline = "   ";
+            private const string _pathPrefix = "  ";
+            private const string _pathSeparator = "›";
+            private const string _separatorLine = "...........................................................";
+            private const string _separatorLine2 = "˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙";
+            
 
             public DisplayView(IMyTextPanel target)
             {
                 _target = target;
+                SetupTarget(_target);
 
                 DetermineMaxLineLength();
+            }
+
+            private void SetupTarget(IMyTextPanel target)
+            {
+                target.Font = _targetFont;
+                target.FontSize = _targetFontSize;
             }
 
             private void DetermineMaxLineLength()
@@ -51,11 +66,9 @@ namespace IngameScript
             private void UpdateScreen()
             {
                 // TODO: Replace static header
-                DisplayHeader = $"\r\n    GridOS - Experimental ({_spinner.Get()})\r\n_______________________________________________";
+                DisplayHeader = $"{Environment.NewLine}  ::GridOS:: {_spinner.Get()}  Status: Ok{Environment.NewLine}{_separatorLine}";
 
-                GetFormattedContent();
-
-                _target.WritePublicText($"{DisplayHeader}{Environment.NewLine}{GetFormattedContent()}");
+                _target.WritePublicText($"{DisplayHeader}{Environment.NewLine}{_path}{Environment.NewLine}{_separatorLine2}{Environment.NewLine}{GetFormattedContent()}");
             }
 
             private string GetFormattedContent()
@@ -92,12 +105,25 @@ namespace IngameScript
                 // implement scrolling here, based on current cursor position and screen/font size
             }
 
-            public void Handle_ContentChanged(List<string> content, int? cursorPosition)
+            public void Handle_ContentChanged(List<string> content, int cursorPosition)
             {
                 _content = content;
                 _cursorPosition = cursorPosition;
                 UpdateScreen();
             }
+
+            internal void Handle_PathChanged(List<string> path)
+            {
+                _builder.Clear();
+                _builder.Append(_pathPrefix);
+                foreach (var s in path)
+                {
+                    _builder.Append(" " + s + " " + _pathSeparator);
+                }
+                //_builder.Remove(_builder.Length-2, 2);
+                _path = _builder.ToString();
+            }
+
 
             /// <summary>
             /// Word wraps the given text to fit within the specified width.

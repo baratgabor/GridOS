@@ -39,6 +39,8 @@ namespace IngameScript
                 _view = view;
                 _viewModel = viewModel;
                 _viewModel.ContentChanged += _view.Handle_ContentChanged;
+                _viewModel.PathChanged += _view.Handle_PathChanged;
+                _viewModel.UpdatePathString();
                 _viewModel.UpdateStringRepresentation();
 
                 _navCommands = new List<CommandItem>()
@@ -49,12 +51,6 @@ namespace IngameScript
                 };
 
                 _commandDispatcher.AddCommands_OverwriteExisting(_navCommands);
-            }
-
-            // TODO: Support command configurationc changes in some way?
-            public void UpdateCommandConfiguration()
-            {
-                throw new Exception("Not implemented");
             }
         }
     }
