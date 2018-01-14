@@ -23,8 +23,8 @@ namespace IngameScript
         /// </summary>
         class DisplayGroup : DisplayElement, IDisplayGroup
         {
-            public bool IsOpen => _isOpen;
-            protected bool _isOpen = false;
+            public int OpenedBy => _openedBy;
+            protected int _openedBy = 0;
 
             protected List<IDisplayElement> _children = new List<IDisplayElement>();
 
@@ -59,21 +59,15 @@ namespace IngameScript
 
             public void Open()
             {
-                if (_isOpen)
-                    return;
-
                 BeforeOpen?.Invoke(this);
-                _isOpen = true;
+                _openedBy++;
                 Opened?.Invoke(this);
             }
 
             public void Close()
             {
-                if (!_isOpen)
-                    return;
-
                 BeforeClose?.Invoke(this);
-                _isOpen = false;
+                _openedBy--;
                 Closed?.Invoke(this);
             }
 
@@ -84,7 +78,7 @@ namespace IngameScript
 
             protected void HandleChildrenLabelChanges(IDisplayElement element)
             {
-                if (!_isOpen)
+                if (_openedBy <= 0)
                     return;
 
                 ChildrenChanged?.Invoke(this);

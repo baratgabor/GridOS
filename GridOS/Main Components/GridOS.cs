@@ -71,7 +71,7 @@ namespace IngameScript
 
                 _commandDispatcher = new CommandDispatcher();
                 _updateDispatcherAndController = new UpdateDispatcherAndController1(_echo, _updateFrequencyGetter, _updateFrequencySetter);
-                _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher);
+                _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _runtime);
 
                 _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
             }
@@ -127,8 +127,8 @@ namespace IngameScript
                 }
 
                 //_echo("ExecuteCycle invoked.");
-                _echo($"Last Instr. Count: {_lastInstrCount}");
-                //_echo($"Last Execusion Time: {_runtime.LastRunTimeMs:G3}");
+                _echo("Last Instr. Count: " + _lastInstrCount);
+                _echo($"Last Execusion Time: {_runtime.LastRunTimeMs:G3}");
                 _echo($"Average Execusion Time: {_avgExecTime:G3}");
 
                 _updateDispatcherAndController.Dispatch(updateType);

@@ -36,10 +36,12 @@ namespace IngameScript
             private int _controllerCounter = 0;
 
             private ICommandDispatcher _commandDispatcher;
+            private IMyGridProgramRuntimeInfo _runtime;
 
-            public DisplayOrchestrator(ICommandDispatcher commandDispatcher)
+            public DisplayOrchestrator(ICommandDispatcher commandDispatcher, IMyGridProgramRuntimeInfo runtime)
             {
                 _commandDispatcher = commandDispatcher;
+                _runtime = runtime;
             }
 
             public void RegisterTextPanel(IMyTextPanel textPanel)
@@ -51,8 +53,9 @@ namespace IngameScript
                     new DisplayController(
                         NextControllerName(),
                         _commandDispatcher,
-                        new DisplayView(textPanel),
-                        new DisplayViewModel(_displayRoot))
+                        new DisplayView(textPanel, _runtime),
+                        new DisplayViewModel(_displayRoot),
+                        _runtime)
                 );
 
                 _registeredTextPanels.Add(textPanel);

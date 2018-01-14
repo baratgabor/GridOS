@@ -24,9 +24,10 @@ namespace IngameScript
         class DisplayView
         {
             private IMyTextPanel _target;
+            private IMyGridProgramRuntimeInfo _runtime;
             private string _targetFont = "Debug";
             private float _targetFontSize = 1.3f;
-            private List<string> _content;
+            private string _formattedContent;
             private string _path = _pathPrefix;
             private int _cursorPosition;
             private int _maxLineWidth;
@@ -40,11 +41,11 @@ namespace IngameScript
             private const string _pathPrefix = "  ";
             private const string _pathSeparator = "›";
             private const string _separatorLine = "...........................................................";
-            private const string _separatorLine2 = "˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙";
+            private const string _separatorLine2 = "˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙";
             
-
-            public DisplayView(IMyTextPanel target)
+            public DisplayView(IMyTextPanel target, IMyGridProgramRuntimeInfo runtime)
             {
+                _runtime = runtime;
                 _target = target;
                 SetupTarget(_target);
 
@@ -59,57 +60,48 @@ namespace IngameScript
 
             private void DetermineMaxLineLength()
             {
-                // TODO: Determine max line length based on display type and settings
-                _maxLineWidth = 30;
+                // Proportional to 34 characters at 1.0 font size
+                _maxLineWidth = (int)Math.Truncate(34 / _targetFontSize);
             }
         
-            private void UpdateScreen()
+            private void UpdateScreen(string formattedString)
             {
                 // TODO: Replace static header
-                DisplayHeader = $"{Environment.NewLine}  ::GridOS:: {_spinner.Get()}  Status: Ok{Environment.NewLine}{_separatorLine}";
+                DisplayHeader = $"{Environment.NewLine}  ::GridOS:: {_spinner.Get()} LRT: {_runtime.LastRunTimeMs:G3}ms{Environment.NewLine}{_separatorLine}";
 
-                _target.WritePublicText($"{DisplayHeader}{Environment.NewLine}{_path}{Environment.NewLine}{_separatorLine2}{Environment.NewLine}{GetFormattedContent()}");
+                _target.WritePublicText($"{DisplayHeader}{Environment.NewLine}{_path}{Environment.NewLine}{_separatorLine2}{Environment.NewLine}{formattedString}");
             }
 
-            private string GetFormattedContent()
+            private string GetFormattedString(List<string> content)
             {
                 _builder.Clear();
-
-                int i = 0;
-                foreach (var s in _content)
+                for (int i = 0; i < content.Count; i++)
                 {
-                    string prefix;
+                    string linePrefix;
                     if (i == _cursorPosition)
-                        prefix = _linePrefixSelected;
+                        linePrefix = _linePrefixSelected;
                     else
-                        prefix = _linePrefixDefault;
+                        linePrefix = _linePrefixDefault;
 
-                    if (s.Length > _maxLineWidth)
-                    {
-                        _builder.AppendLine(WordWrap(s, _maxLineWidth, prefix, _linePrefixMultiline));
-                    }
+                    var line = content[i];
+                    if (line.Length > _maxLineWidth)
+                        _builder.AppendLine(WordWrap(line, _maxLineWidth, linePrefix, _linePrefixMultiline));
                     else
-                    {
-                        _builder.AppendLine(prefix + s);
-                    }
-
-                    i++;
+                        _builder.AppendLine(linePrefix + line);
                 }
 
                 return _builder.ToString();
             }
-
 
             private void SelectVisibleContent()
             {
                 // implement scrolling here, based on current cursor position and screen/font size
             }
 
-            public void Handle_ContentChanged(List<string> content, int cursorPosition)
+            internal void Handle_ContentChanged(List<string> content)
             {
-                _content = content;
-                _cursorPosition = cursorPosition;
-                UpdateScreen();
+                _formattedContent = GetFormattedString(content);
+                UpdateScreen(_formattedContent);
             }
 
             internal void Handle_PathChanged(List<string> path)
@@ -120,18 +112,50 @@ namespace IngameScript
                 {
                     _builder.Append(" " + s + " " + _pathSeparator);
                 }
-                //_builder.Remove(_builder.Length-2, 2);
                 _path = _builder.ToString();
             }
 
+            internal void Handle_SelectionChanged(int cursorPosition)
+            {
+                _builder.Clear();
+                _builder.Append(_formattedContent);
+
+                // Selection moved down
+                if (cursorPosition > _cursorPosition)
+                {
+                    // Remove old selection bullet, replace it with default bullet
+                    int selectionBulletIndex = _formattedContent.IndexOf(_linePrefixSelected);
+                    _builder.Remove(selectionBulletIndex, _linePrefixSelected.Length);
+                    _builder.Insert(selectionBulletIndex, _linePrefixDefault);
+
+                    // Remove next bullet, replace it with selection bullet
+                    int nextBulletIndex = _formattedContent.IndexOf(_linePrefixDefault, selectionBulletIndex);
+                    _builder.Remove(nextBulletIndex, _linePrefixDefault.Length);
+                    _builder.Insert(nextBulletIndex, _linePrefixSelected);
+                }
+
+                // Selection moved up
+                if (cursorPosition < _cursorPosition)
+                {
+                    // Remove old selection bullet, replace it with default bullet
+                    int selectionBulletIndex = _formattedContent.IndexOf(_linePrefixSelected);
+                    _builder.Remove(selectionBulletIndex, _linePrefixSelected.Length);
+                    _builder.Insert(selectionBulletIndex, _linePrefixDefault);
+
+                    // Remove next bullet, replace it with selection bullet
+                    int nextBulletIndex = _formattedContent.LastIndexOf(_linePrefixDefault, selectionBulletIndex);
+                    _builder.Remove(nextBulletIndex, _linePrefixDefault.Length);
+                    _builder.Insert(nextBulletIndex, _linePrefixSelected);
+                }
+
+                _cursorPosition = cursorPosition;
+                _formattedContent = _builder.ToString();
+                UpdateScreen(_formattedContent);
+            }
 
             /// <summary>
             /// Word wraps the given text to fit within the specified width.
             /// </summary>
-            /// <param name="text">Text to be word wrapped</param>
-            /// <param name="width">Width, in characters, to which the text
-            /// should be word wrapped</param>
-            /// <returns>The modified text</returns>
             public static string WordWrap(string text, int width, string linePrefixFirst, string linePrefixSubsequent)
             {
                 int pos, next;
@@ -187,10 +211,6 @@ namespace IngameScript
             /// Locates position to break the given line so as to avoid
             /// breaking words.
             /// </summary>
-            /// <param name="text">String that contains line of text</param>
-            /// <param name="pos">Index where line of text starts</param>
-            /// <param name="max">Maximum line length</param>
-            /// <returns>The modified line length</returns>
             private static int BreakLine(string text, int pos, int max)
             {
                 // Find last whitespace in line

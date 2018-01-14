@@ -28,31 +28,14 @@ namespace IngameScript
             private IDisplayGroup _activeDisplayGroup;
             private bool _showBackCommand = false;
             private int _selectedIndex;
-            private IDisplayElement _selectedElement {
-                get
-                {
-                    if ((_showBackCommand) && (_selectedIndex == -1))
-                        return _backCommand;
-                    else
-                        return _activeDisplayGroup.GetChildren().ElementAtOrDefault(_selectedIndex);
-                }
-            }
             private int _currentLowBound => _showBackCommand ? -1 : 0;
             private StringBuilder _builder = new StringBuilder();
-            public List<string> Content { get; private set; } = new List<string>();
-            public List<string> Path { get; private set; } = new List<string>();
-            public int CursorPosition
-            {
-                get
-                {
-                    if (_showBackCommand)
-                        return _selectedIndex + 1;
-                    else
-                        return _selectedIndex;
-                }
-            }
-            public event Action<List<string>, int> ContentChanged;
+            public List<string> ScreenContent { get; private set; } = new List<string>();
+            public List<string> NavigationPath { get; private set; } = new List<string>();
+            public int CursorPosition => _showBackCommand ? _selectedIndex + 1 : _selectedIndex;
+            public event Action<List<string>> ContentChanged;
             public event Action<List<string>> PathChanged;
+            public event Action<int> SelectionChanged;
 
             // Navigation route of user, to support backwards traversal
             private Stack<IDisplayGroup> _navigationStack = new Stack<IDisplayGroup>();
@@ -63,8 +46,6 @@ namespace IngameScript
             {
                 _rootDisplayGroup = displayRoot;
                 OpenDisplayGoup(_rootDisplayGroup);
-                //UpdatePathString();
-                //UpdateStringRepresentation();
                 _backCommand = new DisplayCommand("Back «", MoveBackCommand);
             }
 
@@ -90,41 +71,43 @@ namespace IngameScript
                 _selectedIndex = _currentLowBound;
             }
 
-            public void UpdateStringRepresentation()
+            public void Update()
+            {
+                UpdateNavigationPathString();
+                UpdateScreenContentString();
+            }
+
+            private void UpdateScreenContentString()
             {
                 var groupContent = _activeDisplayGroup.GetChildren();
 
-                Content.Clear();
+                ScreenContent.Clear();
 
                 if (_showBackCommand)
-                    Content.Add("Back «");
+                    ScreenContent.Add("Back «");
 
-                int i = 0;
                 foreach (var e in groupContent)
-                {
-                    Content.Add((e is IDisplayGroup) ? e.Label + " »" : e.Label);
+                    ScreenContent.Add((e is IDisplayGroup) ? e.Label + " »" : e.Label);
 
-                    i++;
-                }
-
-                ContentChanged?.Invoke(Content, CursorPosition);
+                ContentChanged?.Invoke(ScreenContent);
             }
 
-            public void UpdatePathString()
+            private void UpdateNavigationPathString()
             {
-                Path.Clear();
+                NavigationPath.Clear();
                 var pathList = _navigationStack.ToList();
                 pathList.Reverse();
                 foreach (var p in pathList)
-                    Path.Add(p.Label);
+                    NavigationPath.Add(p.Label);
 
-                PathChanged?.Invoke(Path);
+                PathChanged?.Invoke(NavigationPath);
+                SelectionChanged?.Invoke(CursorPosition);
             }
 
             private void ChildrenChangedHandler(IDisplayGroup displayGroup)
             {
                 // TODO: Adjust selection index if needed, e.g. if change was child removal, and selection index might be out of bounds
-                UpdateStringRepresentation();
+                UpdateScreenContentString();
             }
 
             public void MoveUp(CommandItem sender, string param)
@@ -134,7 +117,8 @@ namespace IngameScript
 
                 _selectedIndex--;
 
-                UpdateStringRepresentation();
+                // Only cursor position changes, no need to rebuild string list here
+                SelectionChanged?.Invoke(CursorPosition);
             }
 
             public void MoveDown(CommandItem sender, string param)
@@ -144,22 +128,29 @@ namespace IngameScript
 
                 _selectedIndex++;
 
-                UpdateStringRepresentation();
+                // Only cursor position changes, no need to rebuild string list here
+                SelectionChanged?.Invoke(CursorPosition);
             }
 
             public void Select(CommandItem sender, string param)
             {
-                if (_selectedElement == null)
+                IDisplayElement selectedElement;
+                if ((_showBackCommand) && (_selectedIndex == -1))
+                    selectedElement = _backCommand;
+                else
+                    selectedElement = _activeDisplayGroup.GetChildren().ElementAtOrDefault(_selectedIndex);
+
+                if (selectedElement == null)
                     return;
 
-                if (_selectedElement is IDisplayGroup)
+                if (selectedElement is IDisplayGroup)
                 {
-                    OpenDisplayGoup(_selectedElement as IDisplayGroup);
-                    UpdatePathString();
-                    UpdateStringRepresentation();
+                    OpenDisplayGoup(selectedElement as IDisplayGroup);
+                    UpdateNavigationPathString();
+                    UpdateScreenContentString();
                 }
-                else if (_selectedElement is IDisplayCommand)
-                    (_selectedElement as IDisplayCommand).Execute();
+                else if (selectedElement is IDisplayCommand)
+                    (selectedElement as IDisplayCommand).Execute();
             }
 
             private void MoveBackCommand()
@@ -182,8 +173,8 @@ namespace IngameScript
                 // TODO: Don't assume that group content is the same; check to make sure
                 _selectedIndex = _activeDisplayGroup.GetChildren().IndexOf(PreviousGroup);
 
-                UpdatePathString();
-                UpdateStringRepresentation();
+                UpdateNavigationPathString();
+                UpdateScreenContentString();
             }
         }
     }

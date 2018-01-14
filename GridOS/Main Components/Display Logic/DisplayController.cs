@@ -30,18 +30,20 @@ namespace IngameScript
             private DisplayViewModel _viewModel;
             private List<CommandItem> _navCommands;
             private ICommandDispatcher _commandDispatcher;
+            private IMyGridProgramRuntimeInfo _runtime;
 
-            public DisplayController(string name, ICommandDispatcher commandDispatcher, DisplayView view, DisplayViewModel viewModel)
+            public DisplayController(string name, ICommandDispatcher commandDispatcher, DisplayView view, DisplayViewModel viewModel, IMyGridProgramRuntimeInfo runtime)
             {
                 _name = name;
                 _commandDispatcher = commandDispatcher;
+                _runtime = runtime;
 
                 _view = view;
                 _viewModel = viewModel;
                 _viewModel.ContentChanged += _view.Handle_ContentChanged;
                 _viewModel.PathChanged += _view.Handle_PathChanged;
-                _viewModel.UpdatePathString();
-                _viewModel.UpdateStringRepresentation();
+                _viewModel.SelectionChanged += _view.Handle_SelectionChanged;
+                _viewModel.Update();
 
                 _navCommands = new List<CommandItem>()
                 {

@@ -96,6 +96,9 @@ namespace IngameScript
 
             public void Dispatch(UpdateType updateType)
             {
+                if (updateType < UpdateType.Update1)
+                    return;
+
                 _echo(_progress.Get() + " UpdateDispatcher reports:");
                 _echo($"# update tiers: {_moduleLists.Count}");
 

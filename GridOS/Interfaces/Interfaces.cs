@@ -86,7 +86,7 @@ namespace IngameScript
             event Action<IDisplayGroup> BeforeClose;
             event Action<IDisplayGroup> Closed;
 
-            bool IsOpen { get; }
+            int OpenedBy { get; }
         }
 
         interface IDisplayElementPublisher
