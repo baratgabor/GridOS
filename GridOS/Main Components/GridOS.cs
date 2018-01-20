@@ -74,6 +74,8 @@ namespace IngameScript
                 _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _runtime);
 
                 _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
+                _commandDispatcher.AddCommand(new CommandItem("DisableUpdates", CommandHandler_DisableUpdates));
+                _commandDispatcher.AddCommand(new CommandItem("EnableUpdates", CommandHandler_EnableUpdates));
             }
 
             /// <summary>
@@ -132,10 +134,16 @@ namespace IngameScript
                 _echo($"Average Execusion Time: {_avgExecTime:G3}");
 
                 _updateDispatcherAndController.Dispatch(updateType);
-
-                if (argument != "")
+                try
                 {
-                    _commandDispatcher.TryDispatch(argument.Trim());
+                    if (argument != "")
+                    {
+                        _commandDispatcher.TryDispatch(argument.Trim());
+                    }
+                }
+                catch(Exception e)
+                {
+                    _echo(e.ToString());
                 }
 
                 _lastInstrCount = _runtime.CurrentInstructionCount;
@@ -161,6 +169,16 @@ namespace IngameScript
                     return;
 
                 RegisterTextPanel(textpanel as IMyTextPanel);
+            }
+
+            private void CommandHandler_DisableUpdates(CommandItem sender, string param)
+            {
+                _updateDispatcherAndController.DisableUpdates();
+            }
+
+            private void CommandHandler_EnableUpdates(CommandItem sender, string param)
+            {
+                _updateDispatcherAndController.EnableUpdates();
             }
         }
     }

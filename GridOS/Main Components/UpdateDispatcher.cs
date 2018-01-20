@@ -173,7 +173,19 @@ namespace IngameScript
 
                 return updateType;
             }
+
+            public void DisableUpdates()
+            {
+                _updateFrequencySetter(UpdateFrequency.None);
+            }
+
+            public void EnableUpdates()
+            {
+                UpdateMasterUpdateFrequency();
+            }
         }
+
+
 
         /// <summary>
         /// Your friendly class responsible for executing the appropriate modules at each update cycle. Also handles modules' UpdateFrequency changes, and establishes and sets the base UpdateFrequency for the Programmable Block.
@@ -246,6 +258,16 @@ namespace IngameScript
             private void HandleModuleUpdateFrequencyChanges(ObservableUpdateFrequency obsUpdFreqOfModule, UpdateFrequency oldUpdateFrequency, UpdateFrequency newUpdateFrequency)
             {
                 // Yep, we don't need any of the passed data here.
+                UpdateMasterUpdateFrequency();
+            }
+
+            public void DisableUpdates()
+            {
+                _updateFrequencySetter(UpdateFrequency.None);
+            }
+
+            public void EnableUpdates()
+            {
                 UpdateMasterUpdateFrequency();
             }
         }

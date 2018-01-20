@@ -27,15 +27,10 @@ namespace IngameScript
             private IDisplayGroup _rootDisplayGroup;
             private IDisplayGroup _activeDisplayGroup;
             private bool _showBackCommand = false;
-            private int _selectedIndex;
-            private int _currentLowBound => _showBackCommand ? -1 : 0;
-            private StringBuilder _builder = new StringBuilder();
-            public List<string> ScreenContent { get; private set; } = new List<string>();
-            public List<string> NavigationPath { get; private set; } = new List<string>();
-            public int CursorPosition => _showBackCommand ? _selectedIndex + 1 : _selectedIndex;
-            public event Action<List<string>> ContentChanged;
-            public event Action<List<string>> PathChanged;
-            public event Action<int> SelectionChanged;
+            public List<IDisplayElement> ScreenContent { get; private set; } = new List<IDisplayElement>();
+            public List<IDisplayGroup> NavigationPath { get; private set; } = new List<IDisplayGroup>();
+            public event Action<List<IDisplayElement>> ContentChanged;
+            public event Action<List<IDisplayGroup>> PathChanged;
 
             // Navigation route of user, to support backwards traversal
             private Stack<IDisplayGroup> _navigationStack = new Stack<IDisplayGroup>();
@@ -67,90 +62,55 @@ namespace IngameScript
                 _navigationStack.Push(_activeDisplayGroup);
                 _activeDisplayGroup.Open();
                 _activeDisplayGroup.ChildrenChanged += ChildrenChangedHandler;
-
-                _selectedIndex = _currentLowBound;
             }
 
             public void Update()
             {
-                UpdateNavigationPathString();
-                UpdateScreenContentString();
+                UpdateNavigationPath();
+                UpdateScreenContent();
             }
 
-            private void UpdateScreenContentString()
+            private void UpdateScreenContent()
             {
-                var groupContent = _activeDisplayGroup.GetChildren();
-
                 ScreenContent.Clear();
 
                 if (_showBackCommand)
-                    ScreenContent.Add("Back «");
+                    ScreenContent.Add(_backCommand);
 
-                foreach (var e in groupContent)
-                    ScreenContent.Add((e is IDisplayGroup) ? e.Label + " »" : e.Label);
+                ScreenContent.AddRange(_activeDisplayGroup.GetChildren());
 
                 ContentChanged?.Invoke(ScreenContent);
             }
 
-            private void UpdateNavigationPathString()
+            private void UpdateNavigationPath()
             {
                 NavigationPath.Clear();
-                var pathList = _navigationStack.ToList();
-                pathList.Reverse();
-                foreach (var p in pathList)
-                    NavigationPath.Add(p.Label);
+                var navpath = _navigationStack.ToList();
+                navpath.Reverse();
+                NavigationPath = navpath;
 
                 PathChanged?.Invoke(NavigationPath);
-                SelectionChanged?.Invoke(CursorPosition);
             }
 
             private void ChildrenChangedHandler(IDisplayGroup displayGroup)
             {
                 // TODO: Adjust selection index if needed, e.g. if change was child removal, and selection index might be out of bounds
-                UpdateScreenContentString();
+                UpdateScreenContent();
             }
 
-            public void MoveUp(CommandItem sender, string param)
+            public void Execute(IDisplayElement element)
             {
-                if (_selectedIndex <= _currentLowBound)
+                if (element == null)
                     return;
 
-                _selectedIndex--;
-
-                // Only cursor position changes, no need to rebuild string list here
-                SelectionChanged?.Invoke(CursorPosition);
-            }
-
-            public void MoveDown(CommandItem sender, string param)
-            {
-                if (_selectedIndex >= _activeDisplayGroup.GetChildren().Count - 1)
-                    return;
-
-                _selectedIndex++;
-
-                // Only cursor position changes, no need to rebuild string list here
-                SelectionChanged?.Invoke(CursorPosition);
-            }
-
-            public void Select(CommandItem sender, string param)
-            {
-                IDisplayElement selectedElement;
-                if ((_showBackCommand) && (_selectedIndex == -1))
-                    selectedElement = _backCommand;
-                else
-                    selectedElement = _activeDisplayGroup.GetChildren().ElementAtOrDefault(_selectedIndex);
-
-                if (selectedElement == null)
-                    return;
-
-                if (selectedElement is IDisplayGroup)
+                if (element is IDisplayGroup)
                 {
-                    OpenDisplayGoup(selectedElement as IDisplayGroup);
-                    UpdateNavigationPathString();
-                    UpdateScreenContentString();
+                    OpenDisplayGoup(element as IDisplayGroup);
+                    UpdateNavigationPath();
+                    UpdateScreenContent();
                 }
-                else if (selectedElement is IDisplayCommand)
-                    (selectedElement as IDisplayCommand).Execute();
+                else if (element is IDisplayCommand)
+                    (element as IDisplayCommand).Execute();
             }
 
             private void MoveBackCommand()
@@ -170,11 +130,8 @@ namespace IngameScript
                 _activeDisplayGroup.Open();
                 _activeDisplayGroup.ChildrenChanged += ChildrenChangedHandler;
 
-                // TODO: Don't assume that group content is the same; check to make sure
-                _selectedIndex = _activeDisplayGroup.GetChildren().IndexOf(PreviousGroup);
-
-                UpdateNavigationPathString();
-                UpdateScreenContentString();
+                UpdateNavigationPath();
+                UpdateScreenContent();
             }
         }
     }

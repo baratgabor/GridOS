@@ -39,6 +39,8 @@ namespace IngameScript
             void Add(IUpdateSubscriber updateSubscriber);
             void Remove(IUpdateSubscriber updateSubscriber);
             void Dispatch(UpdateType UpdateType);
+            void DisableUpdates();
+            void EnableUpdates();
         }
 
         interface ICommandDispatcher

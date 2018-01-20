@@ -42,14 +42,14 @@ namespace IngameScript
                 _viewModel = viewModel;
                 _viewModel.ContentChanged += _view.Handle_ContentChanged;
                 _viewModel.PathChanged += _view.Handle_PathChanged;
-                _viewModel.SelectionChanged += _view.Handle_SelectionChanged;
+                _view.Selected += _viewModel.Execute;
                 _viewModel.Update();
 
                 _navCommands = new List<CommandItem>()
                 {
-                    new CommandItem($"{_name}Up", _viewModel.MoveUp),
-                    new CommandItem($"{_name}Down", _viewModel.MoveDown),
-                    new CommandItem($"{_name}Select", _viewModel.Select)
+                    new CommandItem($"{_name}Up", _view.MoveUp),
+                    new CommandItem($"{_name}Down", _view.MoveDown),
+                    new CommandItem($"{_name}Select", _view.Select)
                 };
 
                 _commandDispatcher.AddCommands_OverwriteExisting(_navCommands);
