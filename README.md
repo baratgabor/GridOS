@@ -1,9 +1,13 @@
 # GridOS
 Modular multitasking and command handling ingame script for Space Engineers. This script provides a framework for creating separate code modules to run on a single Programmable Block.
 
-Experimental version; frequent, breaking changes. Primarily made for my own use.
+Additionally, it provides access to a highly flexible hierarchical menu system that implements intelligent automatic screen updates (when the underlying data changes), and supports showing different parts of the same menu hierarchy on different displays (additional displays can be added or removed dynamically at runtime).
 
-Initial documentation; will be expanded later.
+**Very early version** – expect frequent changes, including breaking changes in the consumer-facing interfaces and classes. Primarily made for my own use, but if it seems useful to you, you can utilize it however you wish.
+
+*Large architectural overhaul is coming, which will expand the capabilities of modules quite a bit.*
+
+This readme gets outdated all the time due to the frequent changes, but I'll try to update it now and then.
 
 ## How does it work
 
@@ -108,3 +112,21 @@ public void Main(string argument, UpdateType UpdateType)
     gridOS.Main(argument, UpdateType);
 }
 ```
+
+## Getting started using the framework
+
+**Environment**
+
+If you wish to utilize this framework in your scripting projects, you should be using:
+- [Visual Studio](https://www.visualstudio.com/downloads/), and
+- [MDK plugin](https://github.com/malware-dev/MDK-SE).
+
+*The MDK plugin is the only comfortable way currently available for merging multiple project files into a single Programmable Block script.*
+
+**Adding the framework as a shared project**
+
+This project is created as a *shared project* that you can (after cloning or downloading it) add to your existing solutions, by selecting **File > Open > Project/Solution > Add to solution**. Afterwards you need to add a reference to it by right-clicking the **References** node in your own project (in Solution Explorer), then selecting **Add Reference > Shared Projects**, and checking the checkbox in front of **GridOS**.
+
+**Deploying the finished script**
+
+After you've written your script against the framework, and wish to transfer it to SE, right-click the solution node in Solution Explorer, and select **Deploy All MDK Scripts**. This command merges all files, including both the files of the framework and your own project files, into a single script file placed into SE's script folder, ready for selecting it in-game from the list of scripts.
