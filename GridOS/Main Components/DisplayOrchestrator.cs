@@ -42,6 +42,8 @@ namespace IngameScript
             {
                 _commandDispatcher = commandDispatcher;
                 _runtime = runtime;
+
+                _displayRoot.AddChild(new HelpMenu());
             }
 
             public void RegisterTextPanel(IMyTextPanel textPanel)

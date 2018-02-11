@@ -40,8 +40,9 @@ namespace IngameScript
 
                 _view = view;
                 _viewModel = viewModel;
+                _viewModel.ElementChanged += _view.Handle_ElementChanged;
                 _viewModel.ContentChanged += _view.Handle_ContentChanged;
-                _viewModel.PathChanged += _view.Handle_PathChanged;
+                _viewModel.ContextChanged += _view.Handle_ContextChanged;
                 _view.Selected += _viewModel.Execute;
                 _viewModel.Update();
 

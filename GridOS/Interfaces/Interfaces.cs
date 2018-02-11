@@ -79,6 +79,7 @@ namespace IngameScript
             void RemoveChild(IDisplayElement element);
             List<IDisplayElement> GetChildren();
             event Action<IDisplayGroup> ChildrenChanged;
+            event Action<IDisplayElement> ChildLabelChanged;
 
             void Open();
             event Action<IDisplayGroup> BeforeOpen;
@@ -89,6 +90,7 @@ namespace IngameScript
             event Action<IDisplayGroup> Closed;
 
             int OpenedBy { get; }
+            bool ShowBackCommandAtBottom { get; }
         }
 
         interface IDisplayElementPublisher

@@ -26,9 +26,12 @@ namespace IngameScript
             public int OpenedBy => _openedBy;
             protected int _openedBy = 0;
 
+            public bool ShowBackCommandAtBottom { get; internal set; }
+
             protected List<IDisplayElement> _children = new List<IDisplayElement>();
 
             public event Action<IDisplayGroup> ChildrenChanged;
+            public event Action<IDisplayElement> ChildLabelChanged;
             public event Action<IDisplayGroup> BeforeOpen;
             public event Action<IDisplayGroup> Opened;
             public event Action<IDisplayGroup> BeforeClose;
@@ -81,7 +84,7 @@ namespace IngameScript
                 if (_openedBy <= 0)
                     return;
 
-                ChildrenChanged?.Invoke(this);
+                ChildLabelChanged?.Invoke(this);
             }
         }
     }

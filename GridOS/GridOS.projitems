@@ -12,9 +12,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ObservableT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ObservableUpdateFrequency.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Enums.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Built-In Menu\HelpMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\DisplayController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\DisplayView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\DisplayViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\DisplayElementMenuHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\DisplayElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\DisplayCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\DisplayGroup.cs" />
