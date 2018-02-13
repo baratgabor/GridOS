@@ -36,14 +36,13 @@ namespace IngameScript
 
             private const string _pathPrefix = "  ";
             private const string _pathSeparator = "›";
-            private const char _lineSeparatorChar1 = '.';
-            private const char _lineSeparatorChar2 = '˙';
-            private string _separatorLine1;
-            private string _separatorLine2;
+            private const char _lineSeparatorCharTop = '.';
+            private const char _lineSeparatorCharBottom = '˙';
+            private string _separatorLineTop;
+            private string _separatorLineBottom;
 
             public event Action<IDisplayElement> Selected;
 
-            // New scrollable textarea implementation
             private DisplayElementMenuHandler _displayElementMenu = new DisplayElementMenuHandler();
 
             public DisplayView(IMyTextPanel target, IMyGridProgramRuntimeInfo runtime)
@@ -53,14 +52,14 @@ namespace IngameScript
 
                 SetupTarget(_target);
                 _maxLineWidth = DetermineMaxLineLength();
-                _separatorLine1 = new String(_lineSeparatorChar1, _maxLineWidth * 2);
-                _separatorLine2 = new String(_lineSeparatorChar2, _maxLineWidth * 2);
+                _separatorLineTop = new String(_lineSeparatorCharTop, _maxLineWidth * 2);
+                _separatorLineBottom = new String(_lineSeparatorCharBottom, _maxLineWidth * 2);
 
                 _displayElementMenu.MaxWidth = _maxLineWidth;
                 _displayElementMenu.LineHeight = _maxLineNum;
                 _displayElementMenu.LeftPadding = 3;
                 _displayElementMenu.WordWrap = true;
-                _displayElementMenu.MenuChanged += Handle_MenuChanged;
+                _displayElementMenu.RedrawRequired += Redraw;
             }
 
             private void SetupTarget(IMyTextPanel target)
@@ -78,15 +77,14 @@ namespace IngameScript
 
             private void UpdateScreen(string formattedString)
             {
-                // TODO: Replace static header
-                DisplayHeader = $"{Environment.NewLine}  ::GridOS:: {_spinner.Get()} LRT: {_runtime.LastRunTimeMs:G3}ms{Environment.NewLine}{_separatorLine1}";
+                DisplayHeader = $"{Environment.NewLine}  ::GridOS:: {_spinner.Get()} LRT: {_runtime.LastRunTimeMs:G3}ms{Environment.NewLine}{_separatorLineTop}";
 
-                _target.WritePublicText($"{DisplayHeader}{Environment.NewLine}{_path}{Environment.NewLine}{_separatorLine2}{Environment.NewLine}{formattedString}");
+                _target.WritePublicText($"{DisplayHeader}{Environment.NewLine}{_path}{Environment.NewLine}{_separatorLineBottom}{Environment.NewLine}{formattedString}");
             }
 
             internal void Handle_ContextChanged(ContentChangeInfo changeInfo)
             {
-                Handle_PathChanged(changeInfo.NavigationPath);
+                UpdatePathString(changeInfo.NavigationPath);
 
                 _displayElementMenu.SetMenuElements(changeInfo.Content);
                 if (changeInfo.PreviousContext != null)
@@ -95,18 +93,18 @@ namespace IngameScript
                 UpdateScreen(_displayElementMenu.GetContent());
             }
 
-            internal void Handle_PathChanged(List<IDisplayGroup> path)
+            internal void UpdatePathString(List<IDisplayGroup> path)
             {
                 _builder.Clear();
                 _builder.Append(_pathPrefix);
-                foreach (var e in path)
+                foreach (var group in path)
                 {
-                    _builder.Append(" " + e.Label + " " + _pathSeparator);
+                    _builder.Append(" " + group.Label + " " + _pathSeparator);
                 }
                 _path = _builder.ToString();
             }
 
-            internal void Handle_MenuChanged()
+            internal void Redraw()
             {
                 UpdateScreen(_displayElementMenu.GetContent());
             }
@@ -114,13 +112,13 @@ namespace IngameScript
             public void Handle_ElementChanged(IDisplayElement element)
             {
                 // TODO: Implement fine-grained element change to improve performance
-                _displayElementMenu.FlushContent();
+                _displayElementMenu.FlushCaches();
                 UpdateScreen(_displayElementMenu.GetContent());
             }
 
             internal void Handle_ContentChanged(List<IDisplayElement> elements)
             {
-                _displayElementMenu.FlushContent();
+                _displayElementMenu.FlushCaches();
                 UpdateScreen(_displayElementMenu.GetContent());
             }
 

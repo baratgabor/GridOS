@@ -44,7 +44,7 @@ namespace IngameScript
                 _viewModel.ContentChanged += _view.Handle_ContentChanged;
                 _viewModel.ContextChanged += _view.Handle_ContextChanged;
                 _view.Selected += _viewModel.Execute;
-                _viewModel.Update();
+                _viewModel.PushUpdate();
 
                 _navCommands = new List<CommandItem>()
                 {

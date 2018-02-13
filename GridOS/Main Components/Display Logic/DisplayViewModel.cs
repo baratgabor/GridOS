@@ -42,76 +42,81 @@ namespace IngameScript
             private IDisplayGroup _rootDisplayGroup;
             private IDisplayGroup _activeDisplayGroup;
             private bool _showBackCommand = false;
-            public List<IDisplayElement> ScreenContent { get; private set; } = new List<IDisplayElement>();
+            public List<IDisplayElement> Content { get; private set; } = new List<IDisplayElement>();
             public List<IDisplayGroup> NavigationPath { get; private set; } = new List<IDisplayGroup>();
-            public event Action<List<IDisplayElement>> ContentChanged;
-            public event Action<IDisplayElement> ElementChanged;
+            public event Action<List<IDisplayElement>> ContentChanged; // Elements added or removed
+            public event Action<IDisplayElement> ElementChanged; // Single element label changed
             public event Action<ContentChangeInfo> ContextChanged; // When moving to another group
-
 
             // Navigation route of user, to support backwards traversal
             private Stack<IDisplayGroup> _navigationStack = new Stack<IDisplayGroup>();
             // Built-in command for handling backwards traversal in tree
             private DisplayCommand _backCommand;
-            private DisplayCommand _backCommandBottom;
+            private DisplayCommand _backCommandBottom; // Separate instance; top and bottom back command shouldn't evaluate to equal
 
             public DisplayViewModel(IDisplayGroup displayRoot)
             {
                 _rootDisplayGroup = displayRoot;
-                OpenDisplayGoup(_rootDisplayGroup);
+                ChangeContextTo(_rootDisplayGroup);
                 _backCommand = new DisplayCommand("Back «", MoveBackCommand);
                 _backCommandBottom = new DisplayCommand("Back «", MoveBackCommand);
             }
 
-            // TODO: Is this book-keeping excessive? Seems too much to do for a simple context change
-            private void OpenDisplayGoup(IDisplayGroup displayGroup)
+            private void ChangeContextTo(IDisplayGroup displayGroup)
+            {
+                if (_activeDisplayGroup != null)
+                    CloseDisplayGroup(_activeDisplayGroup);
+
+                _activeDisplayGroup = displayGroup;
+                _navigationStack.Push(displayGroup);
+                OpenDisplayGroup(displayGroup);
+            }
+
+            private void CloseDisplayGroup(IDisplayGroup displayGroup)
+            {
+                displayGroup.ChildrenChanged -= Handle_ChildrenChanged;
+                displayGroup.ChildLabelChanged -= Handle_ChildLabelChanged;
+                displayGroup.Close();
+            }
+
+            private void OpenDisplayGroup(IDisplayGroup displayGroup)
             {
                 if (displayGroup == _rootDisplayGroup)
                     _showBackCommand = false;
                 else
                     _showBackCommand = true;
 
-                if (_activeDisplayGroup != null)
-                {
-                    _activeDisplayGroup.ChildrenChanged -= Handle_ChildrenChanged;
-                    _activeDisplayGroup.ChildLabelChanged -= Handle_ChildLabelChanged;
-                    _activeDisplayGroup.Close();
-                }
-
-                _activeDisplayGroup = displayGroup;
-                _navigationStack.Push(_activeDisplayGroup);
-                _activeDisplayGroup.Open();
-                _activeDisplayGroup.ChildrenChanged += Handle_ChildrenChanged;
-                _activeDisplayGroup.ChildLabelChanged += Handle_ChildLabelChanged;
+                displayGroup.Open();
+                displayGroup.ChildrenChanged += Handle_ChildrenChanged;
+                displayGroup.ChildLabelChanged += Handle_ChildLabelChanged;
             }
 
-            public void Update(IDisplayGroup previousContext = null)
+            public void PushUpdate(IDisplayGroup previousContext = null)
             {
                 ContextChanged?.Invoke(new ContentChangeInfo(
-                    content: UpdateScreenContent(),
+                    content: UpdateContent(),
                     navigationPath: UpdateNavigationPath(),
                     previousContext: previousContext
                     ));
             }
 
-            private List<IDisplayElement> UpdateScreenContent()
+            private List<IDisplayElement> UpdateContent()
             {
-                ScreenContent.Clear();
+                Content.Clear();
 
                 if (_showBackCommand)
-                    ScreenContent.Add(_backCommand);
+                    Content.Add(_backCommand);
 
-                ScreenContent.AddRange(_activeDisplayGroup.GetChildren());
+                Content.AddRange(_activeDisplayGroup.GetChildren());
 
                 if (_activeDisplayGroup.ShowBackCommandAtBottom)
-                    ScreenContent.Add(_backCommandBottom);
+                    Content.Add(_backCommandBottom);
 
-                return ScreenContent;
+                return Content;
             }
 
             private List<IDisplayGroup> UpdateNavigationPath()
             {
-                NavigationPath.Clear();
                 var navpath = _navigationStack.ToList();
                 navpath.Reverse();
                 NavigationPath = navpath;
@@ -121,7 +126,7 @@ namespace IngameScript
 
             private void Handle_ChildrenChanged(IDisplayGroup displayGroup)
             {
-                ContentChanged?.Invoke(UpdateScreenContent());
+                ContentChanged?.Invoke(UpdateContent());
             }
 
             private void Handle_ChildLabelChanged(IDisplayElement element)
@@ -136,8 +141,8 @@ namespace IngameScript
 
                 if (element is IDisplayGroup)
                 {
-                    OpenDisplayGoup(element as IDisplayGroup);
-                    Update();
+                    ChangeContextTo(element as IDisplayGroup);
+                    PushUpdate();
                 }
                 else if (element is IDisplayCommand)
                     (element as IDisplayCommand).Execute();
@@ -145,25 +150,14 @@ namespace IngameScript
 
             private void MoveBackCommand()
             {
-                IDisplayGroup PreviousGroup = _activeDisplayGroup;
+                IDisplayGroup previousGroup = _activeDisplayGroup;
 
-                _activeDisplayGroup.ChildrenChanged -= Handle_ChildrenChanged;
-                _activeDisplayGroup.ChildLabelChanged -= Handle_ChildLabelChanged;
-
-                _activeDisplayGroup.Close();
+                CloseDisplayGroup(_activeDisplayGroup);
                 _navigationStack.Pop();
                 _activeDisplayGroup = _navigationStack.Peek();
+                OpenDisplayGroup(_activeDisplayGroup);
 
-                if (_activeDisplayGroup == _rootDisplayGroup)
-                    _showBackCommand = false;
-                else
-                    _showBackCommand = true;
-
-                _activeDisplayGroup.Open();
-                _activeDisplayGroup.ChildrenChanged += Handle_ChildrenChanged;
-                _activeDisplayGroup.ChildLabelChanged += Handle_ChildLabelChanged;
-
-                Update(PreviousGroup);
+                PushUpdate(previousGroup);
             }
         }
     }

@@ -19,36 +19,72 @@ namespace IngameScript
     {
         class DisplayElementMenuHandler
         {
-            private Flush _flush = Flush.All;
-            private StringBuilder _builder_Temp = new StringBuilder();
-            private StringBuilder _builder_Formatted = new StringBuilder();
-            private StringBuilder _builder_FormattedView = new StringBuilder();
-            private List<LineInfo> _lineInfo = new List<LineInfo>();
-            public event Action MenuChanged;
+            private StringBuilder _builder_Temp = new StringBuilder(); // Generic reusable builder
+
+            private Flush _flush = Flush.All; // Cache flushing controller flags
+            private List<IDisplayElement> _elements; // Raw content to be abstracted
+            private StringBuilder _builder_Formatted = new StringBuilder(); // 1st (caching) stage of content abstraction
+            private StringBuilder _builder_FormattedView = new StringBuilder(); // 2nd (caching) stage of content abstraction
+            private List<LineInfo> _lineInfo = new List<LineInfo>(); // Text line data for view filtering and translation from primary selection (line) to secondary (element)
 
             private const char _itemBulletDefault = '·';
             private const char _itemBulletSelected = '•';
             private const char _selectedLineBullet = '›';
             private const char _groupItemSuffix = '»';
 
-            private int _selectedLine = 0;
-            private List<IDisplayElement> _elements;
+            private int _selectedLine = 0; // Primary selection tracking
             public IDisplayElement SelectedElement => _selectedElement;
-            private IDisplayElement _selectedElement;
+            private IDisplayElement _selectedElement; // Secondary selection tracking (derived from _selectedLine)
 
-            // Standard getters & setters, with added book-keeping of what needs to be flushed
-            public int MaxWidth { get { return _maxWidth; } set { if (_maxWidth != value) { _maxWidth = value; _flush |= Flush.All; } } }
+            private Dictionary<ValidationRule, Func<int, bool>> _intValidationMap = new Dictionary<ValidationRule, Func<int, bool>>() { // Predicate not supported in SE
+                { ValidationRule.None, (x) => true },
+                { ValidationRule.ForceZeroOrPositive, (x) => x >= 0 },
+                { ValidationRule.ForceGreaterThanZero, (x) => x > 0 }
+            };
+
+            // Public properties with flush controlling setters
+            public int MaxWidth { get { return _maxWidth; } set { TrySet(ref _maxWidth, value, ValidationRule.ForceZeroOrPositive, Flush.All); } }
             private int _maxWidth = 0;
-            public int LineHeight { get { return _lineHeight; } set { if (_lineHeight != value) { _lineHeight = value; _flush |= Flush.View; } } }
+            public int LineHeight { get { return _lineHeight; } set { TrySet(ref _lineHeight, value, ValidationRule.ForceZeroOrPositive, Flush.View); } }
             private int _lineHeight = 0;
-            public int VerticalOffset { get { return _verticalOffset; } set { if (_verticalOffset != value) { _verticalOffset = value; _flush |= Flush.View; } } }
+            public int VerticalOffset { get { return _verticalOffset; } set { TrySet(ref _verticalOffset, value, ValidationRule.ForceZeroOrPositive, Flush.View); } }
             private int _verticalOffset = 0;
-            public int LeftPadding { get { return _leftPadding; } set { if (_leftPadding != value) { _leftPadding = value; _flush |= Flush.All; } } }
+            public int LeftPadding { get { return _leftPadding; } set { TrySet(ref _leftPadding, value, ValidationRule.ForceZeroOrPositive, Flush.All); } }
             private int _leftPadding = 0;
 
-            // TODO: implement WordWrap switch
+            // TODO: implement WordWrap switch - strategy
             public bool WordWrap { get; set; } = false;
 
+            public event Action RedrawRequired;
+
+            private void TrySet<T>(ref T field, T value, Flush flush = Flush.None)
+            {
+                if (EqualityComparer<T>.Default.Equals(field, value))
+                    return;
+
+                _flush |= flush;
+                field = value;
+            }
+
+            // Boxes ints, but not hot code, so shouldn't cause performance issues
+            private void TrySet(ref int field, int value, ValidationRule rule = ValidationRule.None, Flush flush = Flush.None)
+            {
+                if (field == value)
+                    return;
+
+                if (!_intValidationMap[rule].Invoke(value))
+                {
+                    throw new Exception($"Argument found invalid by validation rule: {rule.ToString()}");
+                }
+
+                _flush |= flush;
+                field = value;
+            }
+
+            /// <summary>
+            /// Replace all content and reset state.
+            /// </summary>
+            /// <param name="elements">Elements to set.</param>
             public void SetMenuElements(List<IDisplayElement> elements)
             {
                 _elements = elements;
@@ -92,7 +128,7 @@ namespace IngameScript
                 if (_selectedLine >= _lineInfo.Count-1)
                     return;
 
-                UpdateSelection(_selectedLine+1);
+                UpdateSelection(_selectedLine + 1);
             }
 
             private void UpdateSelection(int newSelectedLine)
@@ -116,7 +152,7 @@ namespace IngameScript
                 _selectedElement = _lineInfo[_selectedLine].ParentDisplayElement;
                 AdjustViewport(_selectedLine);
                 _flush |= Flush.View;
-                MenuChanged?.Invoke();
+                RedrawRequired?.Invoke();
             }
 
             private void AdjustViewport(int selectedLine)
@@ -153,50 +189,24 @@ namespace IngameScript
                 return _builder_FormattedView.ToString();
             }
 
-            public void FlushContent()
+            public void FlushCaches()
             {
                 _flush = Flush.All;
             }
 
-            // TODO: Try refactor, make it pretty
             private void BuildView()
             {
                 _builder_FormattedView.Clear();
 
-                if (LineHeight > 0 && LineHeight < _lineInfo.Count)
-                {
-                    // Get a portion of full result, based on VerticalOffset and MaxLines - aka "viewport content"
-                    int ViewPortStart = _lineInfo[VerticalOffset].StartPosition;
-                    int ViewPortEnd;
+                int ViewportStart = _lineInfo[_verticalOffset].StartPosition;
+                int ViewportEnd = _verticalOffset + _lineHeight >= _lineInfo.Count ? _builder_Formatted.Length : _lineInfo[_verticalOffset + _lineHeight].StartPosition - 2; // -2 cuts \r\n
 
-                    int ContentEnd = VerticalOffset + LineHeight;
-                    if (ContentEnd > _lineInfo.Count - 1)
-                    {
-                        ContentEnd = _lineInfo.Count - 1;
-                        ViewPortEnd = _builder_Formatted.Length;
-                    }
-                    else
-                    {
-                        ViewPortEnd = _lineInfo[ContentEnd].StartPosition;
-                    }
+                _builder_FormattedView.Append(_builder_Formatted.ToString(ViewportStart, ViewportEnd - ViewportStart));
 
-                    for (int i = ViewPortStart; i < ViewPortEnd; i++)
-                    {
-                        _builder_FormattedView.Append(_builder_Formatted[i]);
-                    }
-
-                    if (_builder_FormattedView[_builder_FormattedView.Length - 2] == '\r')
-                    {
-                        _builder_FormattedView.Remove(_builder_FormattedView.Length - 2, 2);
-                    }
-                }
-                else // Get full content
-                {
-                    for (int i = 0; i < _builder_Formatted.Length; i++)
-                    {
-                        _builder_FormattedView.Append(_builder_Formatted[i]);
-                    }
-                }
+                /* // Seems markedly slower than simply creating a string... test it further
+                for (int i = ViewportStart; i < ViewportEnd; i++)
+                    _builder_FormattedView.Append(_builder_Formatted[i]);
+                */
             }
 
             private string BuildDefaultBulletLinePrefix()
@@ -241,7 +251,7 @@ namespace IngameScript
 
             // TODO: Need to keep track of previous line number, and update vertical offset accordingly
             // e.g. if there are less lines by 2 after the content changes, vertical offset should be decreased by 2
-            // BUT ONLY if the decrease was above the displayed content :D :D how to implement that?
+            // BUT ONLY if the decrease was above the displayed content
             // TODO: Refactor method below; it's way too long
             private void BuildFormat()
             {
@@ -361,7 +371,7 @@ namespace IngameScript
                             lineWidth++;
                         }
                     }
-                    // TODO: think about some same place for this; not really the responsibility of format builder
+                    // TODO: think about some sane place for this; not really the responsibility of format builder
                     if (element is IDisplayGroup)
                         _builder_Formatted.Append(" " + _groupItemSuffix);
 
@@ -373,9 +383,17 @@ namespace IngameScript
             [Flags]
             private enum Flush
             {
+                None = 0,
+                Prefixes = 2,
+                View = 4,
+                All = 8
+            }
+
+            private enum ValidationRule
+            {
                 None,
-                View,
-                All
+                ForceZeroOrPositive,
+                ForceGreaterThanZero
             }
 
             private struct LineInfo

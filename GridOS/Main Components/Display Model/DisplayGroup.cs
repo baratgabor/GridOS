@@ -26,7 +26,7 @@ namespace IngameScript
             public int OpenedBy => _openedBy;
             protected int _openedBy = 0;
 
-            public bool ShowBackCommandAtBottom { get; internal set; }
+            public bool ShowBackCommandAtBottom { get; internal set; } = false;
 
             protected List<IDisplayElement> _children = new List<IDisplayElement>();
 
@@ -64,14 +64,20 @@ namespace IngameScript
             {
                 BeforeOpen?.Invoke(this);
                 _openedBy++;
-                Opened?.Invoke(this);
+
+                // Invoke only if opened first (multidisplay support)
+                if (_openedBy == 1)
+                    Opened?.Invoke(this);
             }
 
             public void Close()
             {
                 BeforeClose?.Invoke(this);
                 _openedBy--;
-                Closed?.Invoke(this);
+
+                // Invoke only if closed by all (multidisplay support)
+                if (_openedBy <= 0)
+                    Closed?.Invoke(this);
             }
 
             public List<IDisplayElement> GetChildren()
