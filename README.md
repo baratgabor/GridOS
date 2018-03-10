@@ -33,8 +33,8 @@ This readme gets outdated all the time due to the frequent changes, but I'll try
 
 * **Composite:** The model (background data) part of the display system is mostly based on the Composite pattern, which means that it's a node-based hierarchical structure where nodes can contain additional nodes, creating a tree structure.
 	* This node-based system is carefully planned with flexibility in mind:
-		* Nodes don't have a defined parent, facilitating scenarios where nodes (e.g. commands) are reused in multiple parts of the tree structure.
-		* Group and Command type of nodes expose various events to facilitate the implementation custom event-driven functionality.
+		* Nodes don't have a defined parent, facilitating scenarios where nodes (e.g. commands) are reused in multiple parts of the tree structure. *(Just be careful if you want to walk the tree; to avoid circular references.)*
+		* Group and Command type of nodes expose various events to facilitate the implementation custom event-driven functionality. *(Of course this means that you should take care to release references if you're disposing your listeners. I'll check if weak events can be used inside the Programmable Block.)*
 
 ## How does it work
 
