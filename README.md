@@ -31,7 +31,7 @@ This readme gets outdated all the time due to the frequent changes, but I'll try
 	* The clear separation of concerns between background data, data selection/filtering logic, and presentation logic provides a highly flexible architecture that supports multiple stateful "views" on the same underlying data, all with automatic update propagation.
 	* The commands required for navigating the display content are registered in the Command Dispatcher, which provides a fast and relatively direct way of request delivery, instead of routing the navigation commands through multiple abstraction layers.
 
-* **Composite:** The model (background data) part of the display system is mostly based on the Composite pattern, which means that it's a node-based hierarchical structure where nodes can contain additional nodes, creating a tree hierarchy.
+* **Composite:** The model (background data) part of the display system is mostly based on the Composite pattern, which means that it's a node-based hierarchical structure where nodes can contain additional nodes, creating a tree structure.
 	* This node-based system is carefully planned with flexibility in mind:
 		* Nodes don't have a defined parent, facilitating scenarios where nodes (e.g. commands) are reused in multiple parts of the tree structure.
 		* Group and Command type of nodes expose various events to facilitate the implementation custom event-driven functionality.
