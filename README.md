@@ -59,7 +59,7 @@ This readme gets outdated all the time due to the frequent changes, but I'll try
 
 ## Getting started using the framework
 
-*(Skip this section if you have Visual Studio and MDK already set up and ready to use.)*
+*(Skip this section if you have Visual Studio and MDK already set up, and it's obvious to you how to add a shared project to your solution.)*
 
 **Environment**
 
