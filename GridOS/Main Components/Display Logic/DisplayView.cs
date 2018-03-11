@@ -111,8 +111,7 @@ namespace IngameScript
 
             public void Handle_ElementChanged(IDisplayElement element)
             {
-                // TODO: Implement fine-grained element change to improve performance
-                _displayElementMenu.FlushCaches();
+                _displayElementMenu.UpdateElement(element);
                 UpdateScreen(_displayElementMenu.GetContent());
             }
 

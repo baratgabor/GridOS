@@ -51,14 +51,21 @@ namespace IngameScript
                 if (_registeredTextPanels.Contains(textPanel))
                     return;
 
-                _controllers.Add(
+                try
+                {
+                    _controllers.Add(
                     new DisplayController(
                         NextControllerName(),
                         _commandDispatcher,
                         new DisplayView(textPanel, _runtime),
                         new DisplayViewModel(_displayRoot),
                         _runtime)
-                );
+                    );
+                }
+                catch (Exception e)
+                {
+                    throw new Exception(e.Message + "\n" + e.StackTrace);
+                }
 
                 _registeredTextPanels.Add(textPanel);
             }
@@ -84,6 +91,11 @@ namespace IngameScript
             private string NextControllerName()
             {
                 return $"{_controllerNameTemplate}{++_controllerCounter}";
+            }
+
+            public void ClearAll()
+            {
+                _registeredTextPanels.ForEach(x => x.WritePublicText(""));
             }
         }
     }

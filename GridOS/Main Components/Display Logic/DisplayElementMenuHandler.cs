@@ -27,14 +27,19 @@ namespace IngameScript
             private StringBuilder _builder_FormattedView = new StringBuilder(); // 2nd (caching) stage of content abstraction
             private List<LineInfo> _lineInfo = new List<LineInfo>(); // Text line data for view filtering and translation from primary selection (line) to secondary (element)
 
-            private const char _itemBulletDefault = '·';
-            private const char _itemBulletSelected = '•';
-            private const char _selectedLineBullet = '›';
-            private const char _groupItemSuffix = '»';
+            private LoopingPipeline<Command_ProcessDisplayElement, StringBuilder> _displayElementProcessor;
+            private Command_ProcessDisplayElement _displayElementProcessingCommand = new Command_ProcessDisplayElement();
 
-            private int _selectedLine = 0; // Primary selection tracking
-            public IDisplayElement SelectedElement => _selectedElement;
-            private IDisplayElement _selectedElement; // Secondary selection tracking (derived from _selectedLine)
+            private Dictionary<Type, char> _prefixMap = new Dictionary<Type, char>() {
+                { typeof(IDisplayCommand), '·' },
+                { typeof(IDisplayGroup), '·' },
+                { typeof(IDisplayElement), ' ' }
+            };
+            private Dictionary<Type, char> _suffixMap = new Dictionary<Type, char>() {
+                { typeof(IDisplayCommand), ' ' },
+                { typeof(IDisplayGroup), '»' },
+                { typeof(IDisplayElement), ' ' }
+            };
 
             private Dictionary<ValidationRule, Func<int, bool>> _intValidationMap = new Dictionary<ValidationRule, Func<int, bool>>() { // Predicate not supported in SE
                 { ValidationRule.None, (x) => true },
@@ -56,6 +61,40 @@ namespace IngameScript
             public bool WordWrap { get; set; } = false;
 
             public event Action RedrawRequired;
+
+            private const char _itemBulletDefault = '·';
+            private const char _itemBulletSelected = '•';
+            private const char _selectedLineBullet = '›';
+            private const char _groupItemSuffix = '»';
+            private readonly string _newLine = Environment.NewLine;
+
+            private int _selectedLine = 0; // Primary selection tracking
+            public IDisplayElement SelectedElement => _selectedElement;
+            private IDisplayElement _selectedElement; // Secondary selection tracking (derived from _lineInfo[_selectedLine])
+
+            public DisplayElementMenuHandler()
+            {
+
+                /*
+                _displayElementProcessor =
+                    new CachingDecorator(
+                        new LoopingTransformingPipeline<Command_ProcessDisplayElement, string, StringBuilder>());
+                //new TransformStringToStringBuilder();
+                */
+
+
+                // TODO: This refactor failed. Change to cleaner separation of concerns by first running pure word-wrap per displayelement/string, then separate additional processing. Employ caching to offset overhead.
+                _displayElementProcessor =
+                        //  new CachingDecorator(
+                        new LoopingPipeline<Command_ProcessDisplayElement, StringBuilder>();
+                        //);
+
+                _displayElementProcessor
+                    .Add(new Processor_AddNewLine())
+                    .Add(new Processor_AddLineInfo(_lineInfo, _leftPadding))
+                    .Add(new Processor_AddLinePrefix(_leftPadding))
+                    .Add(new Processor_AddLineContent(_maxWidth));
+            }
 
             private void TrySet<T>(ref T field, T value, Flush flush = Flush.None)
             {
@@ -100,11 +139,39 @@ namespace IngameScript
                     return;
 
                 _selectedElement = element;
-                
+
                 // TODO: we probably shouldn't call buildformat directly from here
                 BuildFormat();
                 _flush = Flush.View;
                 AdjustViewport(_selectedLine);
+            }
+
+            // TODO: Test and make it nicer
+            public void UpdateElement(IDisplayElement element)
+            {
+                // TODO: Refactor ineffecient queries
+                LineInfo li = _lineInfo.FirstOrDefault((x) => x.ParentDisplayElement == element);
+
+                if (li.Equals(default(LineInfo)))
+                    return;
+
+                int i = _lineInfo.IndexOf(li);
+
+                int endPos;
+                if (_lineInfo.Count < i + 1)
+                    endPos = _builder_Formatted.Length;
+                else
+                    endPos = _lineInfo[i + 1].StartPosition - _newLine.Length;
+
+                // TODO: Efficiently store/retrieve old string to replace
+                string oldStr = _builder_Formatted.ToString(li.StartPosition, endPos - li.StartPosition);
+
+                _builder_Temp.Clear();
+                string newStr = _displayElementProcessor.Process(SetupCommand(element), _builder_Temp).ToString();
+
+                // None of the StringBuilder.Replace overloads seem ideal
+                _builder_Formatted.Replace(oldStr, newStr, li.StartPosition, endPos);
+                _flush = Flush.View;
             }
 
             public void MoveUp()
@@ -125,7 +192,7 @@ namespace IngameScript
                     _flush &= ~Flush.All;
                 }
 
-                if (_selectedLine >= _lineInfo.Count-1)
+                if (_selectedLine >= _lineInfo.Count - 1)
                     return;
 
                 UpdateSelection(_selectedLine + 1);
@@ -136,7 +203,7 @@ namespace IngameScript
                 // TODO: refactor these bullet changing hacks
                 if (_builder_Formatted[_lineInfo[_selectedLine].StartPosition + 1] == _selectedLineBullet)
                     _builder_Formatted[_lineInfo[_selectedLine].StartPosition + 1] = ' ';
-                if(_builder_Formatted[_lineInfo[newSelectedLine].StartPosition + 1] == ' ')
+                if (_builder_Formatted[_lineInfo[newSelectedLine].StartPosition + 1] == ' ')
                     _builder_Formatted[_lineInfo[newSelectedLine].StartPosition + 1] = _selectedLineBullet;
 
                 // If selected display element needs to be changed
@@ -209,184 +276,44 @@ namespace IngameScript
                 */
             }
 
-            private string BuildDefaultBulletLinePrefix()
-            {
-                _builder_Temp.Clear();
-
-                if (LeftPadding >= 2)
-                {
-                    _builder_Temp.Clear();
-                    for (int i = 0; i < LeftPadding-2; i++)
-                    {
-                        _builder_Temp.Append(' ');
-                    }
-                }
-                _builder_Temp.Append(_itemBulletDefault + " ");
-                return _builder_Temp.ToString();
-            }
-
-            private string BuildSelectedBulletLinePrefix()
-            {
-                _builder_Temp.Clear();
-
-                if (LeftPadding >= 2)
-                {
-                    _builder_Temp.Clear();
-                    for (int i = 0; i < LeftPadding - 2; i++)
-                    {
-                        _builder_Temp.Append(' ');
-                    }
-                }
-                _builder_Temp.Append(_itemBulletSelected + " ");
-                return _builder_Temp.ToString();
-            }
-
-            private string BuildPaddingLinePrefix()
-            {
-                if (LeftPadding > 0)
-                    return new string(' ', LeftPadding);
-                else
-                    return null;
-            }
-
-            // TODO: Need to keep track of previous line number, and update vertical offset accordingly
-            // e.g. if there are less lines by 2 after the content changes, vertical offset should be decreased by 2
-            // BUT ONLY if the decrease was above the displayed content
-            // TODO: Refactor method below; it's way too long
             private void BuildFormat()
             {
                 _builder_Formatted.Clear();
                 _lineInfo.Clear();
 
-                // Create prefix strings to be added in front of lines
-                // TODO: cache prefix strings, and only create them if they need to be flushed due to property changes
-                string leftPaddingStr = BuildPaddingLinePrefix();
-                string defaultBulletPrefix = BuildDefaultBulletLinePrefix();
-                string selectedBulletPrefix = BuildSelectedBulletLinePrefix();
-
                 foreach (var element in _elements)
                 {
-                    int lineWidth = 0;
-                    int bulletCharPosition;
-
-                    // TODO: not the responsibility of the build; move this to somewhere sane
-                    if (_selectedElement == null)
-                        _selectedElement = element;
-
-                    // Add appropriate special prefix in front of element
-                    // TODO: refactor to remove repetition
-                    if (element == _selectedElement)
-                    {
-                        _builder_Formatted.Append(selectedBulletPrefix);
-                        lineWidth += selectedBulletPrefix.Length;
-                        bulletCharPosition = _builder_Formatted.Length - 2;
-
-                        // TODO: shouldn't be here, resolve in a sane manner
-                        _selectedLine = _lineInfo.Count;
-                    }
-                    else
-                    {
-                        _builder_Formatted.Append(defaultBulletPrefix);
-                        lineWidth += defaultBulletPrefix.Length;
-                        bulletCharPosition = _builder_Formatted.Length - 2;
-                    }
-
-                    // Save line data for subsequent operations
-                    _lineInfo.Add(new LineInfo(
-                        startPosition: _builder_Formatted.Length - defaultBulletPrefix.Length,
-                        // TODO: solve temporal conflict: startPosition needs to be saved BEFORE adding prefix string; bulletCharPosition is saved AFTER prefix already added
-                        parentDisplayElement: element,
-                        bulletCharPosition: bulletCharPosition
-                    ));
-
-                    string elementString = element.Label;
-
-                    // Enumerate raw stringbuilder as char array
-                    for (int i = 0, lastWhiteSpace = 0; i < elementString.Length; i++)
-                    {
-                        char c = elementString[i];
-
-                        // If newline found, reset line width counter
-                        if (c == '\r')
-                        {
-                            lineWidth = 0;
-                            lastWhiteSpace = 0; // 0 is a magic number for "none" :'(
-
-                            // Replicate newline in result builder
-                            _builder_Formatted.Append(Environment.NewLine);
-
-                            // Save line data for subsequent operations
-                            _lineInfo.Add(new LineInfo(
-                                startPosition: _builder_Formatted.Length,
-                                parentDisplayElement: element,
-                                bulletCharPosition: bulletCharPosition
-                                ));
-
-                            // Add default left padding
-                            _builder_Formatted.Append(leftPaddingStr);
-                            lineWidth += leftPaddingStr.Length;
-
-                            // If two-character newline sequence (\r\n) found, skip second character
-                            if ((i + 1 < elementString.Length) && (elementString[i + 1] == '\n'))
-                                i++;
-                        }
-                        else
-                        {
-                            if (Char.IsWhiteSpace(c))
-                                lastWhiteSpace = _builder_Formatted.Length;
-
-                            // Line too long, break it
-                            else if (MaxWidth > 0 && lineWidth >= MaxWidth)
-                            {
-                                int newlineStartPosition = 0;
-
-                                // Simple linebreak at current position:
-                                // Max length reached at a whitespace char OR we don't have last whitespace ("word" longer than max line length)
-                                if ((lastWhiteSpace == _builder_Formatted.Length) || (lastWhiteSpace == 0))
-                                {
-                                    _builder_Formatted.Append(Environment.NewLine + leftPaddingStr);
-                                    newlineStartPosition = _builder_Formatted.Length - leftPaddingStr.Length;
-                                    lineWidth = leftPaddingStr.Length;
-                                }
-
-                                // Smart linebreak at last whitespace:
-                                // Max length reached at mid-word; break at last known whitespace position
-                                else if (lastWhiteSpace != 0)
-                                {
-                                    _builder_Formatted.Insert(lastWhiteSpace + 1, Environment.NewLine + leftPaddingStr);
-                                    newlineStartPosition = lastWhiteSpace + 1 + 2; // +2 is to take into account the length of \r\n
-                                    lineWidth = _builder_Formatted.Length - lastWhiteSpace - 2;
-                                }
-
-                                lastWhiteSpace = 0;
-                                _lineInfo.Add(new LineInfo(
-                                    startPosition: newlineStartPosition,
-                                    parentDisplayElement: element,
-                                    bulletCharPosition: bulletCharPosition
-                                    ));
-                            }
-
-                            // Add the next character to the resulting stringbuilder
-                            _builder_Formatted.Append(c);
-                            lineWidth++;
-                        }
-                    }
-                    // TODO: think about some sane place for this; not really the responsibility of format builder
-                    if (element is IDisplayGroup)
-                        _builder_Formatted.Append(" " + _groupItemSuffix);
-
-                    // Add newline after menu element
-                    _builder_Formatted.Append(Environment.NewLine);
+                    _displayElementProcessingCommand = SetupCommand(element);
+                    _displayElementProcessor.Process(_displayElementProcessingCommand, _builder_Formatted);
                 }
+            }
+
+            private Command_ProcessDisplayElement SetupCommand(IDisplayElement element)
+            {
+                _displayElementProcessingCommand.DisplayElement = element;
+
+                if (element.GetType() is IDisplayElement)
+                    _displayElementProcessingCommand.Bullet = _prefixMap[typeof(IDisplayElement)];
+                else if (element.GetType() is IDisplayGroup)
+                    _displayElementProcessingCommand.Bullet = _prefixMap[typeof(IDisplayGroup)];
+                else if (element.GetType() is IDisplayCommand)
+                    _displayElementProcessingCommand.Bullet = _prefixMap[typeof(IDisplayCommand)];
+
+                _displayElementProcessingCommand.CurrentLineWidth = 0;
+                _displayElementProcessingCommand.InputProgress = 0;
+                _displayElementProcessingCommand.Loop = true;
+                _displayElementProcessingCommand.Selected = _selectedElement == element ? true : false;
+
+                return _displayElementProcessingCommand;
             }
 
             [Flags]
             private enum Flush
             {
                 None = 0,
-                Prefixes = 2,
-                View = 4,
-                All = 8
+                Prefixes = 1,
+                View = 2,
+                All = 4
             }
 
             private enum ValidationRule
@@ -395,20 +322,180 @@ namespace IngameScript
                 ForceZeroOrPositive,
                 ForceGreaterThanZero
             }
+        }
 
-            private struct LineInfo
+        struct LineInfo
+        {
+            public readonly int StartPosition;
+            public readonly IDisplayElement ParentDisplayElement;
+            public readonly int BulletCharPosition;
+
+            public LineInfo(int startPosition, IDisplayElement parentDisplayElement, int bulletCharPosition)
             {
-                public readonly int StartPosition;
-                public readonly IDisplayElement ParentDisplayElement;
-                public readonly int BulletCharPosition;
-
-                public LineInfo(int startPosition, IDisplayElement parentDisplayElement, int bulletCharPosition)
-                {
-                    StartPosition = startPosition;
-                    ParentDisplayElement = parentDisplayElement;
-                    BulletCharPosition = bulletCharPosition;
-                }
+                StartPosition = startPosition;
+                ParentDisplayElement = parentDisplayElement;
+                BulletCharPosition = bulletCharPosition;
             }
         }
+
+
+        class CachingDecorator : LoopingPipeline<Command_ProcessDisplayElement, StringBuilder>
+        {
+            protected Dictionary<IDisplayElement, string> _cache = new Dictionary<IDisplayElement, string>();
+            protected LoopingPipeline<Command_ProcessDisplayElement, StringBuilder> _original;
+            protected StringBuilder _builder = new StringBuilder();
+
+            public CachingDecorator(LoopingPipeline<Command_ProcessDisplayElement, StringBuilder> pipeline)
+            {
+                _original = pipeline;
+            }
+
+            public override StringBuilder Process(Command_ProcessDisplayElement input, StringBuilder output)
+            {
+                string value = _cache.GetValueOrDefault(input.DisplayElement);
+
+                // If not cached, get fresh and cache it
+                if (value.Equals(default(string)))
+                {
+                    _builder.Clear();
+                    value = _original.Process(input, _builder).ToString();
+                    _cache.Add(input.DisplayElement, value);
+                    input.DisplayElement.LabelChanged += RemoveElement;
+                }
+
+                output.Append(value);
+                return output;
+            }
+
+            public override IProcessorComposite<Command_ProcessDisplayElement, StringBuilder> Add(IProcessor<Command_ProcessDisplayElement, StringBuilder> processor)
+            {
+                return _original.Add(processor);
+            }
+
+            private void RemoveElement(IDisplayElement element)
+            {
+                element.LabelChanged -= RemoveElement;
+                _cache.Remove(element);
+            }
+
+            private void RemoveAll()
+            {
+                foreach (var item in _cache)
+                {
+                    item.Key.LabelChanged -= RemoveElement;
+                }
+                _cache.Clear();
+            }
+        }
+
+        class Command_ProcessDisplayElement : ILoopSignal
+        {
+            public IDisplayElement DisplayElement;
+            public int InputProgress;
+            public int CurrentLineWidth;
+            public bool Selected;
+            public char Bullet;
+            public bool Loop { get; set; } = false;
+        }
+
+        class Processor_AddLineInfo : IProcessor<Command_ProcessDisplayElement, StringBuilder>
+        {
+            private List<LineInfo> _lineInfo;
+            private int _leftPadding;
+
+            public Processor_AddLineInfo(List<LineInfo> lineInfo, int leftPadding)
+            {
+                _lineInfo = lineInfo;
+                _leftPadding = leftPadding;
+            }
+
+            public StringBuilder Process(Command_ProcessDisplayElement input, StringBuilder output)
+            {
+                _lineInfo.Add(new LineInfo(
+                    startPosition: output.Length,
+                    parentDisplayElement: input.DisplayElement,
+                    bulletCharPosition: output.Length + _leftPadding
+                    ));
+
+                return output;
+            }
+        }
+
+        class Processor_AddNewLine : IProcessor<Command_ProcessDisplayElement, StringBuilder>
+        {
+            public StringBuilder Process(Command_ProcessDisplayElement input, StringBuilder output)
+            {
+                if (output.Length > 0) // don't add newline before first line
+                    output.Append(Environment.NewLine);
+
+                input.CurrentLineWidth = 0;
+                return output;
+            }
+        }
+
+        class Processor_AddLinePrefix : IProcessor<Command_ProcessDisplayElement, StringBuilder>
+        {
+            private int _leftPadding;
+
+            public Processor_AddLinePrefix(int leftPadding)
+            {
+                _leftPadding = leftPadding;
+            }
+
+            public StringBuilder Process(Command_ProcessDisplayElement input, StringBuilder output)
+            {
+                string _linePrefix = new string(' ', _leftPadding) + input.Bullet + ' ';
+                output.Append(_linePrefix);
+                input.CurrentLineWidth += _linePrefix.Length;
+                return output;
+            }
+        }
+
+        class Processor_AddLineContent : IProcessor<Command_ProcessDisplayElement, StringBuilder>
+        {
+            private int _maxLineWidth;
+
+            public Processor_AddLineContent(int lineWidth)
+            {
+                _maxLineWidth = lineWidth;
+            }
+
+            public StringBuilder Process(Command_ProcessDisplayElement input, StringBuilder output)
+            {
+                string str = input.DisplayElement.Label;
+                int NextBreakPoint = FindNextBreakPoint(str, input.InputProgress, _maxLineWidth - input.CurrentLineWidth);
+                int NextLineLength = NextBreakPoint - input.InputProgress;
+                string newLine = str.Substring(input.InputProgress, NextLineLength);
+                output.Append(newLine);
+                input.CurrentLineWidth += newLine.Length;
+                input.InputProgress = NextBreakPoint;
+
+                if (NextBreakPoint == str.Length)
+                    input.Loop = false;
+                else
+                    input.Loop = true;
+
+                return output;
+            }
+
+            private int FindNextBreakPoint(string input, int startingPos, int maxWidth)
+            {
+                int breakpoint = startingPos;
+
+                while (breakpoint < startingPos + maxWidth)
+                {
+                    breakpoint = input.IndexOf(' ', breakpoint);
+
+                    if (breakpoint == -1)
+                    {
+                        breakpoint = input.Length;
+                        break;
+                    }
+                }
+
+                return breakpoint;
+            }
+        }
+
     }
 }
