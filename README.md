@@ -48,6 +48,7 @@ This readme gets outdated all the time due to the frequent changes, but I'll try
 
 ## Planned Features
 
+- **Overhauled overall framework consumption model:** Instead of the static, compile-time implementation of `IUpdateSubscriber`, etc. interfaces, the framework will expose a service object through which modules can dynamically subscribe to, use, and unsubscribe from framework services during runtime.
 - **Expanded selection of update frequencies:** E.g. 200 ticks, 1-2 minutes, etc. Currently the code modules can set only the vanilla update frequencies (`Update1`, `Update10`, `Update100`, and `None`).
 - **Screen Update Aggregation:** Currently all changes in the displayed menu content are directly propagated to the display, which means that if you update multiple display elements in the same execution cycle, you're incurring increasing runtime costs (due to the repetitive processing/formatting of content). An aggregation layer will be added that collects all updates in a given cycle, and applies them in one go at the end of the cycle.
 - **Load balancing:** Currently, if e.g. 10 modules are registered for the `Update100` tier, all of them will execute in the same Programmable Block invocation (in the same tick). I'm planning to introduce load-balancing, which will offset each module's running cycle. The tradeoff will be a higher base frequency of the Programmable Block itself. This feature will probably be switchable.
