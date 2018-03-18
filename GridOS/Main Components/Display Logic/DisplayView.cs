@@ -123,12 +123,12 @@ namespace IngameScript
 
             public void MoveUp(CommandItem sender, string param)
             {
-                _displayElementMenu.MoveUp();
+                //_displayElementMenu.MoveUp();
             }
 
             public void MoveDown(CommandItem sender, string param)
             {
-                _displayElementMenu.MoveDown();
+                //_displayElementMenu.MoveDown();
             }
 
             public void Select(CommandItem sender, string param)
