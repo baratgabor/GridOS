@@ -40,15 +40,15 @@ namespace IngameScript
                 _inner.RedrawRequired += Process_Redraw;
             }
 
-            protected void Get_Process_Redraw()
+            public void Get_Process_Redraw()
             {
                 Process_Redraw(_inner.GetContent());
             }
 
             protected void Process_Redraw(StringBuilder input)
             {
-                RedrawRequired?.Invoke(
-                    Process(input));
+                _buffer = Process(input);
+                RedrawRequired?.Invoke(_buffer);
             }
 
             public StringBuilder GetContent()
@@ -132,21 +132,23 @@ namespace IngameScript
         class ScrollableFrame : Frame, IScrollable
         {
             public int VerticalOffset => _verticalOffset;
-            public int LineHeight => _lineHeight;
-            public int LineNumber => _lineInfo.Count;
-            public List<LineInfo> LineInfo => _lineInfo;
+            public int LineHeight => _config.LineHeight;
+            public int LineNumber => _source.LineInfo.Count;
+            public List<LineInfo> LineInfo => _source.LineInfo;
 
-            protected int _verticalOffset;
-            protected int _lineHeight;
-            protected List<LineInfo> _lineInfo;
+            protected int _verticalOffset = 0;
+            protected IViewportConfig _config;
+            protected ILineInfoProviderControl _source;
 
-            public ScrollableFrame(IControl builder) : base(builder)
+            public ScrollableFrame(IViewportConfig config, ILineInfoProviderControl source) : base(source)
             {
+                _config = config;
+                _source = source;
             }
 
             public bool SetVerticalOffset(int value)
             {
-                if (value == _verticalOffset || value < 0 || value + _lineHeight > _lineInfo.Count)
+                if (value == _verticalOffset || value < 0 || value + _config.LineHeight > LineInfo.Count)
                     return false;
 
                 _verticalOffset = value;
@@ -158,8 +160,8 @@ namespace IngameScript
             {
                 _buffer.Clear();
 
-                int ViewportStart = _lineInfo[_verticalOffset].StartPosition;
-                int ViewportEnd = _verticalOffset + _lineHeight >= _lineInfo.Count ? input.Length : _lineInfo[_verticalOffset + _lineHeight].StartPosition - 2; // -2 cuts \r\n
+                int ViewportStart = LineInfo[_verticalOffset].StartPosition;
+                int ViewportEnd = _verticalOffset + _config.LineHeight >= LineInfo.Count ? input.Length : LineInfo[_verticalOffset + _config.LineHeight].StartPosition - 2; // -2 cuts \r\n
                 int ViewportLength = ViewportEnd - ViewportStart;
 
                 _buffer.Append(input.ToString(ViewportStart, ViewportLength));
@@ -167,26 +169,59 @@ namespace IngameScript
             }
         }
 
+
+        class ProcessingArgs
+        {
+            public string Prefix { get; set; }
+            public string Suffix { get; set; }
+            public List<LineInfo> LineInfo { get; set; }
+            public IDisplayElement Element;
+            public int CurrentOutputLength;
+        }
+
+        // Yeah, ugly
+        interface ILineInfoProviderControl : IControl
+        {
+            List<LineInfo> LineInfo { get; }
+        }
+
         /// <summary>
         /// Content builder that builds content as a single string from a list of elements
         /// </summary>
-        class MenuContentBuilder : IControl
+        class MenuContentBuilder : ILineInfoProviderControl
         {
+            public List<LineInfo> LineInfo => _lineInfo;
+            public event Action<StringBuilder> RedrawRequired;
+
             protected List<IDisplayElement> _menuItems;
             protected List<ITextProcessor> _pipeline = new List<ITextProcessor>();
             protected StringBuilder _buffer = new StringBuilder();
-            public event Action<StringBuilder> RedrawRequired;
+            
+            protected IAffixConfig _config;
+            protected ProcessingArgs _processingArgs = new ProcessingArgs();
+            protected List<LineInfo> _lineInfo = new List<LineInfo>();
+            
+            public MenuContentBuilder(IAffixConfig config)
+            {
+                _config = config;
+                _processingArgs.LineInfo = _lineInfo;
+            }
 
             public StringBuilder Process()
             {
                 _buffer.Clear();
                 foreach (var e in _menuItems)
                 {
+                    _processingArgs.Prefix = _config.GetPrefixFor(e, false);
+                    _processingArgs.Suffix = _config.GetSuffixFor(e, false);
+                    _processingArgs.Element = e;
+                    _processingArgs.CurrentOutputLength = _buffer.Length;
+
                     string s = e.Label;
                     foreach (var p in _pipeline)
                     {
                         // TODO: Eliminate ToString(); use only StringBuilders
-                        s = p.Process(s).ToString();
+                        s = p.Process(s, _processingArgs).ToString();
                     }
                     _buffer.Append(s + Environment.NewLine);
                 }
@@ -230,6 +265,11 @@ namespace IngameScript
             char[] Terminators { get; }
         }
 
+        interface IViewportConfig
+        {
+            int LineHeight { get; }
+        }
+
         interface IPaddingConfig
         {
             char PaddingChar { get; }
@@ -253,15 +293,23 @@ namespace IngameScript
             bool AddSpace { get; }
         }
 
-        class SmartConfig : IWordWrappingConfig, IPaddingConfig, INavConfig
+        interface IAffixConfig
+        {
+            string GetPrefixFor(IDisplayElement element, bool selected);
+            string GetSuffixFor(IDisplayElement element, bool selected);
+        }
+
+        class SmartConfig : IWordWrappingConfig, IViewportConfig, IPaddingConfig, INavConfig, IAffixConfig
         {
             public int LineLength { get; set; }
             public char[] Terminators { get; set; }
 
+            public int LineHeight { get; set;  }
+
             public char PaddingChar { get; set; }
             public int PaddingLeft { get; set; }
 
-            public char SelectionMarker { get; private set; } = '›';
+            public char SelectionMarker { get; set; } = '›';
 
             public Affix Prefixes_Unselected = new Affix()
             {
@@ -331,13 +379,55 @@ namespace IngameScript
             bool ISuffixConfig.AddSpace { get; }
         }
 
+
+
         interface ITextProcessor
         {
-            StringBuilder Process(string input);
-            StringBuilder Process(string input, StringBuilder output, bool clearOutput = false);
+            StringBuilder Process(string input, ProcessingArgs args);
+            StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false);
             // Implement this later; needs IndexOfAny implementation for StringBuilder:
             // StringBuilder Process(StringBuilder input, StringBuilder output, bool clearOutput = false);
         }
+
+
+
+        class LineInfoExtractor : ITextProcessor
+        {
+            protected StringBuilder _buffer = new StringBuilder();
+            protected IPaddingConfig _config;
+
+            public LineInfoExtractor(IPaddingConfig config)
+            {
+                _config = config;
+            }
+
+            public StringBuilder Process(string input, ProcessingArgs args)
+            {
+                _buffer.Clear();
+                _buffer.Append(input);
+                return Process(input, args, _buffer, true);
+            }
+
+            public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
+            {
+                // TODO: highly assumptious; bulletCharPosition is problematic, since we switch to prefix strings, which can be longer than 1 char.
+                // also assumes that structure is "padding + prefix + element", but actually order can be any
+                int bulletCharPosition = args.CurrentOutputLength + _config.PaddingLeft;
+
+                for (int currentPos = 0; currentPos != -1; currentPos = input.IndexOf(Environment.NewLine, currentPos))
+                {
+                    if (currentPos != -1)
+                    {
+                        if (currentPos != 0) currentPos += Environment.NewLine.Length;
+                        args.LineInfo.Add(new LineInfo(currentPos + args.CurrentOutputLength, args.Element, bulletCharPosition));
+                        currentPos++;
+                    }
+                }
+
+                return output;
+            }
+        }
+
 
         /// <summary>
         /// Wraps the provided string or StringBuilder according to the settings given.
@@ -353,12 +443,12 @@ namespace IngameScript
                 _config = config;
             }
 
-            public StringBuilder Process(string input)
+            public StringBuilder Process(string input, ProcessingArgs args)
             {
-                return Process(input, _outputBuffer, true);
+                return Process(input, args, _outputBuffer, true);
             }
 
-            public StringBuilder Process(string input, StringBuilder output, bool clearOutput = false)
+            public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
             {
                 if (clearOutput == true)
                     output.Clear();
@@ -404,12 +494,12 @@ namespace IngameScript
                 _config = config;
             }
 
-            public StringBuilder Process(string input)
+            public StringBuilder Process(string input, ProcessingArgs args)
             {
-                return Process(input, _builder, true);
+                return Process(input, args, _builder, true);
             }
 
-            public StringBuilder Process(string input, StringBuilder output, bool clearOutput = false)
+            public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
             {
                 if (clearOutput == true)
                     output.Clear();
@@ -422,7 +512,7 @@ namespace IngameScript
                 return AddPaddingToAllNewline(input, output);
             }
 
-            public StringBuilder AddPaddingToAllNewline(string input, StringBuilder output)
+            protected StringBuilder AddPaddingToAllNewline(string input, StringBuilder output)
             {
                 for (int nextNewline = 0, prevNewline = 0; nextNewline != -1;)
                 {
@@ -458,12 +548,12 @@ namespace IngameScript
                 _config = config;
             }
 
-            public StringBuilder Process(string input)
+            public StringBuilder Process(string input, ProcessingArgs args)
             {
-                return Process(input, _buffer, true);
+                return Process(input, args, _buffer, true);
             }
 
-            public StringBuilder Process(string input, StringBuilder output, bool clearOutput = false)
+            public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
             {
                 if (clearOutput == true)
                     output.Clear();
@@ -483,12 +573,12 @@ namespace IngameScript
                 _config = config;
             }
 
-            public StringBuilder Process(string input)
+            public StringBuilder Process(string input, ProcessingArgs args)
             {
-                return Process(input, _buffer, true);
+                return Process(input, args, _buffer, true);
             }
 
-            public StringBuilder Process(string input, StringBuilder output, bool clearOutput = false)
+            public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
             {
                 if (clearOutput == true)
                     output.Clear();

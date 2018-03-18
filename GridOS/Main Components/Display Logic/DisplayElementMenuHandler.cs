@@ -78,7 +78,7 @@ namespace IngameScript
                 // proto
                 var config = new SmartConfig();
                 var dynconfig = new DynamicConfig(); // will be created dynamically, need to wire it in
-                var builder = new MenuContentBuilder();
+                var builder = new MenuContentBuilder(config);
 
                 builder
                     .AddProcessor(new WordWrap_Strategy1(config))
@@ -88,7 +88,7 @@ namespace IngameScript
                     .AddContent(_elements);
 
                 var root = new NavigationFrame(config,
-                    new ScrollableFrame(
+                    new ScrollableFrame(config,
                         builder));
 
                 // Wire in root redraw into View (but not from this class; this class will likely be obsolete):
