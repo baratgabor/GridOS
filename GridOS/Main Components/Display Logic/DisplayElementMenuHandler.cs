@@ -19,17 +19,10 @@ namespace IngameScript
     {
         class DisplayElementMenuHandler
         {
-            private StringBuilder _builder_Temp = new StringBuilder(); // Generic reusable builder
-
             private Flush _flush = Flush.All; // Cache flushing controller flags
             private List<IDisplayElement> _elements; // Raw content to be abstracted
-            private StringBuilder _builder_Formatted = new StringBuilder(); // 1st (caching) stage of content abstraction
-            private StringBuilder _builder_FormattedView = new StringBuilder(); // 2nd (caching) stage of content abstraction
-            private List<LineInfo> _lineInfo = new List<LineInfo>(); // Text line data for view filtering and translation from primary selection (line) to secondary (element)
-
-            //private LoopingPipeline<Command_ProcessDisplayElement, StringBuilder> _displayElementProcessor;
-            //private Command_ProcessDisplayElement _displayElementProcessingCommand = new Command_ProcessDisplayElement();
-
+            
+            /*
             private Dictionary<Type, char> _prefixMap = new Dictionary<Type, char>() {
                 { typeof(IDisplayCommand), '·' },
                 { typeof(IDisplayGroup), '·' },
@@ -40,6 +33,7 @@ namespace IngameScript
                 { typeof(IDisplayGroup), '»' },
                 { typeof(IDisplayElement), ' ' }
             };
+            */
 
             private Dictionary<ValidationRule, Func<int, bool>> _intValidationMap = new Dictionary<ValidationRule, Func<int, bool>>() { // Predicate not supported in SE
                 { ValidationRule.None, (x) => true },
@@ -57,33 +51,20 @@ namespace IngameScript
             public int LeftPadding { get { return _leftPadding; } set { TrySet(ref _leftPadding, value, ValidationRule.ForceZeroOrPositive, Flush.All); } }
             private int _leftPadding = 0;
 
-            // TODO: implement WordWrap switch - strategy
-            public bool WordWrap { get; set; } = false;
-
             public event Action RedrawRequired;
 
-            private const char _itemBulletDefault = '·';
-            private const char _itemBulletSelected = '•';
-            private const char _selectedLineBullet = '›';
-            private const char _groupItemSuffix = '»';
-            private readonly string _newLine = Environment.NewLine;
-
-            private int _selectedLine = 0; // Primary selection tracking
-            public IDisplayElement SelectedElement => _selectedElement;
-            private IDisplayElement _selectedElement; // Secondary selection tracking (derived from _lineInfo[_selectedLine])
 
             public DisplayElementMenuHandler()
             {
 
                 // proto
                 var config = new SmartConfig();
-                var dynconfig = new DynamicConfig(); // will be created dynamically, need to wire it in
                 var builder = new MenuContentBuilder(config);
 
                 builder
                     .AddProcessor(new WordWrap_Strategy1(config))
-                    .AddProcessor(new AddPrefix(dynconfig))
-                    .AddProcessor(new AddSuffix(dynconfig))
+                    .AddProcessor(new AddPrefix())
+                    .AddProcessor(new AddSuffix())
                     .AddProcessor(new PadAllNewLines(config))
                     .AddContent(_elements);
 
@@ -125,11 +106,7 @@ namespace IngameScript
             /// <param name="elements">Elements to set.</param>
             public void SetMenuElements(List<IDisplayElement> elements)
             {
-                _elements = elements;
-                _selectedLine = 0;
-                _selectedElement = null;
-                _verticalOffset = 0;
-                _flush = Flush.All;
+
             }
 
             public void SetSelectedElement(IDisplayElement element)
@@ -139,29 +116,7 @@ namespace IngameScript
             // TODO: Test and make it nicer
             public void UpdateElement(IDisplayElement element)
             {
-                // TODO: Refactor ineffecient queries
-                LineInfo li = _lineInfo.FirstOrDefault((x) => x.ParentDisplayElement == element);
 
-                if (li.Equals(default(LineInfo)))
-                    return;
-
-                int i = _lineInfo.IndexOf(li);
-
-                int endPos;
-                if (_lineInfo.Count < i + 1)
-                    endPos = _builder_Formatted.Length;
-                else
-                    endPos = _lineInfo[i + 1].StartPosition - _newLine.Length;
-
-                // TODO: Efficiently store/retrieve old string to replace
-                string oldStr = _builder_Formatted.ToString(li.StartPosition, endPos - li.StartPosition);
-
-                _builder_Temp.Clear();
-                //string newStr = _displayElementProcessor.Process(SetupCommand(element), _builder_Temp).ToString();
-
-                // None of the StringBuilder.Replace overloads seem ideal
-                //_builder_Formatted.Replace(oldStr, newStr, li.StartPosition, endPos);
-                _flush = Flush.View;
             }
 
             private void UpdateSelection(int newSelectedLine)
@@ -189,7 +144,9 @@ namespace IngameScript
 
                 _flush = Flush.None;
 
-                return _builder_FormattedView.ToString();
+                //return _builder_FormattedView.ToString();
+
+                return "";
             }
 
             public void FlushCaches()
@@ -220,6 +177,16 @@ namespace IngameScript
                 None,
                 ForceZeroOrPositive,
                 ForceGreaterThanZero
+            }
+
+            public void MoveUp()
+            {
+
+            }
+
+            public void MoveDown()
+            {
+
             }
         }
 

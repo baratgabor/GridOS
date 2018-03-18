@@ -43,8 +43,6 @@ namespace IngameScript
 
             public event Action<IDisplayElement> Selected;
 
-            private DisplayElementMenuHandler _displayElementMenu = new DisplayElementMenuHandler();
-
             public DisplayView(IMyTextPanel target, IMyGridProgramRuntimeInfo runtime)
             {
                 _runtime = runtime;
@@ -55,11 +53,7 @@ namespace IngameScript
                 _separatorLineTop = new String(_lineSeparatorCharTop, _maxLineWidth * 2);
                 _separatorLineBottom = new String(_lineSeparatorCharBottom, _maxLineWidth * 2);
 
-                _displayElementMenu.MaxWidth = _maxLineWidth;
-                _displayElementMenu.LineHeight = _maxLineNum;
-                _displayElementMenu.LeftPadding = 3;
-                _displayElementMenu.WordWrap = true;
-                _displayElementMenu.RedrawRequired += Redraw;
+
             }
 
             private void SetupTarget(IMyTextPanel target)
@@ -84,13 +78,7 @@ namespace IngameScript
 
             internal void Handle_ContextChanged(ContentChangeInfo changeInfo)
             {
-                UpdatePathString(changeInfo.NavigationPath);
 
-                _displayElementMenu.SetMenuElements(changeInfo.Content);
-                if (changeInfo.PreviousContext != null)
-                    _displayElementMenu.SetSelectedElement(changeInfo.PreviousContext);
-
-                UpdateScreen(_displayElementMenu.GetContent());
             }
 
             internal void UpdatePathString(List<IDisplayGroup> path)
@@ -106,19 +94,15 @@ namespace IngameScript
 
             internal void Redraw()
             {
-                UpdateScreen(_displayElementMenu.GetContent());
+
             }
 
             public void Handle_ElementChanged(IDisplayElement element)
             {
-                _displayElementMenu.UpdateElement(element);
-                UpdateScreen(_displayElementMenu.GetContent());
             }
 
             internal void Handle_ContentChanged(List<IDisplayElement> elements)
             {
-                _displayElementMenu.FlushCaches();
-                UpdateScreen(_displayElementMenu.GetContent());
             }
 
             public void MoveUp(CommandItem sender, string param)
@@ -133,7 +117,7 @@ namespace IngameScript
 
             public void Select(CommandItem sender, string param)
             {
-                Selected?.Invoke(_displayElementMenu.SelectedElement);
+                //Selected?.Invoke(_displayElementMenu.SelectedElement);
             }
         }
     }

@@ -18,9 +18,6 @@ namespace IngameScript
 {
     partial class Program
     {
-        // TODO: Implement LineInfo creation, wire configuration into all components
-
-
         interface IControl
         {
             event Action<StringBuilder> RedrawRequired;
@@ -281,18 +278,6 @@ namespace IngameScript
             char SelectionMarker { get; }
         }
 
-        interface IPrefixConfig
-        {
-            string Prefix { get; }
-            bool AddSpace { get; }
-        }
-
-        interface ISuffixConfig
-        {
-            string Suffix { get; }
-            bool AddSpace { get; }
-        }
-
         interface IAffixConfig
         {
             string GetPrefixFor(IDisplayElement element, bool selected);
@@ -371,13 +356,7 @@ namespace IngameScript
             }
         }
 
-        struct DynamicConfig : IPrefixConfig, ISuffixConfig
-        {
-            public string Prefix { get; private set; }
-            bool IPrefixConfig.AddSpace { get; }
-            public string Suffix { get; private set; }
-            bool ISuffixConfig.AddSpace { get; }
-        }
+
 
 
 
@@ -541,12 +520,6 @@ namespace IngameScript
         class AddPrefix : ITextProcessor
         {
             protected StringBuilder _buffer = new StringBuilder();
-            protected IPrefixConfig _config;
-
-            public AddPrefix(IPrefixConfig config)
-            {
-                _config = config;
-            }
 
             public StringBuilder Process(string input, ProcessingArgs args)
             {
@@ -558,7 +531,7 @@ namespace IngameScript
                 if (clearOutput == true)
                     output.Clear();
 
-                output.Append(_config.Prefix + (_config.AddSpace ? " " : "") + input);
+                output.Append(args.Prefix + (args.Prefix.Length > 0 ? " " : "") + input);
                 return output;
             }
         }
@@ -566,12 +539,6 @@ namespace IngameScript
         class AddSuffix : ITextProcessor
         {
             protected StringBuilder _buffer = new StringBuilder();
-            protected ISuffixConfig _config;
-
-            public AddSuffix(ISuffixConfig config)
-            {
-                _config = config;
-            }
 
             public StringBuilder Process(string input, ProcessingArgs args)
             {
@@ -583,7 +550,7 @@ namespace IngameScript
                 if (clearOutput == true)
                     output.Clear();
 
-                output.Append(input + (_config.AddSpace ? " " : "") + _config.Suffix);
+                output.Append(input + (args.Suffix.Length > 0 ? " " : "") + args.Suffix);
                 return output;
             }
         }
