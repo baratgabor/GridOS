@@ -19,27 +19,26 @@ namespace IngameScript
     partial class Program
     {
         /// <summary>
-        /// Fills and refreshes a TextPanel's "viewport" with content, according to the TextPanel's settings and characteristics.
+        /// Sets up a TextPanel with the appropriate settings, and fills/refreshes it with the content of the Controls added.
         /// </summary>
         class DisplayView
         {
-            private IMyTextPanel _target;
-            private IMyGridProgramRuntimeInfo _runtime;
-            private string _targetFont = "Debug";
-            private float _targetFontSize = 1.3f;
-            private string _path = _pathPrefix;
-            private int _maxLineWidth;
-            private int _maxLineNum = 8;
-            public string DisplayHeader { get; set; }
-            private ProgressIndicator2 _spinner = new ProgressIndicator2();
-            private StringBuilder _builder = new StringBuilder();
+            protected IMyTextPanel _target;
+            protected IMyGridProgramRuntimeInfo _runtime;
+            protected string _targetFont = "Debug";
+            protected float _targetFontSize = 1.3f;
+            protected int _maxLineWidth;
+            protected int _maxLineNum = 8; // TODO: Check this max line number, and make it scale dynamically based on font size
 
-            private const string _pathPrefix = "  ";
-            private const string _pathSeparator = "›";
-            private const char _lineSeparatorCharTop = '.';
-            private const char _lineSeparatorCharBottom = '˙';
-            private string _separatorLineTop;
-            private string _separatorLineBottom;
+            protected StringBuilder _buffer = new StringBuilder();
+            protected List<IControl> _controls = new List<IControl>();
+            protected List<string> _controls_cache = new List<string>();
+            protected List<int> _controls_BufferStartPositions = new List<int>(); // Possible strategy for replacing only a single changed item, instead of rebuilding the buffer
+
+            protected const char _lineSeparatorCharTop = '.';
+            protected const char _lineSeparatorCharBottom = '˙';
+            protected string _separatorLineTop;
+            protected string _separatorLineBottom;
 
             public event Action<IDisplayElement> Selected;
 
@@ -52,8 +51,30 @@ namespace IngameScript
                 _maxLineWidth = DetermineMaxLineLength();
                 _separatorLineTop = new String(_lineSeparatorCharTop, _maxLineWidth * 2);
                 _separatorLineBottom = new String(_lineSeparatorCharBottom, _maxLineWidth * 2);
+            }
 
+            public void AddControl(IControl control)
+            {
+                _controls.Add(control);
+                control.RedrawRequired += Redraw;
+            }
 
+            // TODO: Consider control disposal mechanisms? Or what's the assumption when we remove a control?
+            public void RemoveControl(IControl control)
+            {
+                if (_controls.Contains(control))
+                {
+                    control.RedrawRequired -= Redraw;
+                    _controls.Remove(control);
+                }
+            }
+
+            public void ClearControls()
+            {
+                foreach (var c in _controls)
+                    c.RedrawRequired -= Redraw;
+
+                _controls.Clear();
             }
 
             private void SetupTarget(IMyTextPanel target)
@@ -71,53 +92,28 @@ namespace IngameScript
 
             private void UpdateScreen(string formattedString)
             {
-                DisplayHeader = $"{Environment.NewLine}  ::GridOS:: {_spinner.Get()} LRT: {_runtime.LastRunTimeMs:G3}ms{Environment.NewLine}{_separatorLineTop}";
-
-                _target.WritePublicText($"{DisplayHeader}{Environment.NewLine}{_path}{Environment.NewLine}{_separatorLineBottom}{Environment.NewLine}{formattedString}");
+                //_target.WritePublicText($"{displayHeader}{Environment.NewLine}{_path}{Environment.NewLine}{_separatorLineBottom}{Environment.NewLine}{formattedString}");
             }
 
-            internal void Handle_ContextChanged(ContentChangeInfo changeInfo)
+            internal void Redraw(StringBuilder content)
             {
+                // TODO: Make the event payload meaningful; e.g. it needs to ID the source at least.
+                // Currently we are simply ignoring the event payload (content), and requesting it again
+                // But that's okay actually, since it's supposed to be cached
 
-            }
-
-            internal void UpdatePathString(List<IDisplayGroup> path)
-            {
-                _builder.Clear();
-                _builder.Append(_pathPrefix);
-                foreach (var group in path)
+                // TODO: possibly implement caching, by using _controls_cache, if that improves the runtime due to eliminating one reference; but probably the diff. is negligible
+                _buffer.Clear();
+                _controls_BufferStartPositions.Clear();
+                for (int i = 0, pos = 0; i < _controls.Count; i++)
                 {
-                    _builder.Append(" " + group.Label + " " + _pathSeparator);
+                    _controls_BufferStartPositions.Add(pos);
+                    _buffer.Append(_controls[i].GetContent() + (i < _controls.Count-1 ? Environment.NewLine : ""));
+                    pos += _buffer.Length;
                 }
-                _path = _builder.ToString();
-            }
 
-            internal void Redraw()
-            {
-
-            }
-
-            public void Handle_ElementChanged(IDisplayElement element)
-            {
-            }
-
-            internal void Handle_ContentChanged(List<IDisplayElement> elements)
-            {
-            }
-
-            public void MoveUp(CommandItem sender, string param)
-            {
-                //_displayElementMenu.MoveUp();
-            }
-
-            public void MoveDown(CommandItem sender, string param)
-            {
-                //_displayElementMenu.MoveDown();
-            }
-
-            public void Select(CommandItem sender, string param)
-            {
-                //Selected?.Invoke(_displayElementMenu.SelectedElement);
+                // TODO: Should we do line number checks on the control outputs?
+                // MaxLineNum is textpanel settings dependent, so this View will decide on that
+                _target.WritePublicText(_buffer.ToString());
             }
         }
     }

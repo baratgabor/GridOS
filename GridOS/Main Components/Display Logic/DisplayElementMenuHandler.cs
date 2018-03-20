@@ -62,10 +62,10 @@ namespace IngameScript
                 var builder = new MenuContentBuilder(config);
 
                 builder
-                    .AddProcessor(new WordWrap_Strategy1(config))
+                    .AddProcessor(new WordWrap_BreakPresearchStrategy(config))
                     .AddProcessor(new AddPrefix())
                     .AddProcessor(new AddSuffix())
-                    .AddProcessor(new PadAllNewLines(config))
+                    .AddProcessor(new PadAllLines(config))
                     .AddContent(_elements);
 
                 var root = new NavigationFrame(config,
