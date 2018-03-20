@@ -26,11 +26,17 @@ namespace IngameScript
             protected INavConfig _config;
             protected int _selectedLine = 0;
             protected IScrollable _scrollableBox;
+            public event Action<IDisplayElement> ItemSelected;
 
             public NavigationFrame(INavConfig config, IScrollable scrollableBox) : base(scrollableBox)
             {
                 _config = config;
                 _scrollableBox = scrollableBox;
+            }
+
+            public void MoveUp(CommandItem sender, string parameter)
+            {
+                MoveUp();
             }
 
             public bool MoveUp()
@@ -42,6 +48,12 @@ namespace IngameScript
                 return true;
             }
 
+
+            public void MoveDown(CommandItem sender, string parameter)
+            {
+                MoveDown();
+            }
+
             public bool MoveDown()
             {
                 if (_selectedLine >= _scrollableBox.LineNumber - 1)
@@ -49,6 +61,13 @@ namespace IngameScript
 
                 AdjustSelectedLine(_selectedLine + 1);
                 return true;
+            }
+
+            public void Select(CommandItem sender, string parameter)
+            {
+                if (_selectedLine > _scrollableBox.LineInfo.Count - 1)
+                    return;
+                ItemSelected?.Invoke(_scrollableBox.LineInfo[_selectedLine].ParentDisplayElement);
             }
 
             private void AdjustSelectedLine(int value)

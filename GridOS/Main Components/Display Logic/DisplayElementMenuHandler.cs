@@ -125,6 +125,7 @@ namespace IngameScript
 
             public string GetContent()
             {
+                /*
                 switch (_flush)
                 {
                     case Flush.None:
@@ -144,7 +145,8 @@ namespace IngameScript
 
                 _flush = Flush.None;
 
-                //return _builder_FormattedView.ToString();
+                return _builder_FormattedView.ToString();
+                */
 
                 return "";
             }
@@ -152,16 +154,7 @@ namespace IngameScript
             public void FlushCaches()
             {
                 _flush = Flush.All;
-            }
-
-            private void BuildView()
-            {
-
-            }
-
-            private void BuildFormat()
-            {
-            }
+            }  
 
             [Flags]
             private enum Flush
@@ -177,16 +170,6 @@ namespace IngameScript
                 None,
                 ForceZeroOrPositive,
                 ForceGreaterThanZero
-            }
-
-            public void MoveUp()
-            {
-
-            }
-
-            public void MoveDown()
-            {
-
             }
         }
 

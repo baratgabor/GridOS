@@ -50,6 +50,11 @@ namespace IngameScript
                     _buffer.Append((i == 0 ? _padding : " ") + newPath[i] + (i == newPath.Count - 1 ? "" : " " + _pathSeparator));
                 }
             }
+
+            internal void OnPathChanged(ContentChangeInfo obj)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

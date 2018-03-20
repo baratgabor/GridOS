@@ -53,10 +53,11 @@ namespace IngameScript
                 _separatorLineBottom = new String(_lineSeparatorCharBottom, _maxLineWidth * 2);
             }
 
-            public void AddControl(IControl control)
+            public DisplayView AddControl(IControl control)
             {
                 _controls.Add(control);
                 control.RedrawRequired += Redraw;
+                return this;
             }
 
             // TODO: Consider control disposal mechanisms? Or what's the assumption when we remove a control?

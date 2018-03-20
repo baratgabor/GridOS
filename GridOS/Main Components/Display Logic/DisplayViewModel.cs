@@ -46,7 +46,7 @@ namespace IngameScript
             public List<IDisplayGroup> NavigationPath { get; private set; } = new List<IDisplayGroup>();
             public event Action<List<IDisplayElement>> ContentChanged; // Elements added or removed
             public event Action<IDisplayElement> ElementChanged; // Single element label changed
-            public event Action<ContentChangeInfo> ContextChanged; // When moving to another group
+            public event Action<ContentChangeInfo> PathChanged; // When moving to another group
 
             // Navigation route of user, to support backwards traversal
             private Stack<IDisplayGroup> _navigationStack = new Stack<IDisplayGroup>();
@@ -93,7 +93,7 @@ namespace IngameScript
 
             public void PushUpdate(IDisplayGroup previousContext = null)
             {
-                ContextChanged?.Invoke(new ContentChangeInfo(
+                PathChanged?.Invoke(new ContentChangeInfo(
                     content: UpdateContent(),
                     navigationPath: UpdateNavigationPath(),
                     previousContext: previousContext

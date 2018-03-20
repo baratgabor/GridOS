@@ -32,6 +32,12 @@ namespace IngameScript
             private ICommandDispatcher _commandDispatcher;
             private IMyGridProgramRuntimeInfo _runtime;
 
+            private SmartConfig _config = new SmartConfig();
+
+            private NavigationFrame _navigation;
+            private MenuContentBuilder _menuBuilder;
+            private Breadcrumb _breadcrumb;
+
             public DisplayController(string name, ICommandDispatcher commandDispatcher, DisplayView view, DisplayViewModel viewModel, IMyGridProgramRuntimeInfo runtime)
             {
                 _name = name;
@@ -40,20 +46,37 @@ namespace IngameScript
 
                 _view = view;
                 _viewModel = viewModel;
-                _viewModel.ElementChanged += _view.Handle_ElementChanged;
-                _viewModel.ContentChanged += _view.Handle_ContentChanged;
-                _viewModel.ContextChanged += _view.Handle_ContextChanged;
-                _view.Selected += _viewModel.Execute;
+
+                _breadcrumb = new Breadcrumb(_config);
+
+                _menuBuilder = new MenuContentBuilder(_config);
+                _menuBuilder
+                    .AddProcessor(new WordWrap_BreakPresearchStrategy(_config))
+                    .AddProcessor(new AddPrefix())
+                    .AddProcessor(new AddSuffix())
+                    .AddProcessor(new PadAllLines(_config))
+                    .AddProcessor(new LineInfoExtractor(_config));
+
+                _view
+                    .AddControl(new DisplayHeader(_config, _runtime))
+                    .AddControl(_breadcrumb)
+                    .AddControl(_menuBuilder);
+
+                _navigation = new NavigationFrame(_config,
+                    new ScrollableFrame(_config,
+                        _menuBuilder));
+
+                _viewModel.PathChanged += _breadcrumb.OnPathChanged;
+                _viewModel.ContentChanged += _menuBuilder.OnContentChanged;
+                _viewModel.ElementChanged += _menuBuilder.OnElementChanged;
+                _navigation.ItemSelected += _viewModel.Execute;
+                
+                _commandDispatcher
+                    .AddCommand_OverwriteExisting(new CommandItem($"{_name}Up", _navigation.MoveUp))
+                    .AddCommand_OverwriteExisting(new CommandItem($"{_name}Down", _navigation.MoveDown))
+                    .AddCommand_OverwriteExisting(new CommandItem($"{_name}Select", _navigation.Select));
+
                 _viewModel.PushUpdate();
-
-                _navCommands = new List<CommandItem>()
-                {
-                    new CommandItem($"{_name}Up", _view.MoveUp),
-                    new CommandItem($"{_name}Down", _view.MoveDown),
-                    new CommandItem($"{_name}Select", _view.Select)
-                };
-
-                _commandDispatcher.AddCommands_OverwriteExisting(_navCommands);
             }
         }
     }

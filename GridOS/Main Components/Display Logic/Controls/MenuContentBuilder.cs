@@ -71,6 +71,11 @@ namespace IngameScript
                 return this;
             }
 
+            internal void OnElementChanged(IDisplayElement obj)
+            {
+                throw new NotImplementedException();
+            }
+
             protected void Process_Redraw()
             {
                 Process();
@@ -91,6 +96,11 @@ namespace IngameScript
             public StringBuilder GetContent()
             {
                 return _buffer;
+            }
+
+            public void OnContentChanged(List<IDisplayElement> elements)
+            {
+                throw new NotImplementedException();
             }
         }
     }
