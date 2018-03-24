@@ -8,6 +8,12 @@
   - [Example module class with all interfaces implemented](#example-module-class-with-all-interfaces-implemented)
   - [Instantiating the framework and registering a module](#instantiating-the-framework-and-registering-a-module)
 
+## Menu Demo
+
+A short demonstration of the menu handling capabilities, which includes: traversing tree structures, automatic word-wrapping, prefix and suffix bullet characters based on item type, auto-scrolling, and displaying navigation breadcrumbs. This demo doesn't cover other existing capabilities, e.g. executing commands and displaying automatically updating text.
+
+![GridOS Menu system demo](GridOS_Menu_Demo.gif)
+
 ## Summary
 GridOS is a modular multitasking and command handling ingame script for Space Engineers. This script provides a framework for creating separate code modules to run on a single Programmable Block.
 
