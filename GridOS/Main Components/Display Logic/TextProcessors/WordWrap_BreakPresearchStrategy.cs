@@ -28,18 +28,24 @@ namespace IngameScript
             protected StringBuilder _outputBuffer = new StringBuilder();
             protected IWordWrappingConfig _config;
 
-            public WordWrap_BreakPresearchStrategy(IWordWrappingConfig config)
+            protected MyGridProgram _program;
+
+            public WordWrap_BreakPresearchStrategy(IWordWrappingConfig config /*, MyGridProgram program*/)
             {
                 _config = config;
+                _program = null; //program;
             }
 
             public StringBuilder Process(string input, ProcessingArgs args)
-            {
+            {              
                 return Process(input, args, _outputBuffer, true);
             }
 
             public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
             {
+                //
+                _program?.Echo("Processing: " + input);
+
                 if (clearOutput == true)
                     output.Clear();
 

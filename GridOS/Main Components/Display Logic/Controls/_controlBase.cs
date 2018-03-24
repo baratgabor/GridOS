@@ -37,6 +37,16 @@ namespace IngameScript
                 _inner.RedrawRequired += Process_Redraw;
             }
 
+            protected void Redraw()
+            {
+                RedrawRequired?.Invoke(_buffer);
+            }
+
+            protected void Get_Process()
+            {
+                _buffer = Process(_inner.GetContent());
+            }
+
             public void Get_Process_Redraw()
             {
                 Process_Redraw(_inner.GetContent());
@@ -44,7 +54,7 @@ namespace IngameScript
 
             protected void Process_Redraw(StringBuilder input)
             {
-                _buffer = Process(input);
+                Process(input);
                 RedrawRequired?.Invoke(_buffer);
             }
 

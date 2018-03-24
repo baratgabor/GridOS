@@ -22,10 +22,10 @@ namespace IngameScript
         struct ContentChangeInfo
         {
             public readonly List<IDisplayElement> Content;
-            public readonly List<IDisplayGroup> NavigationPath;
+            public readonly List<string> NavigationPath;
             public readonly IDisplayGroup PreviousContext;
 
-            public ContentChangeInfo(List<IDisplayElement> content, List<IDisplayGroup> navigationPath, IDisplayGroup previousContext)
+            public ContentChangeInfo(List<IDisplayElement> content, List<string> navigationPath, IDisplayGroup previousContext)
             {
                 Content = content;
                 NavigationPath = navigationPath;
@@ -50,6 +50,8 @@ namespace IngameScript
 
             // Navigation route of user, to support backwards traversal
             private Stack<IDisplayGroup> _navigationStack = new Stack<IDisplayGroup>();
+            private List<string> _path = new List<string>();
+
             // Built-in command for handling backwards traversal in tree
             private DisplayCommand _backCommand;
             private DisplayCommand _backCommandBottom; // Separate instance; top and bottom back command shouldn't evaluate to equal
@@ -115,13 +117,16 @@ namespace IngameScript
                 return Content;
             }
 
-            private List<IDisplayGroup> UpdateNavigationPath()
+            private List<string> UpdateNavigationPath()
             {
-                var navpath = _navigationStack.ToList();
-                navpath.Reverse();
-                NavigationPath = navpath;
+                _path.Clear();
 
-                return NavigationPath;
+                foreach (var e in _navigationStack)
+                    _path.Add(e.Label);
+
+                _path.Reverse();
+
+                return _path;
             }
 
             private void Handle_ChildrenChanged(IDisplayGroup displayGroup)

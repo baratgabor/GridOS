@@ -34,6 +34,14 @@ namespace IngameScript
                 _scrollableBox = scrollableBox;
             }
 
+            protected bool IsReady()
+            {
+                if (_buffer.Length == 0)
+                    return false;
+
+                return true;
+            }
+
             public void MoveUp(CommandItem sender, string parameter)
             {
                 MoveUp();
@@ -41,13 +49,14 @@ namespace IngameScript
 
             public bool MoveUp()
             {
-                if (_selectedLine <= 0)
+                if (!IsReady())
                     return false;
 
-                AdjustSelectedLine(_selectedLine - 1);
+                if (_selectedLine <= 0)
+                    return false;
+                AdjustSelectedLineAndDraw(_selectedLine - 1);
                 return true;
             }
-
 
             public void MoveDown(CommandItem sender, string parameter)
             {
@@ -56,36 +65,50 @@ namespace IngameScript
 
             public bool MoveDown()
             {
+                if (!IsReady())
+                    return false;
+
                 if (_selectedLine >= _scrollableBox.LineNumber - 1)
                     return false;
 
-                AdjustSelectedLine(_selectedLine + 1);
+                AdjustSelectedLineAndDraw(_selectedLine + 1);
                 return true;
             }
 
             public void Select(CommandItem sender, string parameter)
             {
-                if (_selectedLine > _scrollableBox.LineInfo.Count - 1)
-                    return;
-                ItemSelected?.Invoke(_scrollableBox.LineInfo[_selectedLine].ParentDisplayElement);
+                Select();
             }
 
-            private void AdjustSelectedLine(int value)
+            public bool Select()
             {
-                if (AdjustVerticalOffset(value) == false)
+                if (!IsReady())
+                    return false;
+
+                if (_selectedLine > _scrollableBox.LineInfo.Count - 1)
+                    return false;
+
+                ItemSelected?.Invoke(_scrollableBox.LineInfo[_selectedLine].ParentDisplayElement);
+                return true;
+            }
+
+            protected void AdjustSelectedLineAndDraw(int newSelectedLine)
+            {
+                if (AdjustVerticalOffset(newSelectedLine) == false)
                 {
                     RemoveSelectionMarker(_selectedLine);
-                    AddSelectionMarker(value);
-                    _selectedLine = value;
+                    AddSelectionMarker(newSelectedLine);
+                    _selectedLine = newSelectedLine;
+                    Redraw();
                 }
             }
 
-            private void AddSelectionMarker(int selectedLine)
+            protected void AddSelectionMarker(int selectedLine)
             {
                 _buffer[_scrollableBox.LineInfo[selectedLine].StartPosition + 1] = _config.SelectionMarker;
             }
 
-            private void RemoveSelectionMarker(int selectedLine)
+            protected void RemoveSelectionMarker(int selectedLine)
             {
                 _buffer[_scrollableBox.LineInfo[selectedLine].StartPosition + 1] = ' ';
             }
@@ -115,8 +138,7 @@ namespace IngameScript
                 _buffer.Append(input);
 
                 // Needed after moving to a different "folder"?
-                // AdjustVerticalOffset(_selectedLine);
-                AddSelectionMarker(_selectedLine);
+                AdjustSelectedLineAndDraw(_selectedLine);
 
                 return _buffer;
             }

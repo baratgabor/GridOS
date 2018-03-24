@@ -18,11 +18,22 @@ namespace IngameScript
 {
     partial class Program
     {
+
+        interface IView
+        {
+            DisplayView AddControl(IControl control);
+            void RemoveControl(IControl control);
+            void ClearControls();
+            void Redraw(StringBuilder content);
+        }
+
         /// <summary>
         /// Sets up a TextPanel with the appropriate settings, and fills/refreshes it with the content of the Controls added.
         /// </summary>
-        class DisplayView
+        class DisplayView : IView
         {
+            protected int iii = 0;
+
             protected IMyTextPanel _target;
             protected IMyGridProgramRuntimeInfo _runtime;
             protected string _targetFont = "Debug";
@@ -40,15 +51,18 @@ namespace IngameScript
             protected string _separatorLineTop;
             protected string _separatorLineBottom;
 
-            public event Action<IDisplayElement> Selected;
+            protected IViewConfig_Writeable _config;
 
-            public DisplayView(IMyTextPanel target, IMyGridProgramRuntimeInfo runtime)
+            public DisplayView(IMyTextPanel target, IViewConfig_Writeable fillable_config, IMyGridProgramRuntimeInfo runtime)
             {
                 _runtime = runtime;
                 _target = target;
+                _config = fillable_config;
 
                 SetupTarget(_target);
-                _maxLineWidth = DetermineMaxLineLength();
+                _config.LineLength = _maxLineWidth = DetermineMaxLineLength();
+                _config.LineHeight = _maxLineNum;
+
                 _separatorLineTop = new String(_lineSeparatorCharTop, _maxLineWidth * 2);
                 _separatorLineBottom = new String(_lineSeparatorCharBottom, _maxLineWidth * 2);
             }
@@ -96,7 +110,7 @@ namespace IngameScript
                 //_target.WritePublicText($"{displayHeader}{Environment.NewLine}{_path}{Environment.NewLine}{_separatorLineBottom}{Environment.NewLine}{formattedString}");
             }
 
-            internal void Redraw(StringBuilder content)
+            public void Redraw(StringBuilder content)
             {
                 // TODO: Make the event payload meaningful; e.g. it needs to ID the source at least.
                 // Currently we are simply ignoring the event payload (content), and requesting it again
@@ -104,14 +118,16 @@ namespace IngameScript
 
                 // TODO: possibly implement caching, by using _controls_cache, if that improves the runtime due to eliminating one reference; but probably the diff. is negligible
                 _buffer.Clear();
-                _controls_BufferStartPositions.Clear();
+                _buffer.Append("   " + iii + Environment.NewLine);
+                //_controls_BufferStartPositions.Clear();
                 for (int i = 0, pos = 0; i < _controls.Count; i++)
                 {
-                    _controls_BufferStartPositions.Add(pos);
+                    //_controls_BufferStartPositions.Add(pos);
                     _buffer.Append(_controls[i].GetContent() + (i < _controls.Count-1 ? Environment.NewLine : ""));
-                    pos += _buffer.Length;
-                }
+                    //pos += _buffer.Length;
+                }             
 
+                iii++;
                 // TODO: Should we do line number checks on the control outputs?
                 // MaxLineNum is textpanel settings dependent, so this View will decide on that
                 _target.WritePublicText(_buffer.ToString());

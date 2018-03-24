@@ -20,10 +20,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Controls\DisplayHeader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Controls\ScrollableFrame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Controls\_ControlBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\DisplayController.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\DisplayView.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\DisplayViewModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\DisplayElementMenuHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Main Display Components\DisplayController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Main Display Components\DisplayView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Main Display Components\DisplayViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Main Display Components\_obsolete_DisplayElementMenuHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\TextProcessors\WordWrap_BreakPresearchStrategy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\TextProcessors\PadAllLines.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\TextProcessors\LineInfoExtractor.cs" />
@@ -42,5 +42,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Pipelining\Pipelining.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\ConverterMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\ProgressIndicator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Main Display Components\" />
   </ItemGroup>
 </Project>

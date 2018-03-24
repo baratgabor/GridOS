@@ -42,18 +42,18 @@ namespace IngameScript
                 return _buffer;
             }
 
-            public void OnPathChanged(List<string> newPath)
+            public void OnPathChanged(ContentChangeInfo obj)
             {
+                var newPath = obj.NavigationPath;
+
                 _buffer.Clear();
                 for (int i = 0; i < newPath.Count; i++)
                 {
-                    _buffer.Append((i == 0 ? _padding : " ") + newPath[i] + (i == newPath.Count - 1 ? "" : " " + _pathSeparator));
+                    _buffer.Append((i == 0 ? _padding : " ") + newPath[i] + (i < newPath.Count - 1 ? " " + _pathSeparator : ""));
                 }
-            }
 
-            internal void OnPathChanged(ContentChangeInfo obj)
-            {
-                throw new NotImplementedException();
+                // Doesn't invoke RedrawRequired, because other component does that pertaining to path/folder change.
+                // But this should be corrected instead with some aggregation mechanism (to avoid multiple consequent redraws).
             }
         }
     }

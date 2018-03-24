@@ -60,17 +60,27 @@ namespace IngameScript
             string GetSuffixFor(IDisplayElement element, bool selected);
         }
 
-        class SmartConfig : IWordWrappingConfig, IViewportConfig, IPaddingConfig, INavConfig, IAffixConfig, IBreadcrumbConfig
+        interface IViewConfig_Writeable
+        {
+            int LineLength { get; set; }
+            int LineHeight { get; set; }
+            char PaddingChar { get; set; }
+            int PaddingLeft { get; set; }
+            string PathSeparator { get; set; }
+            char SelectionMarker { get; set; }
+        }
+
+        class SmartConfig : IWordWrappingConfig, IViewportConfig, IPaddingConfig, INavConfig, IAffixConfig, IBreadcrumbConfig, IViewConfig_Writeable
         {
             public int LineLength { get; set; }
-            public char[] Terminators { get; set; }
+            public char[] Terminators { get; set; } = {' ', '-'};
 
             public int LineHeight { get; set; }
 
-            public char PaddingChar { get; set; }
-            public int PaddingLeft { get; set; }
+            public char PaddingChar { get; set; } = ' ';
+            public int PaddingLeft { get; set; } = 4;
 
-            public string PathSeparator { get; set; }
+            public string PathSeparator { get; set; } = "›";
 
             public char SelectionMarker { get; set; } = '›';
 
@@ -120,7 +130,7 @@ namespace IngameScript
                     value = affix.Group;
                 else if (element is IDisplayCommand)
                     value = affix.Command;
-                else if (element is IDisplayElement)
+                else
                     value = affix.Element;
 
                 return value;

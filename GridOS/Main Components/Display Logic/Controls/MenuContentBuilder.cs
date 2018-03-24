@@ -73,7 +73,12 @@ namespace IngameScript
 
             internal void OnElementChanged(IDisplayElement obj)
             {
-                throw new NotImplementedException();
+                Process_Redraw();
+            }
+
+            internal void OnPathChanged(ContentChangeInfo obj)
+            {
+                AddContent(obj.Content);
             }
 
             protected void Process_Redraw()
@@ -100,7 +105,7 @@ namespace IngameScript
 
             public void OnContentChanged(List<IDisplayElement> elements)
             {
-                throw new NotImplementedException();
+                AddContent(elements);
             }
         }
     }
