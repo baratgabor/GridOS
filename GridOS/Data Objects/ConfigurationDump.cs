@@ -42,11 +42,14 @@ namespace IngameScript
         {
             char PaddingChar { get; }
             int PaddingLeft { get; }
+            int PaddingLeft_FirstLine { get; }
         }
 
         interface IBreadcrumbConfig : IPaddingConfig
         {
             string PathSeparator { get; }
+            string SeparatorLineTop { get; }
+            string SeparatorLineBottom { get; }
         }
 
         interface INavConfig
@@ -66,8 +69,11 @@ namespace IngameScript
             int LineHeight { get; set; }
             char PaddingChar { get; set; }
             int PaddingLeft { get; set; }
+            int PaddingLeft_FirstLine { get; set; }
             string PathSeparator { get; set; }
             char SelectionMarker { get; set; }
+            string SeparatorLineTop { get; set; }
+            string SeparatorLineBottom { get; set; }
         }
 
         class SmartConfig : IWordWrappingConfig, IViewportConfig, IPaddingConfig, INavConfig, IAffixConfig, IBreadcrumbConfig, IViewConfig_Writeable
@@ -78,32 +84,35 @@ namespace IngameScript
             public int LineHeight { get; set; }
 
             public char PaddingChar { get; set; } = ' ';
-            public int PaddingLeft { get; set; } = 4;
+            public int PaddingLeft { get; set; } = 0;
+            public int PaddingLeft_FirstLine { get; set; }
 
             public string PathSeparator { get; set; } = "›";
+            public string SeparatorLineTop { get; set; }
+            public string SeparatorLineBottom { get; set; }
 
             public char SelectionMarker { get; set; } = '›';
 
-            public Affix Prefixes_Unselected = new Affix()
+            public Affix Prefixes_Unselected { get; set; } = new Affix()
             {
                 Element = " ",
                 Command = "·",
                 Group = "·"
             };
 
-            public Affix Suffixes_Unselected = new Affix()
+            public Affix Suffixes_Unselected { get; set; } = new Affix()
             {
                 Element = "",
                 Command = "",
                 Group = "»"
             };
-            public Affix Prefixes_Selected = new Affix()
+            public Affix Prefixes_Selected { get; set; } = new Affix()
             {
                 Element = " ",
                 Command = "•",
                 Group = "•"
             };
-            public Affix Suffixes_Selected = new Affix()
+            public Affix Suffixes_Selected { get; set; } = new Affix()
             {
                 Element = "",
                 Command = "",

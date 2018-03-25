@@ -38,13 +38,13 @@ namespace IngameScript
                 _source = source;
             }
 
-            public bool SetVerticalOffset(int value)
+            public bool SetVerticalOffset(int value, bool redraw = true)
             {
                 if (value == _verticalOffset || value < 0 || value + _config.LineHeight > LineInfo.Count)
                     return false;
 
                 _verticalOffset = value;
-                Get_Process_Redraw();
+                if (redraw) Get_Process_Redraw();
                 return true;
             }
 

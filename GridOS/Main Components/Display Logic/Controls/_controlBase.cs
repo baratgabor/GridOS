@@ -72,7 +72,7 @@ namespace IngameScript
             int VerticalOffset { get; }
             int LineHeight { get; }
             List<LineInfo> LineInfo { get; }
-            bool SetVerticalOffset(int value);
+            bool SetVerticalOffset(int value, bool redraw = true);
         }
 
         // Yeah, ugly

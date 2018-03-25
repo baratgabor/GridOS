@@ -16,8 +16,8 @@ using VRageMath;
 
 namespace IngameScript
 {
-	partial class Program
-	{
+    partial class Program
+    {
         /// <summary>
         /// Adds a defined padding in front of all new lines in the string or StringBuilder.
         /// </summary>
@@ -25,9 +25,12 @@ namespace IngameScript
         {
             protected StringBuilder _builder = new StringBuilder();
             protected int _paddingLeft;
+            protected int _paddingLeft_FirstLine;
             protected char _paddingChar;
             protected string _paddingString;
             protected IPaddingConfig _config;
+
+            protected string _paddingString_FirstLine;
 
             public PadAllLines(IPaddingConfig config)
             {
@@ -46,7 +49,7 @@ namespace IngameScript
 
                 if (_config.PaddingLeft == 0) return output.Append(input);
 
-                if (_config.PaddingChar != _paddingChar || _config.PaddingLeft != _paddingLeft)
+                if (_config.PaddingChar != _paddingChar || _config.PaddingLeft != _paddingLeft || _config.PaddingLeft_FirstLine != _paddingLeft_FirstLine)
                     UpdatePaddingString();
 
                 return AddPaddingToAllNewline(input, output);
@@ -54,17 +57,32 @@ namespace IngameScript
 
             protected StringBuilder AddPaddingToAllNewline(string input, StringBuilder output)
             {
+                string paddingString = "";
+
                 for (int nextNewline = 0, prevNewline = 0; nextNewline != -1;)
                 {
                     nextNewline = input.IndexOf(Environment.NewLine, nextNewline);
                     if (nextNewline != -1)
                     {
+                        if (prevNewline == 0)
+                            paddingString = _paddingString_FirstLine;
+                        else
+                            paddingString = _paddingString;
+
                         nextNewline += Environment.NewLine.Length; // Don't include newline when we copy
-                        output.Append(_paddingString + input.Substring(prevNewline, nextNewline - prevNewline));
+                        output.Append(paddingString + input.Substring(prevNewline, nextNewline - prevNewline));
                         prevNewline = nextNewline;
                     }
                     // Add rest of string if no more newlines found
-                    else output.Append(_paddingString + input.Substring(prevNewline, input.Length - prevNewline));
+                    else
+                    {
+                        if (prevNewline == 0)
+                            paddingString = _paddingString_FirstLine;
+                        else
+                            paddingString = _paddingString;
+
+                        output.Append(paddingString + input.Substring(prevNewline, input.Length - prevNewline));
+                    }
                 }
 
                 return output;
@@ -74,7 +92,10 @@ namespace IngameScript
             {
                 _paddingChar = _config.PaddingChar;
                 _paddingLeft = _config.PaddingLeft;
-                _paddingString = new String(_paddingChar, _paddingLeft);
+                _paddingLeft_FirstLine = _config.PaddingLeft_FirstLine;
+
+                _paddingString = new string(_paddingChar, _paddingLeft);
+                _paddingString_FirstLine = new string(_paddingChar, _paddingLeft_FirstLine);
             }
         }
     }

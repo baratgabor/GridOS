@@ -18,7 +18,6 @@ namespace IngameScript
 {
     partial class Program
     {
-
         interface IView
         {
             DisplayView AddControl(IControl control);
@@ -32,8 +31,6 @@ namespace IngameScript
         /// </summary>
         class DisplayView : IView
         {
-            protected int iii = 0;
-
             protected IMyTextPanel _target;
             protected IMyGridProgramRuntimeInfo _runtime;
             protected string _targetFont = "Debug";
@@ -48,9 +45,6 @@ namespace IngameScript
 
             protected const char _lineSeparatorCharTop = '.';
             protected const char _lineSeparatorCharBottom = '˙';
-            protected string _separatorLineTop;
-            protected string _separatorLineBottom;
-
             protected IViewConfig_Writeable _config;
 
             public DisplayView(IMyTextPanel target, IViewConfig_Writeable fillable_config, IMyGridProgramRuntimeInfo runtime)
@@ -63,8 +57,11 @@ namespace IngameScript
                 _config.LineLength = _maxLineWidth = DetermineMaxLineLength();
                 _config.LineHeight = _maxLineNum;
 
-                _separatorLineTop = new String(_lineSeparatorCharTop, _maxLineWidth * 2);
-                _separatorLineBottom = new String(_lineSeparatorCharBottom, _maxLineWidth * 2);
+                _config.PaddingChar = ' ';
+                _config.PaddingLeft = 5;
+                _config.PaddingLeft_FirstLine = 3;
+                _config.SeparatorLineTop = new String(_lineSeparatorCharTop, _maxLineWidth * 2);
+                _config.SeparatorLineBottom = new String(_lineSeparatorCharBottom, _maxLineWidth * 2);
             }
 
             public DisplayView AddControl(IControl control)
@@ -118,7 +115,6 @@ namespace IngameScript
 
                 // TODO: possibly implement caching, by using _controls_cache, if that improves the runtime due to eliminating one reference; but probably the diff. is negligible
                 _buffer.Clear();
-                _buffer.Append("   " + iii + Environment.NewLine);
                 //_controls_BufferStartPositions.Clear();
                 for (int i = 0, pos = 0; i < _controls.Count; i++)
                 {
@@ -127,7 +123,6 @@ namespace IngameScript
                     //pos += _buffer.Length;
                 }             
 
-                iii++;
                 // TODO: Should we do line number checks on the control outputs?
                 // MaxLineNum is textpanel settings dependent, so this View will decide on that
                 _target.WritePublicText(_buffer.ToString());

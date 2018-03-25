@@ -63,6 +63,8 @@ namespace IngameScript
                     .AddControl(_breadcrumb)
                     .AddControl(_navigation);
 
+                // TODO: The order of subscription here matters; refactor it
+                _viewModel.PathChanged += _navigation.OnPathChanged;
                 _viewModel.PathChanged += _breadcrumb.OnPathChanged;
                 _viewModel.PathChanged += _menuBuilder.OnPathChanged;
                 _viewModel.ContentChanged += _menuBuilder.OnContentChanged;

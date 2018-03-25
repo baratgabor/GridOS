@@ -26,7 +26,7 @@ namespace IngameScript
         {
             protected StringBuilder _buffer = new StringBuilder();
             protected string _padding = String.Empty;
-            protected string _pathSeparator = "›";
+            protected IBreadcrumbConfig _config;
 
             public event Action<StringBuilder> RedrawRequired;
 
@@ -34,7 +34,7 @@ namespace IngameScript
             {
                 // TODO: consider whether this needs to be updated when config changes
                 _padding = new String(config.PaddingChar, config.PaddingLeft);
-                _pathSeparator = config.PathSeparator;
+                _config = config;
             }
 
             public StringBuilder GetContent()
@@ -47,10 +47,12 @@ namespace IngameScript
                 var newPath = obj.NavigationPath;
 
                 _buffer.Clear();
+                _buffer.Append(_config.SeparatorLineTop + Environment.NewLine);
                 for (int i = 0; i < newPath.Count; i++)
                 {
-                    _buffer.Append((i == 0 ? _padding : " ") + newPath[i] + (i < newPath.Count - 1 ? " " + _pathSeparator : ""));
+                    _buffer.Append((i == 0 ? _padding : " ") + newPath[i] + (i < newPath.Count - 1 ? " " + _config.PathSeparator : ""));
                 }
+                _buffer.Append(Environment.NewLine + _config.SeparatorLineBottom);
 
                 // Doesn't invoke RedrawRequired, because other component does that pertaining to path/folder change.
                 // But this should be corrected instead with some aggregation mechanism (to avoid multiple consequent redraws).

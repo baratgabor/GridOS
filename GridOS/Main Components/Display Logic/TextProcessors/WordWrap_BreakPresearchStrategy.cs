@@ -28,24 +28,18 @@ namespace IngameScript
             protected StringBuilder _outputBuffer = new StringBuilder();
             protected IWordWrappingConfig _config;
 
-            protected MyGridProgram _program;
-
-            public WordWrap_BreakPresearchStrategy(IWordWrappingConfig config /*, MyGridProgram program*/)
+            public WordWrap_BreakPresearchStrategy(IWordWrappingConfig config)
             {
                 _config = config;
-                _program = null; //program;
             }
 
             public StringBuilder Process(string input, ProcessingArgs args)
-            {              
+            {
                 return Process(input, args, _outputBuffer, true);
             }
 
             public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
             {
-                //
-                _program?.Echo("Processing: " + input);
-
                 if (clearOutput == true)
                     output.Clear();
 
@@ -62,15 +56,47 @@ namespace IngameScript
 
             protected IEnumerable<int> FindNextLineBreak(string input, int lineLength)
             {
-                for (int currentPos = 0, lastBreakPos = 0, lastGoodPos = 0; currentPos != -1; currentPos = input.IndexOfAny(_config.Terminators, currentPos))
+                bool checkNativeNewLines = true;
+                for (int currentPos = 0, lastBreakPos = 0, lastGoodPos = 0; ; currentPos = input.IndexOfAny(_config.Terminators, currentPos))
                 {
+                    // Found the point where the next breakable place exceeds line length
                     if (currentPos != -1 && currentPos >= lastBreakPos + lineLength)
                     {
                         lastBreakPos = lastGoodPos;
                         yield return lastGoodPos + 1; // +1 to put terminator at the end of line, instead of at the beginning of next line
+                        checkNativeNewLines = true;
                     }
+                    // No more breakable points...
+                    else if (currentPos == -1)
+                    {
+                        // ... but, IF last word of string exceeds line length, we need to break once more
+                        if (lastBreakPos + lineLength < input.Length)
+                        {
+                            lastBreakPos = lastGoodPos;
+                            yield return lastGoodPos + 1; // +1 to put terminator at the end of line, instead of at the beginning of next line
+                            checkNativeNewLines = true;
+                        }
+                        break;
+                    }
+
+                    // Special case for new lines already existing in the input text:
+                    // If such a new line is found in the next line range
+                    // (i.e. from last line break to last line break + line length)
+                    // then jump to that position and start counting our line from there.
+                    if (checkNativeNewLines)
+                    {
+                        int nativeNewlinePos = input.IndexOf(Environment.NewLine, lastBreakPos);
+                        if (nativeNewlinePos == -1)
+                            checkNativeNewLines = false; // If fails once, don't repeat IndexOf() checking until the next line
+                        else if (nativeNewlinePos < lastBreakPos + lineLength && nativeNewlinePos + 2 < input.Length)
+                        {
+                            currentPos = nativeNewlinePos + Environment.NewLine.Length;
+                            lastBreakPos = nativeNewlinePos + Environment.NewLine.Length;
+                        }
+                    }
+
                     lastGoodPos = currentPos;
-                    if (currentPos != -1) currentPos++; // Skips space; otherwise IndexOf() returns the same value over and over again.
+                    if (currentPos != -1) currentPos++; // Skips space; otherwise IndexOf() returns the same value over and over again.}
                 }
             }
         }
