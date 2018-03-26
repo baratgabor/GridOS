@@ -47,13 +47,14 @@ namespace IngameScript
                 _breadcrumb = new Breadcrumb(config);
 
                 _menuBuilder = new MenuContentBuilder(config);
+                _menuBuilder.ContentSource = () => _viewModel.Content;
                 _menuBuilder
                     .AddProcessor(new WordWrap_BreakPresearchStrategy(config))
                     .AddProcessor(new AddPrefix())
                     .AddProcessor(new AddSuffix())
                     .AddProcessor(new PadAllLines(config))
                     .AddProcessor(new LineInfoExtractor(config));
-
+                
                 _navigation = new NavigationFrame(config,
                     new ScrollableFrame(config,
                         _menuBuilder));
@@ -66,7 +67,7 @@ namespace IngameScript
                 // TODO: The order of subscription here matters; refactor it
                 _viewModel.PathChanged += _navigation.OnPathChanged;
                 _viewModel.PathChanged += _breadcrumb.OnPathChanged;
-                _viewModel.PathChanged += _menuBuilder.OnPathChanged;
+                //_viewModel.PathChanged += _menuBuilder.OnPathChanged; // _navigation handles all now
                 _viewModel.ContentChanged += _menuBuilder.OnContentChanged;
                 _viewModel.ElementChanged += _menuBuilder.OnElementChanged;
                 _navigation.ItemSelected += _viewModel.Execute;

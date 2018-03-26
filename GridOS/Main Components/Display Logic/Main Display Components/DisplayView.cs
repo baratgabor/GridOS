@@ -98,13 +98,8 @@ namespace IngameScript
 
             private int DetermineMaxLineLength()
             {
-                // Proportional to 42 characters at 1.0 font size
-                return (int)Math.Truncate(42 / _targetFontSize);
-            }
-
-            private void UpdateScreen(string formattedString)
-            {
-                //_target.WritePublicText($"{displayHeader}{Environment.NewLine}{_path}{Environment.NewLine}{_separatorLineBottom}{Environment.NewLine}{formattedString}");
+                // Proportional to X characters at 1.0 font size
+                return (int)Math.Truncate(40 / _targetFontSize);
             }
 
             public void Redraw(StringBuilder content)

@@ -93,10 +93,35 @@ namespace IngameScript
                 return true;
             }
 
-            internal void OnPathChanged(ContentChangeInfo obj)
+
+            // TODO: Factor out this hack; think about some more flexible flow control.
+            // This hack causes double-processing of content here in NavigationFrame:
+            // 1) GetContent(true) will process content (with selection 0) without drawing
+            // 2) Then, if _selectedLine changes, AdjustVerticalOffset will cause a re-process
+            public void OnPathChanged(ContentChangeInfo obj)
             {
                 _selectedLine = 0;
                 _scrollableBox.SetVerticalOffset(0, false);
+                // Pull new content from bottom of chain and process - this refreshes the LineInfo we need below
+                GetContent(true);
+
+                if (obj.PreviousContext != null)
+                {
+                    var lineInfo = _scrollableBox.LineInfo.FirstOrDefault(x => x.ParentDisplayElement == obj.PreviousContext);
+                    if (!object.Equals(lineInfo, default(LineInfo)))
+                    {
+                        _selectedLine = _scrollableBox.LineInfo.IndexOf(lineInfo);
+                    }
+                }
+
+                // If selected line changed, try adjusting offset (which will redraw if offset is adjusted)
+                bool redrawOccurred = false;
+                if (_selectedLine != 0)
+                    redrawOccurred = AdjustVerticalOffset(_selectedLine);
+
+                // If selectedline didn't change, or it did, but no adjustment was needed, we need a manual redraw
+                if (_selectedLine == 0 || !redrawOccurred)
+                    Redraw();
             }
 
             protected void AdjustSelectedLineAndDraw(int newSelectedLine)
@@ -124,6 +149,7 @@ namespace IngameScript
             {
                 int vo = _scrollableBox.VerticalOffset;
                 int lh = _scrollableBox.LineHeight;
+                int max_scroll = _scrollableBox.LineNumber - lh;
 
                 if (selectedLine < vo)
                 {
@@ -134,7 +160,7 @@ namespace IngameScript
                 else if (selectedLine + 2 > vo + lh && vo + lh < _scrollableBox.LineNumber)
                 {
                     _selectedLine = selectedLine;
-                    _scrollableBox.SetVerticalOffset(selectedLine + 2 - lh);
+                    _scrollableBox.SetVerticalOffset((selectedLine + 2 - lh > max_scroll ? max_scroll : selectedLine + 2 - lh));
                     return true;
                 }
 
@@ -146,9 +172,7 @@ namespace IngameScript
                 _buffer.Clear();
                 _buffer.Append(input);
 
-                // Needed after moving to a different "folder"?
                 AddSelectionMarker(_selectedLine);
-                //Redraw();
 
                 return _buffer;
             }

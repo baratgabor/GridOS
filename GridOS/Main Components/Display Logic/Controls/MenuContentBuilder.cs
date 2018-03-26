@@ -25,6 +25,7 @@ namespace IngameScript
         {
             public List<LineInfo> LineInfo => _lineInfo;
             public event Action<StringBuilder> RedrawRequired;
+            public Func<List<IDisplayElement>> ContentSource;
 
             protected List<IDisplayElement> _menuItems;
             protected List<ITextProcessor> _pipeline = new List<ITextProcessor>();
@@ -71,14 +72,15 @@ namespace IngameScript
                 return this;
             }
 
+            protected void Add_Process_NoDraw(List<IDisplayElement> content)
+            {
+                _menuItems = content;
+                Process();
+            }
+
             internal void OnElementChanged(IDisplayElement obj)
             {
                 Process_Redraw();
-            }
-
-            internal void OnPathChanged(ContentChangeInfo obj)
-            {
-                AddContent(obj.Content);
             }
 
             protected void Process_Redraw()
@@ -98,8 +100,17 @@ namespace IngameScript
                 _pipeline.Clear();
             }
 
-            public StringBuilder GetContent()
+            public StringBuilder GetContent(bool FlushCache = false)
             {
+                if (FlushCache)
+                {
+                    if (ContentSource == null)
+                        throw new Exception("Content pull request failed: no content source set.");
+
+                    // Buffer updated with freshly pulled/processed content
+                    Add_Process_NoDraw(ContentSource.Invoke());
+                }
+
                 return _buffer;
             }
 

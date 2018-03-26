@@ -37,8 +37,9 @@ namespace IngameScript
                 _config = config;
             }
 
-            public StringBuilder GetContent()
+            public StringBuilder GetContent(bool FlushCache = false)
             {
+                // Need to ignore flush request here, since we don't have any means of pulling new data
                 return _buffer;
             }
 

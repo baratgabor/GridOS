@@ -21,7 +21,7 @@ namespace IngameScript
         interface IControl
         {
             event Action<StringBuilder> RedrawRequired;
-            StringBuilder GetContent();
+            StringBuilder GetContent(bool FlushCache = false);
         }
 
         abstract class Frame : IControl
@@ -37,7 +37,7 @@ namespace IngameScript
                 _inner.RedrawRequired += Process_Redraw;
             }
 
-            protected void Redraw()
+            protected virtual void Redraw()
             {
                 RedrawRequired?.Invoke(_buffer);
             }
@@ -55,12 +55,15 @@ namespace IngameScript
             protected void Process_Redraw(StringBuilder input)
             {
                 Process(input);
-                RedrawRequired?.Invoke(_buffer);
+                Redraw();
             }
 
-            public StringBuilder GetContent()
+            public StringBuilder GetContent(bool FlushCache = false)
             {
-                return _buffer;
+                if (!FlushCache)
+                    return _buffer;
+
+                return Process(_inner.GetContent(true));
             }
 
             protected abstract StringBuilder Process(StringBuilder input);

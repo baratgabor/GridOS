@@ -18,14 +18,14 @@ namespace IngameScript
 {
 	partial class Program
 	{
+        // TODO: Implement case for words longer than a line length without any breakable part
         /// <summary>
         /// Wraps the provided string or StringBuilder according to the settings given.
         /// Break-presearch strategy: proactively searches for first breakable character, copies substrings instead of char array iteration.
         /// </summary>
         class WordWrap_BreakPresearchStrategy : ITextProcessor
         {
-            protected StringBuilder _inputBuffer = new StringBuilder();
-            protected StringBuilder _outputBuffer = new StringBuilder();
+            protected StringBuilder _buffer = new StringBuilder();
             protected IWordWrappingConfig _config;
 
             public WordWrap_BreakPresearchStrategy(IWordWrappingConfig config)
@@ -35,7 +35,7 @@ namespace IngameScript
 
             public StringBuilder Process(string input, ProcessingArgs args)
             {
-                return Process(input, args, _outputBuffer, true);
+                return Process(input, args, _buffer, true);
             }
 
             public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
@@ -59,36 +59,31 @@ namespace IngameScript
                 bool checkNativeNewLines = true;
                 for (int currentPos = 0, lastBreakPos = 0, lastGoodPos = 0; ; currentPos = input.IndexOfAny(_config.Terminators, currentPos))
                 {
-                    // Found the point where the next breakable place exceeds line length
-                    if (currentPos != -1 && currentPos >= lastBreakPos + lineLength)
+                    // Yield a breakpoint at the last valid breakable point, in two cases:
+                    // 1) Next breakable point would exceed line length
+                    // 2) No next breakable point, but last word would exceed line length
+                    if ((currentPos != -1 && currentPos >= lastBreakPos + lineLength) ||
+                        (currentPos == -1 && lastBreakPos + lineLength < input.Length))
                     {
                         lastBreakPos = lastGoodPos;
                         yield return lastGoodPos + 1; // +1 to put terminator at the end of line, instead of at the beginning of next line
                         checkNativeNewLines = true;
                     }
-                    // No more breakable points...
-                    else if (currentPos == -1)
-                    {
-                        // ... but, IF last word of string exceeds line length, we need to break once more
-                        if (lastBreakPos + lineLength < input.Length)
-                        {
-                            lastBreakPos = lastGoodPos;
-                            yield return lastGoodPos + 1; // +1 to put terminator at the end of line, instead of at the beginning of next line
-                            checkNativeNewLines = true;
-                        }
+                    // Break out if there are no more breakable points
+                    if (currentPos == -1)
                         break;
-                    }
 
                     // Special case for new lines already existing in the input text:
-                    // If such a new line is found in the next line range
-                    // (i.e. from last line break to last line break + line length)
+                    // If such a new line is found in the range of the current line
+                    // (i.e. from last line break to (last line break + line length) OR until end of string)
                     // then jump to that position and start counting our line from there.
                     if (checkNativeNewLines)
                     {
-                        int nativeNewlinePos = input.IndexOf(Environment.NewLine, lastBreakPos);
+                        int nativeNewlinePos = input.IndexOf(Environment.NewLine, lastBreakPos, (lineLength < input.Length - lastBreakPos ? lineLength : input.Length - lastBreakPos));
                         if (nativeNewlinePos == -1)
                             checkNativeNewLines = false; // If fails once, don't repeat IndexOf() checking until the next line
-                        else if (nativeNewlinePos < lastBreakPos + lineLength && nativeNewlinePos + 2 < input.Length)
+                        // Exclude newlines at the end of string 
+                        else if (nativeNewlinePos + Environment.NewLine.Length < input.Length)
                         {
                             currentPos = nativeNewlinePos + Environment.NewLine.Length;
                             lastBreakPos = nativeNewlinePos + Environment.NewLine.Length;
@@ -96,7 +91,7 @@ namespace IngameScript
                     }
 
                     lastGoodPos = currentPos;
-                    if (currentPos != -1) currentPos++; // Skips space; otherwise IndexOf() returns the same value over and over again.}
+                    if (currentPos != -1) currentPos++; // Skips matched char; otherwise IndexOf() returns the same value over and over again.}
                 }
             }
         }

@@ -31,7 +31,7 @@ namespace IngameScript
                 _runtime = runtime;
             }
 
-            public StringBuilder GetContent()
+            public StringBuilder GetContent(bool FlushCache = false)
             {
                 _buffer.Clear();
                 _buffer.Append($"{Environment.NewLine}  ::GridOS:: {_spinner.Get()} LRT: {_runtime.LastRunTimeMs:G3}ms");
