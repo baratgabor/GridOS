@@ -18,6 +18,8 @@ namespace IngameScript
 {
     partial class Program
     {
+        // TODO: Structure properly, clean up, expand
+
         /// <summary>
         /// Built-in menu nodes for GridOS
         /// </summary>

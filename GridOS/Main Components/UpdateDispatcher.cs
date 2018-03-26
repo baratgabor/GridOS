@@ -65,7 +65,6 @@ namespace IngameScript
             {
                 var ModuleListKeyValue = _moduleLists.FirstOrDefault(moduleList => moduleList.Value.Contains(module));
 
-                // If module was found in a list, remove it from the list
                 if (ModuleListKeyValue.Equals(default(KeyValuePair<UpdateType, List<IModule>>)))
                 {
                     Remove(module, ModuleListKeyValue.Value, ModuleListKeyValue.Key);
@@ -81,7 +80,6 @@ namespace IngameScript
                 if (moduleList.Count == 0)
                     _moduleLists.Remove(moduleListKey);
 
-                // TODO: If module is permanently removed, NEED TO PROPERLY DISPOSE ALL MODULE AND MODULE MEMBER REFERENCES FROM MENU SYSTEM TOO
                 UpdateMasterUpdateFrequency();
             }
 

@@ -17,6 +17,10 @@ namespace IngameScript
 {
     partial class Program
     {
+
+        // Don't use; obsolete/stub
+        // TODO: Check if there is a good use case elsewhere of the property validation mechanism below.
+
         class DisplayElementMenuHandler
         {
             private Flush _flush = Flush.All; // Cache flushing controller flags

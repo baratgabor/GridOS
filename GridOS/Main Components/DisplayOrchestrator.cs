@@ -27,7 +27,7 @@ namespace IngameScript
             // TODO: Now that the menu system is dynamic... need to think about whether we need to dispose stuff when an element is removed.
             // What to do if non-empty element is removed? Remove all children, or put them somewhere else? How to react if we're displaying elements below a group node that is removed?
 
-            // Root group displayed by default, parent of all other groups
+            // Root group displayed by default, parent of all other elements/groups
             private IDisplayGroup _displayRoot = new DisplayGroup("Main");
 
             private List<IMyTextPanel> _registeredTextPanels = new List<IMyTextPanel>();
@@ -61,7 +61,8 @@ namespace IngameScript
                         _commandDispatcher,
                         config,
                         new DisplayView(
-                            textPanel, config,
+                            textPanel,
+                            config,
                             _program.Runtime),
                         new DisplayViewModel(
                             _displayRoot),
@@ -88,7 +89,6 @@ namespace IngameScript
                 _registeredTextPanels.Remove(textPanel);
             }
 
-            // TODO: Totally not good... move the responsibility of dealing with display elements directly into this class
             public void RegisterDisplayElement(IDisplayElement element)
             {
                 _displayRoot.AddChild(element);

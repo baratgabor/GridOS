@@ -19,8 +19,8 @@ namespace IngameScript
     partial class Program
     {
         /// <summary>
-        /// Bundles a View and a ViewModel instance, and sets up their interaction.
-        /// Receives commands and routes them to methods exposed by ViewModel.
+        /// Knows how to instantiate and wire together the full stack of classes needed for a working view system.
+        /// Doesn't receive inputs directly, but sets up static routing between command dispatcher and nagivation handler.
         /// </summary>
         class DisplayController
         {
@@ -65,8 +65,8 @@ namespace IngameScript
                     .AddControl(_navigation);
 
                 // TODO: The order of subscription here matters; refactor it
-                _viewModel.PathChanged += _navigation.OnPathChanged;
                 _viewModel.PathChanged += _breadcrumb.OnPathChanged;
+                _viewModel.PathChanged += _navigation.OnPathChanged;
                 //_viewModel.PathChanged += _menuBuilder.OnPathChanged; // _navigation handles all now
                 _viewModel.ContentChanged += _menuBuilder.OnContentChanged;
                 _viewModel.ElementChanged += _menuBuilder.OnElementChanged;

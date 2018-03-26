@@ -18,31 +18,12 @@ namespace IngameScript
 {
     partial class Program
     {
-
-        interface IModuleRegistrator
-        {
-            bool TryRegisterModule();
-        }
-
-        interface IRunHandler
-        {
-            void Execute(UpdateType updateType, string argument);
-        } // connect this to a private event? essentially make them subscribe?
-
-        class Diagnostics
-        {
-            TimeSpan ElapsedGameTime = new TimeSpan();
-
-        }
-
         /// <summary>
         /// Modular multitasking and command handling system that can register and run multiple code modules.
         /// Individual modules can contain components (via implementing the appropriate interface) for publishing commands and/or subscribing to recurring automatic execusion.
         /// </summary>
         class GridOS
         {
-            // TODO: implement proper logging with a cross cutting concern pattern; same with try...catch on components and modules
-
             private MyGridProgram _p;
             private Action<string> _echo;
             private IMyGridProgramRuntimeInfo _runtime;
@@ -92,7 +73,6 @@ namespace IngameScript
 
                 if (module is IUpdateSubscriber)
                 {
-                    // TODO: we maintain the list of modules here and in this class too... think about another solution.
                     _updateDispatcherAndController.Add(module as IUpdateSubscriber);
                 }
 
@@ -133,6 +113,7 @@ namespace IngameScript
                 _echo($"Last Execusion Time: {_runtime.LastRunTimeMs:G3}");
                 _echo($"Average Execusion Time: {_avgExecTime:G3}");
 
+                // TODO: Structure exception handling properly
                 _updateDispatcherAndController.Dispatch(updateType);
                 try
                 {

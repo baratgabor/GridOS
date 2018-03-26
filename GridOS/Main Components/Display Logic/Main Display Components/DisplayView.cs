@@ -18,14 +18,6 @@ namespace IngameScript
 {
     partial class Program
     {
-        interface IView
-        {
-            DisplayView AddControl(IControl control);
-            void RemoveControl(IControl control);
-            void ClearControls();
-            void Redraw(StringBuilder content);
-        }
-
         /// <summary>
         /// Sets up a TextPanel with the appropriate settings, and fills/refreshes it with the content of the Controls added.
         /// </summary>

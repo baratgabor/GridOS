@@ -18,6 +18,22 @@ namespace IngameScript
 {
 	partial class Program
 	{
+        // TODO: Create proper structure for everything in this file
+
+        struct ContentChangeInfo
+        {
+            public readonly List<IDisplayElement> Content;
+            public readonly List<string> NavigationPath;
+            public readonly IDisplayGroup PreviousContext;
+
+            public ContentChangeInfo(List<IDisplayElement> content, List<string> navigationPath, IDisplayGroup previousContext)
+            {
+                Content = content;
+                NavigationPath = navigationPath;
+                PreviousContext = previousContext;
+            }
+        }
+
         class ProcessingArgs
         {
             public string Prefix { get; set; }

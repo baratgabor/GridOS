@@ -18,6 +18,18 @@ namespace IngameScript
 {
     partial class Program
     {
+
+        // TODO: Move these interfaces into more appropriate locations, preferably close to the implementations
+
+        interface IView
+        {
+            DisplayView AddControl(IControl control);
+            void RemoveControl(IControl control);
+            void ClearControls();
+            void Redraw(StringBuilder content);
+        }
+
+
         interface IModule
         {
             string ModuleDisplayName { get; }
@@ -51,14 +63,6 @@ namespace IngameScript
             ICommandDispatcher AddCommand_OverwriteExisting(CommandItem command);
             void RemoveCommands(List<CommandItem> commands);
             void TryDispatch(string commandName);
-        }
-
-        interface IDisplayComponent
-        {
-            string Content { get; }
-            void ProcessCommand(NavigationCommand command);
-            void RefreshContent();
-            event Action<IDisplayComponent> ContentChanged;
         }
 
         public interface IDisplayElement

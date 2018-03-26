@@ -18,23 +18,8 @@ namespace IngameScript
 {
     partial class Program
     {
-        // TODO: Move this struct to somewhere proper
-        struct ContentChangeInfo
-        {
-            public readonly List<IDisplayElement> Content;
-            public readonly List<string> NavigationPath;
-            public readonly IDisplayGroup PreviousContext;
-
-            public ContentChangeInfo(List<IDisplayElement> content, List<string> navigationPath, IDisplayGroup previousContext)
-            {
-                Content = content;
-                NavigationPath = navigationPath;
-                PreviousContext = previousContext;
-            }
-        }
-
         /// <summary>
-        /// Implements model travelsal logic, maintains corresponding state, and shapes current model view into a flat string. 
+        /// Implements model travelsal logic, maintains model view context/state, and communicates model updates via event invocations
         /// </summary>
         class DisplayViewModel
         {
