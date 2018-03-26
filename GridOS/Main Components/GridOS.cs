@@ -71,7 +71,7 @@ namespace IngameScript
 
                 _commandDispatcher = new CommandDispatcher();
                 _updateDispatcherAndController = new UpdateDispatcherAndController1(_echo, _updateFrequencyGetter, _updateFrequencySetter);
-                _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _runtime);
+                _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, p);
 
                 _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
                 _commandDispatcher.AddCommand(new CommandItem("DisableUpdates", CommandHandler_DisableUpdates));

@@ -36,12 +36,12 @@ namespace IngameScript
             private int _controllerCounter = 0;
 
             private ICommandDispatcher _commandDispatcher;
-            private IMyGridProgramRuntimeInfo _runtime;
+            private MyGridProgram _program;
 
-            public DisplayOrchestrator(ICommandDispatcher commandDispatcher, IMyGridProgramRuntimeInfo runtime)
+            public DisplayOrchestrator(ICommandDispatcher commandDispatcher, MyGridProgram program)
             {
                 _commandDispatcher = commandDispatcher;
-                _runtime = runtime;
+                _program = program;
 
                 _displayRoot.AddChild(new HelpMenu());
             }
@@ -51,14 +51,27 @@ namespace IngameScript
                 if (_registeredTextPanels.Contains(textPanel))
                     return;
 
-                _controllers.Add(
+                try
+                {
+                    var config = new SmartConfig();
+
+                    _controllers.Add(
                     new DisplayController(
                         NextControllerName(),
                         _commandDispatcher,
-                        new DisplayView(textPanel, _runtime),
-                        new DisplayViewModel(_displayRoot),
-                        _runtime)
-                );
+                        config,
+                        new DisplayView(
+                            textPanel, config,
+                            _program.Runtime),
+                        new DisplayViewModel(
+                            _displayRoot),
+                        _program)
+                    );
+                }
+                catch (Exception e)
+                {
+                    throw new Exception(e.Message + "\n" + e.StackTrace);
+                }
 
                 _registeredTextPanels.Add(textPanel);
             }
@@ -84,6 +97,11 @@ namespace IngameScript
             private string NextControllerName()
             {
                 return $"{_controllerNameTemplate}{++_controllerCounter}";
+            }
+
+            public void ClearAll()
+            {
+                _registeredTextPanels.ForEach(x => x.WritePublicText(""));
             }
         }
     }

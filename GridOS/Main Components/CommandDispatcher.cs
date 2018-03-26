@@ -25,12 +25,13 @@ namespace IngameScript
         {
             private Dictionary<string, CommandItem> _commands = new Dictionary<string, CommandItem>();
 
-            public void AddCommand(CommandItem command)
+            public ICommandDispatcher AddCommand(CommandItem command)
             {
                 if (!_commands.ContainsValue(command))
                 {
                     _commands.Add(command.CommandName, command);
                 }
+                return this;
             }
 
             public void AddCommands(List<CommandItem> commands)
@@ -47,6 +48,12 @@ namespace IngameScript
                 {
                     _commands[c.CommandName] = c;
                 }
+            }
+
+            public ICommandDispatcher AddCommand_OverwriteExisting(CommandItem command)
+            {
+                _commands[command.CommandName] = command;
+                return this;
             }
 
             public string ListCommands()
