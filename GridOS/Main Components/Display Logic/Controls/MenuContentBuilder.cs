@@ -29,7 +29,8 @@ namespace IngameScript
 
             protected List<IDisplayElement> _menuItems;
             protected List<ITextProcessor> _pipeline = new List<ITextProcessor>();
-            protected StringBuilder _buffer = new StringBuilder();
+            protected StringBuilder _menuBuffer = new StringBuilder();
+            protected StringBuilder _itemBuffer = new StringBuilder();
 
             protected IAffixConfig _config;
             protected ProcessingArgs _processingArgs = new ProcessingArgs();
@@ -43,26 +44,37 @@ namespace IngameScript
 
             public StringBuilder Process()
             {
-                _buffer.Clear();
+                _menuBuffer.Clear();
                 _lineInfo.Clear();
 
-                foreach (var e in _menuItems)
-                {
-                    _processingArgs.Prefix = _config.GetPrefixFor(e, false);
-                    _processingArgs.Suffix = _config.GetSuffixFor(e, false);
-                    _processingArgs.Element = e;
-                    _processingArgs.CurrentOutputLength = _buffer.Length;
+                if (_menuItems == null)
+                    return _menuBuffer;
 
-                    string s = e.Label;
+                for (int i = 0; i < _menuItems.Count; i++)
+                {
+                    var item = _menuItems[i];
+                    _processingArgs.Prefix = _config.GetPrefixFor(item, false);
+                    _processingArgs.Suffix = _config.GetSuffixFor(item, false);
+                    _processingArgs.Element = item;
+                    _processingArgs.CurrentOutputLength = _menuBuffer.Length;
+
+                    _itemBuffer
+                        .Clear() // Prepare item buffer for new item processing
+                        .Append(item.Label); // Set initial item value
+                    
                     foreach (var p in _pipeline)
                     {
-                        // TODO: Eliminate ToString(); use only StringBuilders
-                        s = p.Process(s, _processingArgs).ToString();
+                        // Send initial value through the chain of processors
+                        // Output is stored in the StringBuilder passed in
+                        p.Process(_itemBuffer, _processingArgs);
                     }
-                    _buffer.Append(s + Environment.NewLine);
+
+                    // Add processed item to the menu buffer
+                    // Conditionally add a newline if it's not the last item
+                    _menuBuffer.Append(_itemBuffer + (i+1 >= _menuItems.Count ? "" : Environment.NewLine));
                 }
-                _buffer.Remove(_buffer.Length - 2, 2); // Remove last '\r\n' newline
-                return _buffer;
+
+                return _menuBuffer;
             }
 
             public MenuContentBuilder AddContent(List<IDisplayElement> content)
@@ -86,7 +98,7 @@ namespace IngameScript
             protected void Process_Redraw()
             {
                 Process();
-                RedrawRequired?.Invoke(_buffer);
+                RedrawRequired?.Invoke(_menuBuffer);
             }
 
             public MenuContentBuilder AddProcessor(ITextProcessor processor)
@@ -111,7 +123,7 @@ namespace IngameScript
                     Add_Process_NoDraw(ContentSource.Invoke());
                 }
 
-                return _buffer;
+                return _menuBuffer;
             }
 
             public void OnContentChanged(List<IDisplayElement> elements)

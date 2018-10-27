@@ -18,8 +18,10 @@ namespace IngameScript
 {
 	partial class Program
 	{
+        // TODO: In dire need of refactor. This class' Process() method actually doesn't do what it seems to promise, but instead it does side effects: it fills the passed in 'args' ProcessingArgs instance
+
         /// <summary>
-        /// This text processor doesn't process anything. It extracts data needed for higher level components, with the help of the passed "args". Welcome to the Wild West.
+        /// Extracts data needed for higher level components.
         /// </summary>
         class LineInfoExtractor : ITextProcessor
         {
@@ -55,6 +57,11 @@ namespace IngameScript
                 }
 
                 return output;
+            }
+
+            public void Process(StringBuilder inputOutput, ProcessingArgs args)
+            {
+                Process(inputOutput.ToString(), args, inputOutput);
             }
         }
     }

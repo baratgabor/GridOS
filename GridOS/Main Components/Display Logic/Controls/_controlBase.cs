@@ -47,7 +47,7 @@ namespace IngameScript
                 _buffer = Process(_inner.GetContent());
             }
 
-            public void Get_Process_Redraw()
+            public void Fetch_Process_Redraw()
             {
                 Process_Redraw(_inner.GetContent());
             }

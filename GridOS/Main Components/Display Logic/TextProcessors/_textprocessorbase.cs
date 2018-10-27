@@ -22,8 +22,9 @@ namespace IngameScript
         {
             StringBuilder Process(string input, ProcessingArgs args);
             StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false);
-            // Implement this later; needs IndexOfAny implementation for StringBuilder:
-            // StringBuilder Process(StringBuilder input, StringBuilder output, bool clearOutput = false);
+
+            void Process(StringBuilder inputOutput, ProcessingArgs args);
+            //void Process(StringBuilder input, ProcessingArgs args, StringBuilder output, bool clearOutput = false);
         }
     }
 }

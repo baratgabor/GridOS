@@ -49,10 +49,15 @@ namespace IngameScript
 
                 if (_config.PaddingLeft == 0) return output.Append(input);
 
-                if (_config.PaddingChar != _paddingChar || _config.PaddingLeft != _paddingLeft || _config.PaddingLeft_FirstLine != _paddingLeft_FirstLine)
+                if (PaddingChanged())
                     UpdatePaddingString();
 
                 return AddPaddingToAllNewline(input, output);
+            }
+
+            public void Process(StringBuilder inputOutput, ProcessingArgs args)
+            {
+                Process(inputOutput.ToString(), args, inputOutput, true);
             }
 
             protected StringBuilder AddPaddingToAllNewline(string input, StringBuilder output)
@@ -88,7 +93,7 @@ namespace IngameScript
                 return output;
             }
 
-            private void UpdatePaddingString()
+            protected void UpdatePaddingString()
             {
                 _paddingChar = _config.PaddingChar;
                 _paddingLeft = _config.PaddingLeft;
@@ -97,6 +102,11 @@ namespace IngameScript
                 _paddingString = new string(_paddingChar, _paddingLeft);
                 _paddingString_FirstLine = new string(_paddingChar, _paddingLeft_FirstLine);
             }
+
+            protected bool PaddingChanged()
+                => (_config.PaddingChar != _paddingChar
+                 || _config.PaddingLeft != _paddingLeft
+                 || _config.PaddingLeft_FirstLine != _paddingLeft_FirstLine);
         }
     }
 }

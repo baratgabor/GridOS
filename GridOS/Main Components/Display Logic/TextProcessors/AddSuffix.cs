@@ -38,6 +38,12 @@ namespace IngameScript
                 output.Append(input + (args.Suffix.Length > 0 ? " " : "") + args.Suffix);
                 return output;
             }
+
+            public void Process(StringBuilder inputOutput, ProcessingArgs args)
+            {
+                if (args.Suffix.Length > 0)
+                    inputOutput.Append(" " + args.Suffix);
+            }
         }
     }
 }

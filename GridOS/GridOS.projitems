@@ -39,6 +39,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\CommandItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Interfaces.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pipelining\Pipelining.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\ExtensionMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\ConverterMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\ProgressIndicator.cs" />
   </ItemGroup>

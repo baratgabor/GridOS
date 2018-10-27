@@ -55,6 +55,7 @@ namespace IngameScript
 
                 if (_selectedLine <= 0)
                     return false;
+
                 AdjustSelectedLineAndDraw(_selectedLine - 1);
                 return true;
             }

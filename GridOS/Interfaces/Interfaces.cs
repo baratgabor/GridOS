@@ -100,7 +100,7 @@ namespace IngameScript
 
         interface IDisplayElementPublisher
         {
-            IDisplayElement DisplayElement { get; }
+            List<IDisplayElement> DisplayElements { get; }
         }
     }
 }

@@ -83,7 +83,10 @@ namespace IngameScript
 
                 if (module is IDisplayElementPublisher)
                 {
-                    _displayOrchestrator.RegisterDisplayElement((module as IDisplayElementPublisher).DisplayElement);
+                    foreach (var e in ((IDisplayElementPublisher)module).DisplayElements)
+                    {
+                        _displayOrchestrator.RegisterDisplayElement(e);
+                    }
                 }
 
                 return true;

@@ -44,7 +44,7 @@ namespace IngameScript
                     return false;
 
                 _verticalOffset = value;
-                if (redraw) Get_Process_Redraw();
+                if (redraw) Fetch_Process_Redraw();
                 return true;
             }
 

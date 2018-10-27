@@ -33,12 +33,15 @@ namespace IngameScript
                 _config = config;
             }
 
-            public StringBuilder Process(string input, ProcessingArgs args)
+            public void Process(StringBuilder inputOutput, ProcessingArgs args)
             {
-                return Process(input, args, _buffer, true);
+                Process(inputOutput, args, _buffer, true); // result will be in _buffer
+                inputOutput
+                    .Clear()
+                    .Append(_buffer);
             }
 
-            public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
+            public StringBuilder Process(StringBuilder input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
             {
                 if (clearOutput == true)
                     output.Clear();
@@ -46,15 +49,17 @@ namespace IngameScript
                 int prevBreakPos = 0;
                 foreach (var breakPos in FindNextLineBreak(input, _config.LineLength))
                 {
-                    output.Append(input.Substring(prevBreakPos, breakPos - prevBreakPos) + Environment.NewLine);
+                    // TODO: Take note that this allocates new string for each line; might not be an issue with caching, but could worth replacing it
+                    output.Append(input.ToString(), prevBreakPos, breakPos - prevBreakPos);
+                    output.Append(Environment.NewLine);
                     prevBreakPos = breakPos;
                 }
-                // TODO: Take note that this creates new strings for each line; might not be an issue with caching, but could worth replacing it
-                output.Append(input.Substring(prevBreakPos, input.Length - prevBreakPos)); // Rest of string until the end
+                
+                output.Append(input.ToString(), prevBreakPos, input.Length - prevBreakPos); // Rest of string until the end
                 return output;
             }
 
-            protected IEnumerable<int> FindNextLineBreak(string input, int lineLength)
+            protected IEnumerable<int> FindNextLineBreak(StringBuilder input, int lineLength)
             {
                 bool checkNativeNewLines = true;
                 for (int currentPos = 0, lastBreakPos = 0, lastGoodPos = 0; ; currentPos = input.IndexOfAny(_config.Terminators, currentPos))
@@ -79,7 +84,7 @@ namespace IngameScript
                     // then jump to that position and start counting our line from there.
                     if (checkNativeNewLines)
                     {
-                        int nativeNewlinePos = input.IndexOf(Environment.NewLine, lastBreakPos, (lineLength < input.Length - lastBreakPos ? lineLength : input.Length - lastBreakPos));
+                        int nativeNewlinePos = input.IndexOf(Environment.NewLine, lastBreakPos, (lineLength < input.Length - lastBreakPos ? lineLength : input.Length - lastBreakPos), false);
                         if (nativeNewlinePos == -1)
                             checkNativeNewLines = false; // If fails once, don't repeat IndexOf() checking until the next line
                         // Exclude newlines at the end of string 
@@ -94,6 +99,17 @@ namespace IngameScript
                     if (currentPos != -1) currentPos++; // Skips matched char; otherwise IndexOf() returns the same value over and over again.}
                 }
             }
+
+            public StringBuilder Process(string input, ProcessingArgs args)
+            {
+                throw new NotImplementedException();
+            }
+
+            public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
+            {
+                throw new NotImplementedException();
+            }
+
         }
     }
 }
