@@ -21,14 +21,14 @@ namespace IngameScript
         /// <summary>
         /// Naive IndexOfAny method for StringBuilders
         /// </summary>
-        public static int IndexOfAny(this StringBuilder sb, char[] toFind, int startIndex)
+        public static int IndexOfAny(this StringBuilder haystack, char[] toFind, int startIndex)
         {
             if (toFind.Length == 0)
                 return 0;
 
-            for (int i = startIndex; i < sb.Length; i++)
+            for (int i = startIndex; i < haystack.Length; i++)
             {
-                char c = sb[i];
+                char c = haystack[i];
 
                 foreach (var ch in toFind)
                 {
@@ -47,20 +47,22 @@ namespace IngameScript
         /// <param name="startIndex">The starting index.</param>
         /// <param name="ignoreCase">if set to <c>true</c> it will ignore case</param>
         /// <returns></returns>
-        public static int IndexOf(this StringBuilder sb, string value, int startIndex, int count, bool ignoreCase)
+        public static int IndexOf(this StringBuilder haystack, string value, int startIndex, int count, bool ignoreCase)
         {
             int index;
             int length = value.Length;
-            int maxSearchLength = (count - length) + 1;
+            int maxSearchLength = startIndex + (count - length) + 1;
 
             if (ignoreCase)
             {
+                var firstSearchedCharacter = Char.ToLower(value[0]);
+
                 for (int i = startIndex; i < maxSearchLength; ++i)
                 {
-                    if (Char.ToLower(sb[i]) == Char.ToLower(value[0]))
+                    if (Char.ToLower(haystack[i]) == firstSearchedCharacter)
                     {
                         index = 1;
-                        while ((index < length) && (Char.ToLower(sb[i + index]) == Char.ToLower(value[index])))
+                        while ((index < length) && (Char.ToLower(haystack[i + index]) == Char.ToLower(value[index])))
                             ++index;
 
                         if (index == length)
@@ -70,21 +72,25 @@ namespace IngameScript
 
                 return -1;
             }
-
-            for (int i = startIndex; i < maxSearchLength; ++i)
+            else
             {
-                if (sb[i] == value[0])
+                var firstSearchedCharacter = value[0];
+
+                for (int i = startIndex; i < maxSearchLength; ++i)
                 {
-                    index = 1;
-                    while ((index < length) && (sb[i + index] == value[index]))
-                        ++index;
+                    if (haystack[i] == firstSearchedCharacter)
+                    {
+                        index = 1;
+                        while ((index < length) && (haystack[i + index] == value[index]))
+                            ++index;
 
-                    if (index == length)
-                        return i;
+                        if (index == length)
+                            return i;
+                    }
                 }
-            }
 
-            return -1;
+                return -1;
+            }
         }
     }
 }
