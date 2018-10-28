@@ -8,6 +8,8 @@
   - [Example module class with all interfaces implemented](#example-module-class-with-all-interfaces-implemented)
   - [Instantiating the framework and registering a module](#instantiating-the-framework-and-registering-a-module)
 
+!! Project halted, because in-game programming and LCD block display capabilities don't get a lot of love lately from the developers of Space Engineers. But hopefully I'll finish implementing the planned features and optimizations sometime in the future. If you'd like that, let me know.
+
 ## Menu Demo
 
 A short demonstration of the menu handling capabilities, which includes: traversing tree structures, automatic word-wrapping, prefix and suffix bullet characters based on item type, auto-scrolling, and displaying navigation breadcrumbs. This demo doesn't cover other existing capabilities, e.g. executing commands and displaying automatically updating text.
