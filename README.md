@@ -8,7 +8,7 @@
   - [Example module class with all interfaces implemented](#example-module-class-with-all-interfaces-implemented)
   - [Instantiating the framework and registering a module](#instantiating-the-framework-and-registering-a-module)
 
-!! Project halted, because in-game programming and LCD block display capabilities don't get a lot of love lately from the developers of Space Engineers. But hopefully I'll finish implementing the planned features and optimizations sometime in the future. If you'd like that, let me know.
+!! Project halted, because in-game programming and LCD block display capabilities don't get a lot of love lately from the developers of Space Engineers. In fact, in-game programming is now classified as an "unofficial feature" which is disabled by default. But hopefully I'll finish implementing the planned features and optimizations sometime in the future. If you'd like that, let me know.
 
 ## Menu Demo
 
@@ -62,10 +62,10 @@ This readme gets outdated all the time due to the frequent changes, but I'll try
 - **Screen Update Aggregation:** Currently all changes in the displayed menu content are directly propagated to the display, which means that if you update multiple display elements in the same execution cycle, you're incurring increasing runtime costs (due to the repetitive processing/formatting of content). An aggregation layer will be added that collects all updates in a given cycle, and applies them in one go at the end of the cycle.
 - **Load balancing:** Currently, if e.g. 10 modules are registered for the `Update100` tier, all of them will execute in the same Programmable Block invocation (in the same tick). I'm planning to introduce load-balancing, which will offset each module's running cycle. The tradeoff will be a higher base frequency of the Programmable Block itself. This feature will probably be switchable.
 - **Interpreter:** I'm considering the possibility of building an interpreter into GridOS that can be used to define a menu tree - and possibly even commands - via a text field, without writing code modules. This would make it easier to use GridOS for simple informational menus, plus it would facilitate rapid use, and make the system available to non-programmer players.
-- <s>**More screens to display, including a configuration screen:** Currently, GridOS' display capability is limited to displaying the menu of the registered commands a hierarchical menu. I'm planning to introduce multiple screens, for example a configuration or a status screen, or possibly giving the ability for each module to publish their own information/configuration screen.</s> Switched to hierarchical, composite node based tree stucture, where each group node serves as a "screen". Multi-display support added.
-- **Communication and data sharing between modules:** Currently, the modules are completely separated, but I want to add built-in options for inter-module communication. E.g. a message bus, in which modules can subscribe to topics, and publish payloads on topics.
-- **Persistent storage for modules:** At the moment no persistent storage access is available to modules.
-- **Exception handling for each module:** The main system will be protected by module exceptions. Either by discarding the malfunctioning module, or by forcing the modules to implement a Reset() method for resetting themselves.
+- <s>**More screens to display, including a configuration screen:** Currently, GridOS' display capability is limited to displaying the menu of the registered commands. I'm planning to introduce multiple screens, for example a configuration or a status screen, or possibly giving the ability for each module to publish their own information/configuration screen.</s> Switched to hierarchical, composite node based tree stucture, where each group node serves as a "screen". Multi-display support added.
+- **Communication and data sharing between modules:** Currently the modules are completely separated, but I want to add built-in options for inter-module communication. E.g. a message bus, in which modules can subscribe to topics, and publish payloads on topics.
+- **Persistent storage for modules:** At the moment no persistent storage access is available for modules.
+- **Exception handling for each module:** The main system will be protected from module exceptions. Either by discarding the malfunctioning module, or by forcing the modules to implement a Reset() method for resetting themselves.
 
 ## Getting started using the framework
 
