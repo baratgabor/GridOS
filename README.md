@@ -12,7 +12,7 @@
 
 ## Menu Demo
 
-The display module of GridOS basically creates a dynamic UI on top of a static textbox. Below there is a short demonstration of the menu handling capabilities, which includes: traversing tree structures, automatic word-wrapping, prefix and suffix bullet characters based on item type, auto-scrolling, and displaying navigation breadcrumbs. This demo doesn't cover other existing capabilities, e.g. executing commands and displaying automatically updating text.
+The display module of GridOS basically creates a dynamic, navigable UI on top of a static textbox. Below there is a short demonstration of the menu handling capabilities, which includes: traversing tree structures, automatic word-wrapping, prefix and suffix bullet characters based on item type, auto-scrolling, and displaying navigation breadcrumbs. This demo doesn't cover other existing capabilities, e.g. executing commands and displaying automatically updating text.
 
 ![GridOS Menu system demo](GridOS_Menu_Demo.gif)
 
