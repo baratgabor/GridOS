@@ -43,5 +43,25 @@ namespace IngameScript
                 }
             }
         }
+
+        public class ProgressIndicator3
+        {
+            private int _counter = 0;
+
+            public string Get()
+            {
+                _counter++;
+                switch (_counter % 3)
+                {
+                    case 0: return ("•––");
+                    case 1: return ("–•–");
+                    case 2: return ("––•");
+                    default: return "";
+                }
+            }
+        }
+
+
+
     }
 }

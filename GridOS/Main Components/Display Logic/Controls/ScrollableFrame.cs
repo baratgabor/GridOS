@@ -24,8 +24,10 @@ namespace IngameScript
         class ScrollableFrame : Frame, IScrollable
         {
             public int VerticalOffset => _verticalOffset;
-            public int LineHeight => _config.LineHeight;
-            public int LineNumber => _source.LineInfo.Count;
+            public int ContentLength => _source.LineInfo.Count;
+            public int ViewportHeight => _config.LineHeight;
+            public int ViewportStart => _verticalOffset;
+            public int ViewportEnd => VerticalOffset + ViewportHeight;
             public List<LineInfo> LineInfo => _source.LineInfo;
 
             protected int _verticalOffset = 0;
@@ -40,11 +42,13 @@ namespace IngameScript
 
             public bool SetVerticalOffset(int value, bool redraw = true)
             {
-                if (value == _verticalOffset || value < 0 || value + _config.LineHeight > LineInfo.Count)
+                if (value == _verticalOffset || value < 0 || IsOverMaximumScroll(value))
                     return false;
 
                 _verticalOffset = value;
+
                 if (redraw) Fetch_Process_Redraw();
+
                 return true;
             }
 
@@ -52,12 +56,47 @@ namespace IngameScript
             {
                 _buffer.Clear();
 
-                int ViewportStart = LineInfo[_verticalOffset].StartPosition;
-                int ViewportEnd = _verticalOffset + _config.LineHeight >= LineInfo.Count ? input.Length : LineInfo[_verticalOffset + _config.LineHeight].StartPosition - 2; // -2 cuts \r\n
-                int ViewportLength = ViewportEnd - ViewportStart;
+                int ViewportStartChar = LineInfo[_verticalOffset].StartPosition;
+                int ViewportEndChar = _verticalOffset + _config.LineHeight >= LineInfo.Count ? input.Length : LineInfo[_verticalOffset + _config.LineHeight].StartPosition - 2; // -2 cuts \r\n
+                int ViewportLengthChar = ViewportEndChar - ViewportStartChar;
 
-                _buffer.Append(input.ToString(ViewportStart, ViewportLength));
+                _buffer.Append(input.ToString(ViewportStartChar, ViewportLengthChar));
                 return _buffer;
+            }
+
+            /// <summary>
+            /// Ensures that given line is visible in viewport by adjusting the vertical offset, if needed.
+            /// </summary>
+            /// <param name="lineNumber">The line number to bring into the viewport.</param>
+            /// <returns>True if adjustment was needed. False if the given line was already in viewport.</returns>
+            public bool ScrollToLine(int lineNumber, bool redraw = true)
+            {
+                int max_scroll = ContentLength - ViewportHeight;
+
+                // Line is above viewport
+                if (lineNumber < VerticalOffset)
+                {
+                    SetVerticalOffset(lineNumber, redraw);
+                    if (redraw == false)
+                        Fetch_Process();
+                    return true;
+                }
+                // Line is below viewport, and scrolling didn't yet reach the end of the content
+                else if (lineNumber + 2 > ViewportEnd
+                    && ViewportEnd < ContentLength)
+                {
+                    SetVerticalOffset((lineNumber + 2 - ViewportHeight > max_scroll ? max_scroll : lineNumber + 2 - ViewportHeight), redraw);
+                    if (redraw == false)
+                        Fetch_Process();
+                    return true;
+                }
+
+                return false;
+            }
+
+            protected bool IsOverMaximumScroll(int lineNumber)
+            {
+                return lineNumber + ViewportHeight > ContentLength;
             }
         }
     }

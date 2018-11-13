@@ -10,17 +10,19 @@ using System;
 using VRage.Collections;
 using VRage.Game.Components;
 using VRage.Game.ModAPI.Ingame;
+using VRage.Game.ModAPI.Ingame.Utilities;
 using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Game;
 using VRageMath;
 
 namespace IngameScript
 {
-	partial class Program
-	{
-        interface IDisplayElementProcessor
+    partial class Program
+    {
+        interface INavigationPathSource
         {
-            void Process(StringBuilder processable, IDisplayElement referenceDisplayElement);
+            IEnumerable<IDisplayGroup> NavigationPath { get; }
+            event Action<IEnumerable<IDisplayGroup>> NavigationPathChanged;
         }
     }
 }

@@ -21,28 +21,21 @@ namespace IngameScript
         /// <summary>
         /// Simply adds a suffix to the input.
         /// </summary>
-        class AddSuffix : ITextProcessor
+        class AddSuffix : IDisplayElementProcessor
         {
-            protected StringBuilder _buffer = new StringBuilder();
+            protected IAffixConfig _config;
 
-            public StringBuilder Process(string input, ProcessingArgs args)
+            public AddSuffix(IAffixConfig config)
             {
-                return Process(input, args, _buffer, true);
+                _config = config;
             }
 
-            public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
+            public void Process(StringBuilder processable, IDisplayElement referenceDisplayElement)
             {
-                if (clearOutput == true)
-                    output.Clear();
-
-                output.Append(input + (args.Suffix.Length > 0 ? " " : "") + args.Suffix);
-                return output;
-            }
-
-            public void Process(StringBuilder inputOutput, ProcessingArgs args)
-            {
-                if (args.Suffix.Length > 0)
-                    inputOutput.Append(" " + args.Suffix);
+                var suffix = _config.GetSuffixFor(referenceDisplayElement, false);
+                if (suffix.Length == 0)
+                    return;
+                processable.Append(" " + suffix);
             }
         }
     }

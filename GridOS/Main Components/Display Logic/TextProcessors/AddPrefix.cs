@@ -21,28 +21,21 @@ namespace IngameScript
         /// <summary>
         /// Simply adds a prefix to the input.
         /// </summary>
-        class AddPrefix : ITextProcessor
+        class AddPrefix : IDisplayElementProcessor
         {
-            protected StringBuilder _buffer = new StringBuilder();
+            protected IAffixConfig _config;
 
-            public StringBuilder Process(string input, ProcessingArgs args)
+            public AddPrefix(IAffixConfig config)
             {
-                return Process(input, args, _buffer, true);
+                _config = config;
             }
 
-            public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
+            public void Process(StringBuilder processable, IDisplayElement referenceDisplayElement)
             {
-                if (clearOutput == true)
-                    output.Clear();
-
-                output.Append(args.Prefix + (args.Prefix.Length > 0 ? " " : "") + input);
-                return output;
-            }
-
-            public void Process(StringBuilder inputOutput, ProcessingArgs args)
-            {
-                if (args.Prefix.Length > 0)
-                    inputOutput.Insert(0, args.Prefix + " ");
+                var prefix = _config.GetPrefixFor(referenceDisplayElement, false);
+                if (prefix.Length == 0)
+                    return;
+                processable.Insert(0, prefix + " ");
             }
         }
     }

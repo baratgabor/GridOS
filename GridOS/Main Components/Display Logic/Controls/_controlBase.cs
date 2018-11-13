@@ -42,14 +42,19 @@ namespace IngameScript
                 RedrawRequired?.Invoke(_buffer);
             }
 
-            protected void Get_Process()
+            protected void Fetch(bool flush = false)
             {
-                _buffer = Process(_inner.GetContent());
+                _buffer.Clear().Append(_inner.GetContent(flush));
             }
 
-            public void Fetch_Process_Redraw()
+            protected void Fetch_Process(bool flush = false)
             {
-                Process_Redraw(_inner.GetContent());
+                Process(_inner.GetContent(flush));
+            }
+
+            public void Fetch_Process_Redraw(bool flush = false)
+            {
+                Process_Redraw(_inner.GetContent(flush));
             }
 
             protected void Process_Redraw(StringBuilder input)
@@ -71,11 +76,12 @@ namespace IngameScript
 
         interface IScrollable : IControl
         {
-            int LineNumber { get; }
+            int ContentLength { get; }
             int VerticalOffset { get; }
-            int LineHeight { get; }
+            int ViewportHeight { get; }
             List<LineInfo> LineInfo { get; }
             bool SetVerticalOffset(int value, bool redraw = true);
+            bool ScrollToLine(int lineNumber, bool redraw = true);
         }
 
         // Yeah, ugly

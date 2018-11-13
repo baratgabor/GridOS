@@ -13,6 +13,7 @@ using VRage.Game.ModAPI.Ingame;
 using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Game;
 using VRageMath;
+using VRage.Game.ModAPI.Ingame.Utilities;
 
 namespace IngameScript
 {
@@ -21,7 +22,7 @@ namespace IngameScript
         /// <summary>
         /// Adds a defined padding in front of all new lines in the string or StringBuilder.
         /// </summary>
-        class PadAllLines : ITextProcessor
+        class PadAllLines : IDisplayElementProcessor
         {
             protected StringBuilder _builder = new StringBuilder();
             protected int _paddingLeft;
@@ -37,57 +38,47 @@ namespace IngameScript
                 _config = config;
             }
 
-            public StringBuilder Process(string input, ProcessingArgs args)
+            public void Process(StringBuilder processable, IDisplayElement referenceDisplayElement)
             {
-                return Process(input, args, _builder, true);
-            }
+                // If padding not requested, no change needed
+                if (_config.PaddingLeft == 0)
+                    return;
 
-            public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
-            {
-                if (clearOutput == true)
-                    output.Clear();
-
-                if (_config.PaddingLeft == 0) return output.Append(input);
-
+                // If padding settings changed since last run, build new padding string
                 if (PaddingChanged())
                     UpdatePaddingString();
 
-                return AddPaddingToAllNewline(input, output);
-            }
-
-            public void Process(StringBuilder inputOutput, ProcessingArgs args)
-            {
-                Process(inputOutput.ToString(), args, inputOutput, true);
+                // Send string copy as input, and cleared StringBuilder as output
+                AddPaddingToAllNewline(processable.ToString(), processable.Clear());
             }
 
             protected StringBuilder AddPaddingToAllNewline(string input, StringBuilder output)
             {
-                string paddingString = "";
+                string paddingString = String.Empty;
 
-                for (int nextNewline = 0, prevNewline = 0; nextNewline != -1;)
+                for (int currentBreakPoint = 0, previousBreakPoint = 0; currentBreakPoint != -1;)
                 {
-                    nextNewline = input.IndexOf(Environment.NewLine, nextNewline);
-                    if (nextNewline != -1)
-                    {
-                        if (prevNewline == 0)
-                            paddingString = _paddingString_FirstLine;
-                        else
-                            paddingString = _paddingString;
+                    currentBreakPoint = input.IndexOf(Environment.NewLine, currentBreakPoint);
 
-                        nextNewline += Environment.NewLine.Length; // Don't include newline when we copy
-                        output.Append(paddingString + input.Substring(prevNewline, nextNewline - prevNewline));
-                        prevNewline = nextNewline;
-                    }
-                    // Add rest of string if no more newlines found
+                    // If first iteration, set special first line padding string
+                    if (previousBreakPoint == 0)
+                        paddingString = _paddingString_FirstLine;
+
+                    // If no more breakpoints are found, set position to end of string to copy the rest
+                    if (currentBreakPoint == -1)
+                        currentBreakPoint = input.Length;
+                    // If breakpoint is found, adjust position to include the detected newline when copying
                     else
-                    {
-                        if (prevNewline == 0)
-                            paddingString = _paddingString_FirstLine;
-                        else
-                            paddingString = _paddingString;
+                        currentBreakPoint += Environment.NewLine.Length;
 
-                        output.Append(paddingString + input.Substring(prevNewline, input.Length - prevNewline));
-                    }
+                    output.Append(paddingString);
+                    output.Append(input, previousBreakPoint, currentBreakPoint - previousBreakPoint); // Add current line content
+                    previousBreakPoint = currentBreakPoint;
+
+                    // Set padding string for the rest of iterations
+                    // at the end of the first iteration
+                    if (previousBreakPoint == 0)
+                        paddingString = _paddingString;
                 }
 
                 return output;

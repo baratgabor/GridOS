@@ -70,7 +70,7 @@ namespace IngameScript
                 if (!IsReady())
                     return false;
 
-                if (_selectedLine >= _scrollableBox.LineNumber - 1)
+                if (_selectedLine >= _scrollableBox.ContentLength - 1)
                     return false;
 
                 AdjustSelectedLineAndDraw(_selectedLine + 1);
@@ -102,12 +102,14 @@ namespace IngameScript
             public void OnPathChanged(ContentChangeInfo obj)
             {
                 _selectedLine = 0;
-                _scrollableBox.SetVerticalOffset(0, false);
-                // Pull new content from bottom of chain and process - this refreshes the LineInfo we need below
-                GetContent(true);
+                Fetch(true);
 
+                // If user moved up in the tree, set previous group as selected
                 if (obj.PreviousContext != null)
                 {
+                    // Pull new content from bottom of chain and process - this refreshes the LineInfo we need below
+                    //GetContent(true);
+
                     var lineInfo = _scrollableBox.LineInfo.FirstOrDefault(x => x.ParentDisplayElement == obj.PreviousContext);
                     if (!object.Equals(lineInfo, default(LineInfo)))
                     {
@@ -115,23 +117,23 @@ namespace IngameScript
                     }
                 }
 
-                // If selected line changed, try adjusting offset (which will redraw if offset is adjusted)
-                bool redrawOccurred = false;
-                if (_selectedLine != 0)
-                    redrawOccurred = AdjustVerticalOffset(_selectedLine);
-
-                // If selectedline didn't change, or it did, but no adjustment was needed, we need a manual redraw
-                if (_selectedLine == 0 || !redrawOccurred)
-                    Redraw();
+                AdjustSelectedLineAndDraw(_selectedLine);
             }
 
             protected void AdjustSelectedLineAndDraw(int newSelectedLine)
             {
-                if (AdjustVerticalOffset(newSelectedLine) == false)
+                var dirty = _scrollableBox.ScrollToLine(newSelectedLine, redraw: false);
+
+                if (dirty)
+                {
+                    _selectedLine = newSelectedLine;
+                    Fetch_Process_Redraw();
+                }
+                else
                 {
                     RemoveSelectionMarker(_selectedLine);
-                    AddSelectionMarker(newSelectedLine);
                     _selectedLine = newSelectedLine;
+                    AddSelectionMarker(_selectedLine);
                     Redraw();
                 }
             }
@@ -144,28 +146,6 @@ namespace IngameScript
             protected void RemoveSelectionMarker(int selectedLine)
             {
                 _buffer[_scrollableBox.LineInfo[selectedLine].StartPosition + 1 - _startingPosition] = ' ';
-            }
-
-            protected bool AdjustVerticalOffset(int selectedLine)
-            {
-                int vo = _scrollableBox.VerticalOffset;
-                int lh = _scrollableBox.LineHeight;
-                int max_scroll = _scrollableBox.LineNumber - lh;
-
-                if (selectedLine < vo)
-                {
-                    _selectedLine = selectedLine;
-                    _scrollableBox.SetVerticalOffset(vo - 1);
-                    return true;
-                }
-                else if (selectedLine + 2 > vo + lh && vo + lh < _scrollableBox.LineNumber)
-                {
-                    _selectedLine = selectedLine;
-                    _scrollableBox.SetVerticalOffset((selectedLine + 2 - lh > max_scroll ? max_scroll : selectedLine + 2 - lh));
-                    return true;
-                }
-
-                return false;
             }
 
             protected override StringBuilder Process(StringBuilder input)

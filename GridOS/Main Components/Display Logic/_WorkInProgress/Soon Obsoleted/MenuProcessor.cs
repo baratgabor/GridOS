@@ -21,38 +21,44 @@ namespace IngameScript
         /// <summary>
         /// Content builder that builds content as a single string from a list of elements
         /// </summary>
-        class MenuContentBuilder : ILineInfoProviderControl
+        class MenuProcessor : ILineInfoProviderControl
         {
             public List<LineInfo> LineInfo => _lineInfo;
             public event Action<StringBuilder> RedrawRequired;
-            public Func<List<IDisplayElement>> ContentSource;
 
-            protected List<IDisplayElement> _menuItems;
-            protected List<ITextProcessor> _pipeline = new List<ITextProcessor>();
+            protected IMenuContentSource _contentSource;
+            protected List<IDisplayElementProcessor> _pipeline = new List<IDisplayElementProcessor>();
             protected StringBuilder _menuBuffer = new StringBuilder();
             protected StringBuilder _itemBuffer = new StringBuilder();
 
             protected IAffixConfig _config;
-            protected ProcessingArgs _processingArgs = new ProcessingArgs();
+            protected ProcessingConfiguration _processingArgs = new ProcessingConfiguration();
             protected List<LineInfo> _lineInfo = new List<LineInfo>();
 
-            public MenuContentBuilder(IAffixConfig config)
+            public MenuProcessor(IAffixConfig config, IMenuContentSource contentSource)
             {
                 _config = config;
                 _processingArgs.LineInfo = _lineInfo;
+
+                _contentSource = contentSource;
+                _contentSource.ContentChanged += OnContentChanged;
             }
 
-            public StringBuilder Process()
+            protected void Process()
             {
                 _menuBuffer.Clear();
+
+                // Honestly, we know that this IEnumerable is a List, so there won't be a lot of overhead with ToList()
+                var menuItems = _contentSource.Content.ToList();
+
+                if (menuItems == null || menuItems.Count == 0)
+                    return;
+
                 _lineInfo.Clear();
 
-                if (_menuItems == null)
-                    return _menuBuffer;
-
-                for (int i = 0; i < _menuItems.Count; i++)
+                for (int i = 0; i < menuItems.Count; i++)
                 {
-                    var item = _menuItems[i];
+                    var item = menuItems[i];
                     _processingArgs.Prefix = _config.GetPrefixFor(item, false);
                     _processingArgs.Suffix = _config.GetSuffixFor(item, false);
                     _processingArgs.Element = item;
@@ -60,37 +66,23 @@ namespace IngameScript
 
                     _itemBuffer
                         .Clear() // Prepare item buffer for new item processing
-                        .Append(item.Label); // Set initial item value
+                        .Append(item.Label); // Set initial value to be processed
                     
                     foreach (var p in _pipeline)
                     {
                         // Send initial value through the chain of processors
                         // Output is stored in the StringBuilder passed in
-                        p.Process(_itemBuffer, _processingArgs);
+                        p.Process(_itemBuffer, item);
                     }
 
                     // Add processed item to the menu buffer
-                    // Conditionally add a newline if it's not the last item
-                    _menuBuffer.Append(_itemBuffer + (i+1 >= _menuItems.Count ? "" : Environment.NewLine));
+                    _menuBuffer.Append(_itemBuffer + Environment.NewLine);
                 }
-
-                return _menuBuffer;
+                // Remove the last NewLine (fastest method)
+                _menuBuffer.Length -= 2;
             }
 
-            public MenuContentBuilder AddContent(List<IDisplayElement> content)
-            {
-                _menuItems = content;
-                Process_Redraw();
-                return this;
-            }
-
-            protected void Add_Process_NoDraw(List<IDisplayElement> content)
-            {
-                _menuItems = content;
-                Process();
-            }
-
-            internal void OnElementChanged(IDisplayElement obj)
+            protected void OnContentChanged(IEnumerable<IDisplayElement> content)
             {
                 Process_Redraw();
             }
@@ -101,7 +93,7 @@ namespace IngameScript
                 RedrawRequired?.Invoke(_menuBuffer);
             }
 
-            public MenuContentBuilder AddProcessor(ITextProcessor processor)
+            public MenuProcessor AddProcessor(IDisplayElementProcessor processor)
             {
                 _pipeline.Add(processor);
                 return this;
@@ -115,20 +107,10 @@ namespace IngameScript
             public StringBuilder GetContent(bool FlushCache = false)
             {
                 if (FlushCache)
-                {
-                    if (ContentSource == null)
-                        throw new Exception("Content pull request failed: no content source set.");
-
-                    // Buffer updated with freshly pulled/processed content
-                    Add_Process_NoDraw(ContentSource.Invoke());
-                }
+                    // Update buffer with freshly pulled/processed content
+                    Process();
 
                 return _menuBuffer;
-            }
-
-            public void OnContentChanged(List<IDisplayElement> elements)
-            {
-                AddContent(elements);
             }
         }
     }

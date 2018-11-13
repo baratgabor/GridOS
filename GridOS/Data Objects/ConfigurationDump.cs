@@ -34,7 +34,7 @@ namespace IngameScript
             }
         }
 
-        class ProcessingArgs
+        class ProcessingConfiguration
         {
             public string Prefix { get; set; }
             public string Suffix { get; set; }
