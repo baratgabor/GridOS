@@ -8,7 +8,9 @@
   - [Example module class with all interfaces implemented](#example-module-class-with-all-interfaces-implemented)
   - [Instantiating the framework and registering a module](#instantiating-the-framework-and-registering-a-module)
 
-!! Project halted, because in-game programming and LCD block display capabilities don't get a lot of love lately from the developers of Space Engineers. In fact, in-game programming is now classified as an "unofficial feature" which is disabled by default. But hopefully I'll finish implementing the planned features and optimizations sometime in the future. If you'd like that, let me know.
+**Note:** Project currently halted, for the most part, because in-game programming became a rather sidelined (i.e. "unofficial", disabled by default) feature in Space Engineers. But if you're interested in using the script, let me know, and I'll try to work on it a bit to implement some of the below mentioned planned features (especially the performance optimizations) and make a release version.
+
+**Note 2:** If you wish to use the script by cloning or downloading it, be aware that the *Master* branch is supposed to be the stable. The *Develop* branch might not even compile at any given time (hey, it's just a one-person project :)).
 
 ## Menu Demo
 
