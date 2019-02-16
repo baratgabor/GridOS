@@ -10,7 +10,7 @@
 
 **Note:** Project currently halted, for the most part, because in-game programming became a rather sidelined (i.e. "unofficial", disabled by default) feature in Space Engineers. But if you're interested in using the script, let me know, and I'll try to work on it a bit to implement some of the below mentioned planned features (especially the performance optimizations) and make a release version.
 
-**Note 2:** If you wish to use the script by cloning or downloading it, be aware that the *Master* branch is supposed to be the stable. The *Develop* branch might not even compile at any given time (hey, it's just a one-person project :)).
+**Note 2:** If you happen to be interested in using the script for whatever purpose, use the *Master* branch, not the develop. Develop is in a sorry state currently (hey, it's just a one-person project :)). Will get back to it and finish what I started there.
 
 ## Menu Demo
 
