@@ -20,7 +20,7 @@ namespace IngameScript
     {
         /// <summary>
         /// Main display component of GridOS. Builds and holds the full model of display data by exposing registration methods.
-        /// Registers TextPanels, and knows how to instantiate all classes required for operating display content on TextPanels.
+        /// Registers TextSurfaces, and knows how to instantiate all classes required for operating display content on TextSurfaces.
         /// </summary>
         class DisplayOrchestrator
         {
@@ -30,7 +30,7 @@ namespace IngameScript
             // Root group displayed by default, parent of all other elements/groups
             private IDisplayGroup _displayRoot = new DisplayGroup("Main");
 
-            private List<IMyTextPanel> _registeredTextPanels = new List<IMyTextPanel>();
+            private List<IMyTextSurface> _registeredTextSurfaces = new List<IMyTextSurface>();
             private List<DisplayController> _controllers = new List<DisplayController>();
             private const string _controllerNameTemplate = "Display";
             private int _controllerCounter = 0;
@@ -46,9 +46,9 @@ namespace IngameScript
                 _displayRoot.AddChild(new HelpMenu());
             }
 
-            public void RegisterTextPanel(IMyTextPanel textPanel)
+            public void RegisterTextSurface(IMyTextSurface textSurface)
             {
-                if (_registeredTextPanels.Contains(textPanel))
+                if (_registeredTextSurfaces.Contains(textSurface))
                     return;
 
                 try
@@ -61,7 +61,7 @@ namespace IngameScript
                         _commandDispatcher,
                         config,
                         new DisplayView(
-                            textPanel,
+                            textSurface,
                             config,
                             _program.Runtime),
                         new DisplayViewModel(
@@ -74,19 +74,19 @@ namespace IngameScript
                     throw new Exception(e.Message + "\n" + e.StackTrace);
                 }
 
-                _registeredTextPanels.Add(textPanel);
+                _registeredTextSurfaces.Add(textSurface);
             }
 
-            public void UnregisterTextPanel(IMyTextPanel textPanel)
+            public void UnregisterTextSurface(IMyTextSurface textSurface)
             {
-                if (!_registeredTextPanels.Contains(textPanel))
+                if (!_registeredTextSurfaces.Contains(textSurface))
                     return;
 
                 // TODO: Create proper removal infrastructure. CHECK REFERENCING to see if disposal is needed.
-                int sharedIndex = _registeredTextPanels.IndexOf(textPanel);
+                int sharedIndex = _registeredTextSurfaces.IndexOf(textSurface);
                 _controllers.Remove(_controllers[sharedIndex]);
 
-                _registeredTextPanels.Remove(textPanel);
+                _registeredTextSurfaces.Remove(textSurface);
             }
 
             public void RegisterDisplayElement(IDisplayElement element)
@@ -101,7 +101,7 @@ namespace IngameScript
 
             public void ClearAll()
             {
-                _registeredTextPanels.ForEach(x => x.WritePublicText(""));
+                _registeredTextSurfaces.ForEach(x => x.WriteText(""));
             }
         }
     }

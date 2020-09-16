@@ -1,18 +1,6 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
+﻿using Sandbox.ModAPI.Ingame;
 using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System.Text;
 using System;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
-using VRageMath;
 
 namespace IngameScript
 {
@@ -141,18 +129,18 @@ namespace IngameScript
                 // TODO: Implement saving and exiting functionality
             }
 
-            public void RegisterTextPanel(IMyTextPanel textPanel)
+            public void RegisterTextSurface(IMyTextSurface textSurface)
             {
-                _displayOrchestrator.RegisterTextPanel(textPanel);
+                _displayOrchestrator.RegisterTextSurface(textSurface);
             }
 
             private void CommandHandler_AddLcd(CommandItem sender, string param)
             {
-                IMyTerminalBlock textpanel = _p.GridTerminalSystem.GetBlockWithName(param);
-                if ((textpanel == null) || !(textpanel is IMyTextPanel))
+                IMyTerminalBlock textSurface = _p.GridTerminalSystem.GetBlockWithName(param);
+                if ((textSurface == null) || !(textSurface is IMyTextSurface))
                     return;
 
-                RegisterTextPanel(textpanel as IMyTextPanel);
+                RegisterTextSurface(textSurface as IMyTextSurface);
             }
 
             private void CommandHandler_DisableUpdates(CommandItem sender, string param)

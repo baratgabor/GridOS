@@ -19,16 +19,16 @@ namespace IngameScript
     partial class Program
     {
         /// <summary>
-        /// Sets up a TextPanel with the appropriate settings, and fills/refreshes it with the content of the Controls added.
+        /// Sets up a TextSurface with the appropriate settings, and fills/refreshes it with the content of the Controls added.
         /// </summary>
         class DisplayView : IView
         {
-            protected IMyTextPanel _target;
+            protected IMyTextSurface _target;
             protected IMyGridProgramRuntimeInfo _runtime;
             protected string _targetFont = "Debug";
-            protected float _targetFontSize = 1.3f;
+            protected float _targetFontSize = 0.5f;
             protected int _maxLineWidth;
-            protected int _maxLineNum = 8; // TODO: Check this max line number, and make it scale dynamically based on font size
+            protected int _maxLineNum = 15; // TODO: Check this max line number, and make it scale dynamically based on font size
 
             protected StringBuilder _buffer = new StringBuilder();
             protected List<IControl> _controls = new List<IControl>();
@@ -39,7 +39,7 @@ namespace IngameScript
             protected const char _lineSeparatorCharBottom = '˙';
             protected IViewConfig_Writeable _config;
 
-            public DisplayView(IMyTextPanel target, IViewConfig_Writeable fillable_config, IMyGridProgramRuntimeInfo runtime)
+            public DisplayView(IMyTextSurface target, IViewConfig_Writeable fillable_config, IMyGridProgramRuntimeInfo runtime)
             {
                 _runtime = runtime;
                 _target = target;
@@ -81,11 +81,11 @@ namespace IngameScript
                 _controls.Clear();
             }
 
-            private void SetupTarget(IMyTextPanel target)
+            private void SetupTarget(IMyTextSurface target)
             {
                 target.Font = _targetFont;
                 target.FontSize = _targetFontSize;
-                target.ShowPublicTextOnScreen();
+                target.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
             }
 
             private int DetermineMaxLineLength()
@@ -111,8 +111,8 @@ namespace IngameScript
                 }             
 
                 // TODO: Should we do line number checks on the control outputs?
-                // MaxLineNum is textpanel settings dependent, so this View will decide on that
-                _target.WritePublicText(_buffer.ToString());
+                // MaxLineNum is textsurface settings dependent, so this View will decide on that
+                _target.WriteText(_buffer.ToString());
             }
         }
     }
