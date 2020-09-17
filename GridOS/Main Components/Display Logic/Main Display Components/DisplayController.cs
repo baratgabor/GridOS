@@ -27,7 +27,7 @@ namespace IngameScript
             public string Name => _name;
             private string _name;
             private IView _view;
-            private DisplayViewModel _viewModel;
+            private MenuViewModel _viewModel;
             private ICommandDispatcher _commandDispatcher;
             private MyGridProgram _program;
 
@@ -35,7 +35,7 @@ namespace IngameScript
             private MenuContentBuilder _menuBuilder;
             private Breadcrumb _breadcrumb;
 
-            public DisplayController(string name, ICommandDispatcher commandDispatcher, SmartConfig config, IView view, DisplayViewModel viewModel, MyGridProgram program)
+            public DisplayController(string name, ICommandDispatcher commandDispatcher, SmartConfig config, IView view, MenuViewModel viewModel, MyGridProgram program)
             {
                 _name = name;
                 _program = program;
@@ -50,8 +50,8 @@ namespace IngameScript
                 _menuBuilder.ContentSource = () => _viewModel.Content;
                 _menuBuilder
                     .AddProcessor(new WordWrapping(config))
-                    .AddProcessor(new AddPrefix())
-                    .AddProcessor(new AddSuffix())
+                    .AddProcessor(new AddPrefix(config))
+                    .AddProcessor(new AddSuffix(config))
                     .AddProcessor(new PadAllLines(config))
                     .AddProcessor(new LineInfoExtractor(config));
                 

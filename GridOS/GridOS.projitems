@@ -14,12 +14,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ObservableUpdateFrequency.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Built-In Menu\HelpMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Controls\Breadcrumb.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\MenuDisplay\DisplayElementPresenter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\Class1.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\MenuDisplay\SelectionWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\MenuDisplay\MenuItemPresenter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\MenuDisplay\MenuView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\MenuDisplay\MenuViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\_IMenuContentSource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\_INavigationPathSource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\_IProcessor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\MenuDisplay\DisplayElementProcessor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\MenuDisplay\MenuItemProcessor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\Soon Obsoleted\MenuProcessor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Controls\NavigationFrame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Controls\DisplayHeader.cs" />
@@ -27,7 +30,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Controls\_ControlBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Main Display Components\DisplayController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Main Display Components\DisplayView.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\MenuDisplay\MenuViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\MenuHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Main Display Components\_obsolete_DisplayElementMenuHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\TextProcessors\WordWrapping.cs" />
@@ -36,9 +38,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\TextProcessors\AddPrefix.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\TextProcessors\AddSuffix.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\TextProcessors\_TextProcessorBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\DisplayElement.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\DisplayCommand.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\DisplayGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\MenuItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\MenuCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Model\MenuGroup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\DisplayOrchestrator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\CommandDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\UpdateDispatcher.cs" />
@@ -52,6 +54,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Main Display Components\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\_WorkInProgress\" />
   </ItemGroup>
 </Project>

@@ -21,8 +21,8 @@ namespace IngameScript
     {
         interface IMenuContentSource
         {
-            IEnumerable<IDisplayElement> Content { get; }
-            event Action<IEnumerable<IDisplayElement>> ContentChanged;
+            IEnumerable<IMenuItem> Content { get; }
+            event Action<IEnumerable<IMenuItem>> ContentChanged;
         }
     }
 }

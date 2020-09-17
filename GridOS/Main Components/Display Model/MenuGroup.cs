@@ -21,76 +21,85 @@ namespace IngameScript
         /// <summary>
         /// Specialized node type that holds children nodes, used for creating hierarchical structures.
         /// </summary>
-        class DisplayGroup : DisplayElement, IDisplayGroup
+        class MenuGroup : MenuItem, IMenuGroup
         {
             public int OpenedBy => _openedBy;
             protected int _openedBy = 0;
 
             public bool ShowBackCommandAtBottom { get; internal set; } = false;
 
-            protected List<IDisplayElement> _children = new List<IDisplayElement>();
+            protected List<IMenuItem> _children = new List<IMenuItem>();
 
-            public event Action<IDisplayGroup> ChildrenChanged;
-            public event Action<IDisplayElement> ChildLabelChanged;
-            public event Action<IDisplayGroup> BeforeOpen;
-            public event Action<IDisplayGroup> Opened;
-            public event Action<IDisplayGroup> BeforeClose;
-            public event Action<IDisplayGroup> Closed;
+            public event Action<IMenuItem> ChildAdded;
+            public event Action<IMenuItem> ChildRemoved;
+            public event Action<IMenuItem> ChildChanged;
+            public event Action<IMenuGroup> Opening;
+            public event Action<IMenuGroup> Opened;
+            public event Action<IMenuGroup> Closing;
+            public event Action<IMenuGroup> Closed;
 
-            public DisplayGroup(string label) : base(label)
+            public MenuGroup(string label) : base(label)
             { }
 
-            public void AddChild(IDisplayElement element)
+            public void AddChild(IMenuItem element)
             {
                 if (_children.Contains(element))
                     return;
 
                 _children.Add(element);
-                element.LabelChanged += HandleChildrenLabelChanges;
-                ChildrenChanged?.Invoke(this);
+                element.LabelChanged += HandleChildrenLabelChanged;
+                ChildAdded?.Invoke(element);
             }
 
-            public void RemoveChild(IDisplayElement element)
+            public void RemoveChild(IMenuItem element)
             {
                 if (!_children.Contains(element))
                     return;
 
                 _children.Remove(element);
-                element.LabelChanged -= HandleChildrenLabelChanges;
-                ChildrenChanged?.Invoke(this);
+                element.LabelChanged -= HandleChildrenLabelChanged;
+                ChildRemoved?.Invoke(element);
             }
 
             public void Open()
             {
-                BeforeOpen?.Invoke(this);
                 _openedBy++;
 
                 // Invoke only if opened first (multidisplay support)
-                if (_openedBy == 1)
-                    Opened?.Invoke(this);
+                if (_openedBy != 1) return;
+
+                Opening?.Invoke(this);
+
+                // Do here what?
+
+                Opened?.Invoke(this);
             }
 
             public void Close()
             {
-                BeforeClose?.Invoke(this);
                 _openedBy--;
 
                 // Invoke only if closed by all (multidisplay support)
-                if (_openedBy <= 0)
-                    Closed?.Invoke(this);
+                if (_openedBy != 0) return;
+
+                Closing?.Invoke(this);
+
+                // Do here what?
+
+                Closed?.Invoke(this);
             }
 
-            public List<IDisplayElement> GetChildren()
+            public List<IMenuItem> GetChildren()
             {
                 return _children;
             }
 
-            protected void HandleChildrenLabelChanges(IDisplayElement element)
+            protected void HandleChildrenLabelChanged(IMenuItem element)
             {
                 if (_openedBy <= 0)
                     return;
 
-                ChildLabelChanged?.Invoke(this);
+                ChildChanged?.Invoke(this);
             }
         }
     }

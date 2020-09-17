@@ -19,26 +19,26 @@ namespace IngameScript
 {
     partial class Program
     {
-        class DisplayElementProcessor : IProcessor<IDisplayElement, string>
+        class MenuItemProcessor : IProcessor<IMenuItem, string>
         {
             protected StringBuilder _buffer = new StringBuilder();
-            protected List<IDisplayElementProcessor> _pipeline = new List<IDisplayElementProcessor>();
+            protected List<IMenuItemProcessor> _pipeline = new List<IMenuItemProcessor>();
 
-            public DisplayElementProcessor(params IDisplayElementProcessor[] textProcessors)
+            public MenuItemProcessor(params IMenuItemProcessor[] itemProcessors)
             {
-                _pipeline.AddRange(textProcessors);
+                _pipeline.AddRange(itemProcessors);
             }
 
-            public string Process(IDisplayElement displayElement)
+            public string Process(IMenuItem menuItem)
             {
                 // Prepare buffer for processing by populating it with the initial value
                 _buffer
                     .Clear()
-                    .Append(displayElement.Label);
+                    .Append(menuItem.Label);
 
                 // Process the initial value in the buffer incrementally by each processor
                 foreach (var p in _pipeline)
-                    p.Process(_buffer, displayElement);
+                    p.Process(_buffer, menuItem);
 
                 return _buffer.ToString();
             }

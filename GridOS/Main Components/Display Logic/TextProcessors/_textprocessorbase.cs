@@ -18,9 +18,9 @@ namespace IngameScript
 {
 	partial class Program
 	{
-        interface IDisplayElementProcessor
+        interface IMenuItemProcessor
         {
-            void Process(StringBuilder processable, IDisplayElement referenceDisplayElement);
+            void Process(StringBuilder processable, IMenuItem referenceMenuItem);
         }
     }
 }

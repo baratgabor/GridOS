@@ -21,7 +21,7 @@ namespace IngameScript
         /// <summary>
         /// Simply adds a suffix to the input.
         /// </summary>
-        class AddSuffix : IDisplayElementProcessor
+        class AddSuffix : IMenuItemProcessor
         {
             protected IAffixConfig _config;
 
@@ -30,9 +30,9 @@ namespace IngameScript
                 _config = config;
             }
 
-            public void Process(StringBuilder processable, IDisplayElement referenceDisplayElement)
+            public void Process(StringBuilder processable, IMenuItem referenceMenuItem)
             {
-                var suffix = _config.GetSuffixFor(referenceDisplayElement, false);
+                var suffix = _config.GetSuffixFor(referenceMenuItem, false);
                 if (suffix.Length == 0)
                     return;
                 processable.Append(" " + suffix);

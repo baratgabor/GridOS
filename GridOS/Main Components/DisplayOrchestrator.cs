@@ -28,7 +28,7 @@ namespace IngameScript
             // What to do if non-empty element is removed? Remove all children, or put them somewhere else? How to react if we're displaying elements below a group node that is removed?
 
             // Root group displayed by default, parent of all other elements/groups
-            private IDisplayGroup _displayRoot = new DisplayGroup("Main");
+            private IMenuGroup _displayRoot = new MenuGroup("Main");
 
             private List<IMyTextSurface> _registeredTextSurfaces = new List<IMyTextSurface>();
             private List<DisplayController> _controllers = new List<DisplayController>();
@@ -64,7 +64,7 @@ namespace IngameScript
                             textSurface,
                             config,
                             _program.Runtime),
-                        new DisplayViewModel(
+                        new MenuViewModel(
                             _displayRoot),
                         _program)
                     );
@@ -89,7 +89,7 @@ namespace IngameScript
                 _registeredTextSurfaces.Remove(textSurface);
             }
 
-            public void RegisterDisplayElement(IDisplayElement element)
+            public void RegisterMenuItem(IMenuItem element)
             {
                 _displayRoot.AddChild(element);
             }

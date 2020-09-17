@@ -21,7 +21,7 @@ namespace IngameScript
         /// <summary>
         /// Breaks the provided content into lines according to the configured line length.
         /// </summary>
-        class WordWrapping : IDisplayElementProcessor
+        class WordWrapping : IMenuItemProcessor
         {
             protected IWordWrappingConfig _config;
 
@@ -30,7 +30,7 @@ namespace IngameScript
                 _config = config;
             }
 
-            public void Process(StringBuilder processable, IDisplayElement referenceDisplayElement)
+            public void Process(StringBuilder processable, IMenuItem referenceMenuItem)
             {
                 Process_inner(processable.ToString(), processable.Clear(), _config.LineLength, _config.Terminators);
             }

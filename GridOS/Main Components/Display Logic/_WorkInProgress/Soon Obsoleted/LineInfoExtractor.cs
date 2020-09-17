@@ -45,7 +45,7 @@ namespace IngameScript
                         args.LineInfo.Add(
                             new LineInfo(
                                 startPosition: currentPos + args.CurrentOutputLength,
-                                parentDisplayElement: args.Element,
+                                parentMenuItem: args.Element,
                                 bulletCharPosition: bulletCharPosition
                             )
                         );
@@ -73,7 +73,7 @@ namespace IngameScript
                     _buffer.Add(
                         new LineInfo(
                   //          startPosition: currentPos + args.CurrentOutputLength,
-                    //        parentDisplayElement: args.Element,
+                    //        parentMenuItem: args.Element,
                       //      bulletCharPosition: bulletCharPosition
                         )
                     );

@@ -27,7 +27,7 @@ namespace IngameScript
             public event Action<StringBuilder> RedrawRequired;
 
             protected IMenuContentSource _contentSource;
-            protected List<IDisplayElementProcessor> _pipeline = new List<IDisplayElementProcessor>();
+            protected List<IMenuItemProcessor> _pipeline = new List<IMenuItemProcessor>();
             protected StringBuilder _menuBuffer = new StringBuilder();
             protected StringBuilder _itemBuffer = new StringBuilder();
 
@@ -82,7 +82,7 @@ namespace IngameScript
                 _menuBuffer.Length -= 2;
             }
 
-            protected void OnContentChanged(IEnumerable<IDisplayElement> content)
+            protected void OnContentChanged(IEnumerable<IMenuItem> content)
             {
                 Process_Redraw();
             }
@@ -93,7 +93,7 @@ namespace IngameScript
                 RedrawRequired?.Invoke(_menuBuffer);
             }
 
-            public MenuProcessor AddProcessor(IDisplayElementProcessor processor)
+            public MenuProcessor AddProcessor(IMenuItemProcessor processor)
             {
                 _pipeline.Add(processor);
                 return this;

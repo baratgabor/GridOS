@@ -22,11 +22,11 @@ namespace IngameScript
 
         struct ContentChangeInfo
         {
-            public readonly List<IDisplayElement> Content;
+            public readonly List<IMenuItem> Content;
             public readonly List<string> NavigationPath;
-            public readonly IDisplayGroup PreviousContext;
+            public readonly IMenuGroup PreviousContext;
 
-            public ContentChangeInfo(List<IDisplayElement> content, List<string> navigationPath, IDisplayGroup previousContext)
+            public ContentChangeInfo(List<IMenuItem> content, List<string> navigationPath, IMenuGroup previousContext)
             {
                 Content = content;
                 NavigationPath = navigationPath;
@@ -39,7 +39,7 @@ namespace IngameScript
             public string Prefix { get; set; }
             public string Suffix { get; set; }
             public List<LineInfo> LineInfo { get; set; }
-            public IDisplayElement Element { get; set; }
+            public IMenuItem Element { get; set; }
             public int CurrentOutputLength { get; set; }
         }
 
@@ -75,8 +75,8 @@ namespace IngameScript
 
         interface IAffixConfig
         {
-            string GetPrefixFor(IDisplayElement element, bool selected);
-            string GetSuffixFor(IDisplayElement element, bool selected);
+            string GetPrefixFor(IMenuItem element, bool selected);
+            string GetSuffixFor(IMenuItem element, bool selected);
         }
 
         interface IViewConfig_Writeable
@@ -135,25 +135,25 @@ namespace IngameScript
                 Group = "»"
             };
 
-            public string GetPrefixFor(IDisplayElement element, bool selected)
+            public string GetPrefixFor(IMenuItem element, bool selected)
             {
                 if (selected) return GetAffix(element, selected, Prefixes_Selected);
                 else return GetAffix(element, selected, Prefixes_Unselected);
             }
 
-            public string GetSuffixFor(IDisplayElement element, bool selected)
+            public string GetSuffixFor(IMenuItem element, bool selected)
             {
                 if (selected) return GetAffix(element, selected, Suffixes_Selected);
                 else return GetAffix(element, selected, Suffixes_Unselected);
             }
 
-            protected string GetAffix(IDisplayElement element, bool selected, Affix affix)
+            protected string GetAffix(IMenuItem element, bool selected, Affix affix)
             {
                 string value = "";
 
-                if (element is IDisplayGroup)
+                if (element is IMenuGroup)
                     value = affix.Group;
-                else if (element is IDisplayCommand)
+                else if (element is IMenuCommand)
                     value = affix.Command;
                 else
                     value = affix.Element;

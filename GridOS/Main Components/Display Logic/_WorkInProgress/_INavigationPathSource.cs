@@ -21,8 +21,8 @@ namespace IngameScript
     {
         interface INavigationPathSource
         {
-            IEnumerable<IDisplayGroup> NavigationPath { get; }
-            event Action<IEnumerable<IDisplayGroup>> NavigationPathChanged;
+            IEnumerable<IMenuGroup> NavigationPath { get; }
+            event Action<IEnumerable<IMenuGroup>> NavigationPathChanged;
         }
     }
 }

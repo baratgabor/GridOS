@@ -19,15 +19,15 @@ namespace IngameScript
 {
     partial class Program
     {
-        class DisplayElementPresenter
+        class MenuItemPresenter
         {
-            public readonly IDisplayElement OriginalElement;
+            public readonly IMenuItem OriginalItem;
             public string PresentableContent { get; protected set; }
             public List<StringSegment> Lines { get; protected set; } = new List<StringSegment>();
 
-            public DisplayElementPresenter(IDisplayElement element, string content)
+            public MenuItemPresenter(IMenuItem item, string content)
             {
-                OriginalElement = element;
+                OriginalItem = item;
                 PresentableContent = content;
                 CreateLineInfo(content);
             }

@@ -21,7 +21,7 @@ namespace IngameScript
         /// <summary>
         /// Simply adds a prefix to the input.
         /// </summary>
-        class AddPrefix : IDisplayElementProcessor
+        class AddPrefix : IMenuItemProcessor
         {
             protected IAffixConfig _config;
 
@@ -30,7 +30,7 @@ namespace IngameScript
                 _config = config;
             }
 
-            public void Process(StringBuilder processable, IDisplayElement referenceDisplayElement)
+            public void Process(StringBuilder processable, IMenuItem referenceDisplayElement)
             {
                 var prefix = _config.GetPrefixFor(referenceDisplayElement, false);
                 if (prefix.Length == 0)

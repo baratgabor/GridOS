@@ -31,30 +31,29 @@ namespace IngameScript
             protected int _selectedLine; // Selected line is viewport-relative
             protected int _lineHeight => _viewportConfig.LineHeight;
 
-            protected int _firstDisplayElementIndex;
-            protected int _firstDisplayElementLineIndex;
+            protected int _firstMenuItemIndex;
+            protected int _firstMenuItemLineIndex;
             protected StringBuilder _buffer;
 
-            protected List<IDisplayElement> _menuElements => _menuContentSource.Content as List<IDisplayElement>;
+            protected List<IMenuItem> _menuElements => _menuContentSource.Content as List<IMenuItem>;
             protected IMenuContentSource _menuContentSource;
 
             protected IAffixConfig _affixConfig;
             protected IViewportConfig _viewportConfig;
 
-            IProcessor<IDisplayElement, string> _displayElementProcessor;
-            // TODO: Rename DisplayElementPresenter, it's a crap name
-            List<DisplayElementPresenter> _displayElementPresenters = new List<DisplayElementPresenter>();
+            IProcessor<IMenuItem, string> _menuItemProcessor;
+            List<MenuItemPresenter> _menuItemPresenters = new List<MenuItemPresenter>();
 
             public MenuViewModel(
                 IAffixConfig affixConfig,
                 IViewportConfig viewportConfig,
                 IMenuContentSource contentSource,
-                IProcessor<IDisplayElement, string> displayElementProcessor)
+                IProcessor<IMenuItem, string> displayElementProcessor)
             {
                 _affixConfig = affixConfig;
                 _viewportConfig = viewportConfig;
                 _menuContentSource = contentSource;
-                _displayElementProcessor = displayElementProcessor;
+                _menuItemProcessor = displayElementProcessor;
 
                 _menuContentSource.ContentChanged += OnContentChanged;
                 GenerateContent();
@@ -67,16 +66,16 @@ namespace IngameScript
                 _contentElementLog.Clear();
                 _buffer.Clear();
 
-                for (int elementIndex = _firstDisplayElementIndex, lineIndex = _firstDisplayElementLineIndex; elementIndex < _displayElementPresenters.Count; elementIndex++)
+                for (int elementIndex = _firstMenuItemIndex, lineIndex = _firstMenuItemLineIndex; elementIndex < _menuItemPresenters.Count; elementIndex++)
                 {
-                    var currentElement = _displayElementPresenters[elementIndex];
+                    var currentElement = _menuItemPresenters[elementIndex];
                     var copyStartPosition = currentElement.Lines[lineIndex].Start;
                     var copyEndPosition = currentElement.PresentableContent.Length;
 
                     var elementStartPosition = _buffer.Length;
                     _buffer.Append(currentElement.PresentableContent, copyStartPosition, copyEndPosition);
                     var elementEndPosition = _buffer.Length;
-                    _buffer.AppendLine(); // TODO: Should NewLines be integrated into DisplayElement processing result instead?
+                    _buffer.AppendLine(); // TODO: Should NewLines be integrated into MenuItem processing result instead?
 
                     _contentElementLog.Add(
                         new ElementStartEndPositions() {
@@ -91,25 +90,25 @@ namespace IngameScript
             protected void MoveToTop()
             {
                 _selectedLine = 0;
-                _firstDisplayElementIndex = 0;
-                _firstDisplayElementLineIndex = 0;
+                _firstMenuItemIndex = 0;
+                _firstMenuItemLineIndex = 0;
             }
 
             protected void GeneratePresenters()
             {
                 // We need to substract the line index to take into account ...
                 // ... how many lines of the element doesn't count, since they are out of viewport.
-                int lineCounter = 0 - _firstDisplayElementLineIndex;
+                int lineCounter = 0 - _firstMenuItemLineIndex;
 
-                for (int i = _firstDisplayElementIndex; i < _menuElements.Count; i++)
+                for (int i = _firstMenuItemIndex; i < _menuElements.Count; i++)
                 {
                     var element = _menuElements[i];
                     var elementPresenter =
-                        new DisplayElementPresenter(
+                        new MenuItemPresenter(
                             element,
-                            _displayElementProcessor.Process(element));
+                            _menuItemProcessor.Process(element));
 
-                    _displayElementPresenters.Add(elementPresenter);
+                    _menuItemPresenters.Add(elementPresenter);
                     lineCounter += elementPresenter.Lines.Count;
 
                     // Stop processing next element we already have enough elements to fill the viewport
@@ -118,7 +117,7 @@ namespace IngameScript
                 }
             }
 
-            private void OnContentChanged(IEnumerable<IDisplayElement> obj)
+            private void OnContentChanged(IEnumerable<IMenuItem> obj)
             {
                 GenerateContent();
             }

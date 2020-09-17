@@ -22,7 +22,7 @@ namespace IngameScript
         /// <summary>
         /// Adds a defined padding in front of all new lines in the string or StringBuilder.
         /// </summary>
-        class PadAllLines : IDisplayElementProcessor
+        class PadAllLines : IMenuItemProcessor
         {
             protected StringBuilder _builder = new StringBuilder();
             protected int _paddingLeft;
@@ -38,7 +38,7 @@ namespace IngameScript
                 _config = config;
             }
 
-            public void Process(StringBuilder processable, IDisplayElement referenceDisplayElement)
+            public void Process(StringBuilder processable, IMenuItem referenceMenuItem)
             {
                 // If padding not requested, no change needed
                 if (_config.PaddingLeft == 0)

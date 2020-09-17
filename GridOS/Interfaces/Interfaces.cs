@@ -65,42 +65,45 @@ namespace IngameScript
             void TryDispatch(string commandName);
         }
 
-        public interface IDisplayElement
+        public interface IMenuItem
         {
             string Label { get; set; }
-            event Action<IDisplayElement> LabelChanged;
+            event Action<IMenuItem> LabelChanged;
         }
 
-        interface IDisplayCommand : IDisplayElement
+        interface IMenuCommand : IMenuItem
         {
-            event Action<IDisplayCommand> Executed;
-            event Action<IDisplayCommand> BeforeExecute;
+            event Action<IMenuCommand> Executed;
+            event Action<IMenuCommand> BeforeExecute;
             void Execute();
         }
 
-        interface IDisplayGroup : IDisplayElement
+        interface IMenuGroup : IMenuItem
         {
-            void AddChild(IDisplayElement element);
-            void RemoveChild(IDisplayElement element);
-            List<IDisplayElement> GetChildren();
-            event Action<IDisplayGroup> ChildrenChanged;
-            event Action<IDisplayElement> ChildLabelChanged;
+            void AddChild(IMenuItem element);
+            event Action<IMenuItem> ChildAdded;
+
+            void RemoveChild(IMenuItem element);
+            event Action<IMenuItem> ChildRemoved;
+
+            event Action<IMenuItem> ChildChanged;
+            List<IMenuItem> GetChildren();
 
             void Open();
-            event Action<IDisplayGroup> BeforeOpen;
-            event Action<IDisplayGroup> Opened;
+            event Action<IMenuGroup> Opening;
+            event Action<IMenuGroup> Opened;
            
             void Close();
-            event Action<IDisplayGroup> BeforeClose;
-            event Action<IDisplayGroup> Closed;
+            event Action<IMenuGroup> Closing;
+            event Action<IMenuGroup> Closed;
 
             int OpenedBy { get; }
             bool ShowBackCommandAtBottom { get; }
         }
 
-        interface IDisplayElementPublisher
+        interface IMenuItemPublisher
         {
-            List<IDisplayElement> DisplayElements { get; }
+            List<IMenuItem> MenuItems { get; }
         }
     }
 }

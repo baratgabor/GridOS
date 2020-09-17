@@ -69,11 +69,11 @@ namespace IngameScript
                     _commandDispatcher.AddCommands((module as ICommandPublisher).Commands);
                 }
 
-                if (module is IDisplayElementPublisher)
+                if (module is IMenuItemPublisher)
                 {
-                    foreach (var e in ((IDisplayElementPublisher)module).DisplayElements)
+                    foreach (var e in ((IMenuItemPublisher)module).MenuItems)
                     {
-                        _displayOrchestrator.RegisterDisplayElement(e);
+                        _displayOrchestrator.RegisterMenuItem(e);
                     }
                 }
 
