@@ -73,7 +73,7 @@ namespace IngameScript
         {
             void AddChild(IDisplayElement element);
             void RemoveChild(IDisplayElement element);
-            List<IDisplayElement> GetChildren();
+            IEnumerable<IDisplayElement> GetChildren();
             event Action<IDisplayGroup> ChildrenChanged;
             event Action<IDisplayElement> ChildLabelChanged;
 

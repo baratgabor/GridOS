@@ -76,7 +76,7 @@ namespace IngameScript
                     Closed?.Invoke(this);
             }
 
-            public List<IDisplayElement> GetChildren()
+            public IEnumerable<IDisplayElement> GetChildren()
             {
                 return _children;
             }
