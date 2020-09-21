@@ -69,9 +69,9 @@ namespace IngameScript
                     _commandDispatcher.AddCommands((module as ICommandPublisher).Commands);
                 }
 
-                if (module is IDisplayElementPublisher)
+                if (module is IDisplayContentPublisher)
                 {
-                    foreach (var e in ((IDisplayElementPublisher)module).DisplayElements)
+                    foreach (var e in ((IDisplayContentPublisher)module).DisplayElements)
                     {
                         _displayOrchestrator.RegisterDisplayElement(e);
                     }

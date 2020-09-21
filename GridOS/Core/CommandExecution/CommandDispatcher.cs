@@ -1,18 +1,5 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
-using VRageMath;
 
 namespace IngameScript
 {
@@ -34,7 +21,7 @@ namespace IngameScript
                 return this;
             }
 
-            public void AddCommands(List<CommandItem> commands)
+            public void AddCommands(IEnumerable<CommandItem> commands)
             {
                 foreach (CommandItem c in commands)
                 {
@@ -42,7 +29,7 @@ namespace IngameScript
                 }
             }
 
-            public void AddCommands_OverwriteExisting(List<CommandItem> commands)
+            public void AddCommands_OverwriteExisting(IEnumerable<CommandItem> commands)
             {
                 foreach (CommandItem c in commands)
                 {
@@ -66,7 +53,7 @@ namespace IngameScript
                 return s;
             }
 
-            public void RemoveCommands(List<CommandItem> commands)
+            public void RemoveCommands(IEnumerable<CommandItem> commands)
             {
                 foreach (CommandItem c in commands)
                 {
