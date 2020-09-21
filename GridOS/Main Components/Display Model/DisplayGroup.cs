@@ -32,9 +32,7 @@ namespace IngameScript
 
             public event Action<IDisplayGroup> ChildrenChanged;
             public event Action<IDisplayElement> ChildLabelChanged;
-            public event Action<IDisplayGroup> BeforeOpen;
             public event Action<IDisplayGroup> Opened;
-            public event Action<IDisplayGroup> BeforeClose;
             public event Action<IDisplayGroup> Closed;
 
             public DisplayGroup(string label) : base(label)
@@ -62,7 +60,6 @@ namespace IngameScript
 
             public void Open()
             {
-                BeforeOpen?.Invoke(this);
                 _openedBy++;
 
                 // Invoke only if opened first (multidisplay support)
@@ -72,7 +69,6 @@ namespace IngameScript
 
             public void Close()
             {
-                BeforeClose?.Invoke(this);
                 _openedBy--;
 
                 // Invoke only if closed by all (multidisplay support)

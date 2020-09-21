@@ -87,11 +87,9 @@ namespace IngameScript
             event Action<IDisplayElement> ChildLabelChanged;
 
             void Open();
-            event Action<IDisplayGroup> BeforeOpen;
             event Action<IDisplayGroup> Opened;
            
             void Close();
-            event Action<IDisplayGroup> BeforeClose;
             event Action<IDisplayGroup> Closed;
 
             int OpenedBy { get; }
