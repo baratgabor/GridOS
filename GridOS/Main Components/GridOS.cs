@@ -16,7 +16,7 @@ namespace IngameScript
             private Action<string> _echo;
             private IMyGridProgramRuntimeInfo _runtime;
 
-            private IUpdateDispatcherAndController _updateDispatcherAndController;
+            private IUpdateDispatcher _updateDispatcher;
             private ICommandDispatcher _commandDispatcher;
             private DisplayOrchestrator _displayOrchestrator;
 
@@ -39,7 +39,7 @@ namespace IngameScript
                 Action<UpdateFrequency> _updateFrequencySetter = (x) => _runtime.UpdateFrequency = x;
 
                 _commandDispatcher = new CommandDispatcher();
-                _updateDispatcherAndController = new UpdateDispatcherAndController1(_echo, _updateFrequencyGetter, _updateFrequencySetter);
+                _updateDispatcher = new UpdateDispatcher_v1(_echo, _updateFrequencyGetter, _updateFrequencySetter);
                 _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, p);
 
                 _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
@@ -61,7 +61,7 @@ namespace IngameScript
 
                 if (module is IUpdateSubscriber)
                 {
-                    _updateDispatcherAndController.Add(module as IUpdateSubscriber);
+                    _updateDispatcher.Add(module as IUpdateSubscriber);
                 }
 
                 if (module is ICommandPublisher)
@@ -105,7 +105,7 @@ namespace IngameScript
                 _echo($"Average Execusion Time: {_avgExecTime:G3}");
 
                 // TODO: Structure exception handling properly
-                _updateDispatcherAndController.Dispatch(updateType);
+                _updateDispatcher.Dispatch(updateType);
                 try
                 {
                     if (argument != "")
@@ -145,12 +145,12 @@ namespace IngameScript
 
             private void CommandHandler_DisableUpdates(CommandItem sender, string param)
             {
-                _updateDispatcherAndController.DisableUpdates();
+                _updateDispatcher.DisableUpdates();
             }
 
             private void CommandHandler_EnableUpdates(CommandItem sender, string param)
             {
-                _updateDispatcherAndController.EnableUpdates();
+                _updateDispatcher.EnableUpdates();
             }
         }
     }

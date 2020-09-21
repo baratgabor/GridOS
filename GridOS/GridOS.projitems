@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ConfigurationDump.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ObservableT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Data Objects\ObservableUpdateFrequency.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IUpdateDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Built-In Menu\HelpMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Controls\Breadcrumb.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Main Components\Display Logic\Controls\MenuContentBuilder.cs" />

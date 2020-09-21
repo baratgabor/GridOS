@@ -1,18 +1,7 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
+﻿using Sandbox.ModAPI.Ingame;
 using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
-using System.Text;
 using System;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
-using VRageMath;
 
 namespace IngameScript
 {
@@ -22,7 +11,7 @@ namespace IngameScript
         /// Your friendly class responsible for executing the appropriate modules at each update cycle. Also handles modules' UpdateFrequency changes, and establishes and sets the base UpdateFrequency for the Programmable Block.
         /// This is Strategy1, optimized for efficiently running large number of components with the same UpdateFrequency. Modules' UpdateFrequency changes are relatively expensive with this strategy.
         /// </summary>
-        class UpdateDispatcherAndController1 : IUpdateDispatcherAndController
+        class UpdateDispatcher_v1 : IUpdateDispatcher
         {
             // TODO: replace dictionary with List<KeyValuePair>, since we're iterating it now
             private Dictionary<UpdateType, List<IUpdateSubscriber>> _moduleLists = new Dictionary<UpdateType, List<IUpdateSubscriber>>();
@@ -40,7 +29,7 @@ namespace IngameScript
             private Action<string> _echo;
             private ProgressIndicator _progress = new ProgressIndicator();
 
-            public UpdateDispatcherAndController1(Action<string> echo, Func<UpdateFrequency> updateFrequencyGetter, Action<UpdateFrequency> updateFrequencySetter)
+            public UpdateDispatcher_v1(Action<string> echo, Func<UpdateFrequency> updateFrequencyGetter, Action<UpdateFrequency> updateFrequencySetter)
             {
                 _echo = echo;
                 _updateFrequencyGetter = updateFrequencyGetter;
@@ -184,12 +173,11 @@ namespace IngameScript
         }
 
 
-
         /// <summary>
         /// Your friendly class responsible for executing the appropriate modules at each update cycle. Also handles modules' UpdateFrequency changes, and establishes and sets the base UpdateFrequency for the Programmable Block.
         /// This is Strategy2, with simplified, flat storage, runs marginally slower, but difference is negligible with low number of modules. Modules' UpdateFrequency changes are cheap with this strategy.
         /// </summary>
-        class UpdateDispatcherAndController2 : IUpdateDispatcherAndController
+        class UpdateDispatcher_v2 : IUpdateDispatcher
         {
             private List<IUpdateSubscriber> _moduleList = new List<IUpdateSubscriber>();
             private List<KeyValuePair<UpdateType, IUpdateSubscriber>> _moduleList2 = new List<KeyValuePair<UpdateType, IUpdateSubscriber>>();
@@ -200,7 +188,7 @@ namespace IngameScript
             private Action<string> _echo;
             private ProgressIndicator _progress = new ProgressIndicator();
 
-            public UpdateDispatcherAndController2(Action<string> echo, Func<UpdateFrequency> updateFrequencyGetter, Action<UpdateFrequency> updateFrequencySetter)
+            public UpdateDispatcher_v2(Action<string> echo, Func<UpdateFrequency> updateFrequencyGetter, Action<UpdateFrequency> updateFrequencySetter)
             {
                 _echo = echo;
                 _updateFrequencyGetter = updateFrequencyGetter;
