@@ -43,7 +43,7 @@ namespace IngameScript
             public StringBuilder Process(string input, ProcessingArgs args, StringBuilder output, bool clearOutput = false)
             {
                 // TODO: highly assumptious; bulletCharPosition is problematic, since we switch to prefix strings, which can be longer than 1 char.
-                // also assumes that structure is "padding + prefix + element", but actually order can be any
+                // also assumes that structure is "padding + prefix + item", but actually order can be any
                 int bulletCharPosition = args.CurrentOutputLength + _config.PaddingLeft;
 
                 for (int currentPos = 0; currentPos != -1; currentPos = input.IndexOf(Environment.NewLine, currentPos))
@@ -51,7 +51,7 @@ namespace IngameScript
                     if (currentPos != -1)
                     {
                         if (currentPos != 0) currentPos += Environment.NewLine.Length;
-                        args.LineInfo.Add(new LineInfo(currentPos + args.CurrentOutputLength, args.Element, bulletCharPosition));
+                        args.LineInfo.Add(new LineInfo(currentPos + args.CurrentOutputLength, args.Item, bulletCharPosition));
                         currentPos++;
                     }
                 }

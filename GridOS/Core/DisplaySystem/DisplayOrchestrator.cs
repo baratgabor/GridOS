@@ -24,11 +24,11 @@ namespace IngameScript
         /// </summary>
         class DisplayOrchestrator
         {
-            // TODO: Now that the menu system is dynamic... need to think about whether we need to dispose stuff when an element is removed.
-            // What to do if non-empty element is removed? Remove all children, or put them somewhere else? How to react if we're displaying elements below a group node that is removed?
+            // TODO: Now that the menu system is dynamic... need to think about whether we need to dispose stuff when an item is removed.
+            // What to do if non-empty item is removed? Remove all children, or put them somewhere else? How to react if we're displaying items below a group node that is removed?
 
-            // Root group displayed by default, parent of all other elements/groups
-            private IDisplayGroup _displayRoot = new DisplayGroup("Main");
+            // Root group displayed by default, parent of all other items/groups
+            private IMenuGroup _menuRoot = new MenuGroup("Main");
 
             private List<IMyTextSurface> _registeredTextSurfaces = new List<IMyTextSurface>();
             private List<DisplayController> _controllers = new List<DisplayController>();
@@ -43,7 +43,7 @@ namespace IngameScript
                 _commandDispatcher = commandDispatcher;
                 _program = program;
 
-                _displayRoot.AddChild(new HelpMenu());
+                _menuRoot.AddChild(new HelpMenu());
             }
 
             public void RegisterTextSurface(IMyTextSurface textSurface)
@@ -64,8 +64,8 @@ namespace IngameScript
                             textSurface,
                             config,
                             _program.Runtime),
-                        new DisplayViewModel(
-                            _displayRoot),
+                        new MenuViewModel(
+                            _menuRoot),
                         _program)
                     );
                 }
@@ -89,9 +89,9 @@ namespace IngameScript
                 _registeredTextSurfaces.Remove(textSurface);
             }
 
-            public void RegisterDisplayElement(IDisplayElement element)
+            public void RegisterMenuItem(IMenuItem item)
             {
-                _displayRoot.AddChild(element);
+                _menuRoot.AddChild(item);
             }
 
             private string NextControllerName()

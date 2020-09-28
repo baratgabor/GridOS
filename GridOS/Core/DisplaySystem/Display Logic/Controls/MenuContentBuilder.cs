@@ -7,15 +7,15 @@ namespace IngameScript
     partial class Program
 	{
         /// <summary>
-        /// Content builder that builds content as a single string from a list of elements
+        /// Content builder that builds content as a single string from a list of items
         /// </summary>
         class MenuContentBuilder : ILineInfoProviderControl
         {
             public List<LineInfo> LineInfo => _lineInfo;
             public event Action<StringBuilder> RedrawRequired;
-            public Func<List<IDisplayElement>> ContentSource;
+            public Func<List<IMenuItem>> ContentSource;
 
-            protected List<IDisplayElement> _menuItems;
+            protected List<IMenuItem> _menuItems;
             protected List<ITextProcessor> _pipeline = new List<ITextProcessor>();
             protected StringBuilder _menuBuffer = new StringBuilder();
             protected StringBuilder _itemBuffer = new StringBuilder();
@@ -43,7 +43,7 @@ namespace IngameScript
                     var item = _menuItems[i];
                     _processingArgs.Prefix = _config.GetPrefixFor(item, false);
                     _processingArgs.Suffix = _config.GetSuffixFor(item, false);
-                    _processingArgs.Element = item;
+                    _processingArgs.Item = item;
                     _processingArgs.CurrentOutputLength = _menuBuffer.Length;
 
                     _itemBuffer
@@ -65,20 +65,20 @@ namespace IngameScript
                 return _menuBuffer;
             }
 
-            public MenuContentBuilder AddContent(List<IDisplayElement> content)
+            public MenuContentBuilder AddContent(List<IMenuItem> content)
             {
                 _menuItems = content;
                 Process_Redraw();
                 return this;
             }
 
-            protected void Add_Process_NoDraw(List<IDisplayElement> content)
+            protected void Add_Process_NoDraw(List<IMenuItem> content)
             {
                 _menuItems = content;
                 Process();
             }
 
-            internal void OnElementChanged(IDisplayElement obj)
+            internal void OnItemChanged(IMenuItem _)
             {
                 Process_Redraw();
             }
@@ -114,9 +114,9 @@ namespace IngameScript
                 return _menuBuffer;
             }
 
-            public void OnContentChanged(List<IDisplayElement> elements)
+            public void OnContentChanged(List<IMenuItem> items)
             {
-                AddContent(elements);
+                AddContent(items);
             }
         }
     }

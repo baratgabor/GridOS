@@ -21,40 +21,40 @@ namespace IngameScript
         /// <summary>
         /// Specialized node type that holds children nodes, used for creating hierarchical structures.
         /// </summary>
-        class DisplayGroup : DisplayElement, IDisplayGroup
+        class MenuGroup : MenuItem, IMenuGroup
         {
             public int OpenedBy => _openedBy;
             protected int _openedBy = 0;
 
             public bool ShowBackCommandAtBottom { get; internal set; } = false;
 
-            protected List<IDisplayElement> _children = new List<IDisplayElement>();
+            protected List<IMenuItem> _children = new List<IMenuItem>();
 
-            public event Action<IDisplayGroup> ChildrenChanged;
-            public event Action<IDisplayElement> ChildLabelChanged;
-            public event Action<IDisplayGroup> Opened;
-            public event Action<IDisplayGroup> Closed;
+            public event Action<IMenuGroup> ChildrenChanged;
+            public event Action<IMenuItem> ChildLabelChanged;
+            public event Action<IMenuGroup> Opened;
+            public event Action<IMenuGroup> Closed;
 
-            public DisplayGroup(string label) : base(label)
+            public MenuGroup(string label) : base(label)
             { }
 
-            public void AddChild(IDisplayElement element)
+            public void AddChild(IMenuItem item)
             {
-                if (_children.Contains(element))
+                if (_children.Contains(item))
                     return;
 
-                _children.Add(element);
-                element.LabelChanged += HandleChildrenLabelChanges;
+                _children.Add(item);
+                item.LabelChanged += HandleChildrenLabelChanges;
                 ChildrenChanged?.Invoke(this);
             }
 
-            public void RemoveChild(IDisplayElement element)
+            public void RemoveChild(IMenuItem item)
             {
-                if (!_children.Contains(element))
+                if (!_children.Contains(item))
                     return;
 
-                _children.Remove(element);
-                element.LabelChanged -= HandleChildrenLabelChanges;
+                _children.Remove(item);
+                item.LabelChanged -= HandleChildrenLabelChanges;
                 ChildrenChanged?.Invoke(this);
             }
 
@@ -76,12 +76,12 @@ namespace IngameScript
                     Closed?.Invoke(this);
             }
 
-            public IEnumerable<IDisplayElement> GetChildren()
+            public IEnumerable<IMenuItem> GetChildren()
             {
                 return _children;
             }
 
-            protected void HandleChildrenLabelChanges(IDisplayElement element)
+            protected void HandleChildrenLabelChanges(IMenuItem item)
             {
                 if (_openedBy <= 0)
                     return;

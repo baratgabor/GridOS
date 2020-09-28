@@ -24,18 +24,18 @@ namespace IngameScript
         class DisplayElementMenuHandler
         {
             private Flush _flush = Flush.All; // Cache flushing controller flags
-            private List<IDisplayElement> _elements; // Raw content to be abstracted
+            private List<IMenuItem> _elements; // Raw content to be abstracted
             
             /*
             private Dictionary<Type, char> _prefixMap = new Dictionary<Type, char>() {
-                { typeof(IDisplayCommand), '·' },
-                { typeof(IDisplayGroup), '·' },
-                { typeof(IDisplayElement), ' ' }
+                { typeof(IMenuCommand), '·' },
+                { typeof(IMenuGroup), '·' },
+                { typeof(IMenuItem), ' ' }
             };
             private Dictionary<Type, char> _suffixMap = new Dictionary<Type, char>() {
-                { typeof(IDisplayCommand), ' ' },
-                { typeof(IDisplayGroup), '»' },
-                { typeof(IDisplayElement), ' ' }
+                { typeof(IMenuCommand), ' ' },
+                { typeof(IMenuGroup), '»' },
+                { typeof(IMenuItem), ' ' }
             };
             */
 
@@ -108,17 +108,17 @@ namespace IngameScript
             /// Replace all content and reset state.
             /// </summary>
             /// <param name="elements">Elements to set.</param>
-            public void SetMenuElements(List<IDisplayElement> elements)
+            public void SetMenuElements(List<IMenuItem> elements)
             {
 
             }
 
-            public void SetSelectedElement(IDisplayElement element)
+            public void SetSelectedElement(IMenuItem element)
             {
             }
 
             // TODO: Test and make it nicer
-            public void UpdateElement(IDisplayElement element)
+            public void UpdateElement(IMenuItem element)
             {
 
             }
@@ -180,13 +180,13 @@ namespace IngameScript
         struct LineInfo
         {
             public readonly int StartPosition;
-            public readonly IDisplayElement ParentDisplayElement;
+            public readonly IMenuItem ParentMenuItem;
             public readonly int BulletCharPosition;
 
-            public LineInfo(int startPosition, IDisplayElement parentDisplayElement, int bulletCharPosition)
+            public LineInfo(int startPosition, IMenuItem parentMenuItem, int bulletCharPosition)
             {
                 StartPosition = startPosition;
-                ParentDisplayElement = parentDisplayElement;
+                ParentMenuItem = parentMenuItem;
                 BulletCharPosition = bulletCharPosition;
             }
         }

@@ -5,9 +5,9 @@ namespace IngameScript
     partial class Program
     {
         /// <summary>
-        /// Simple, non-actionable element to be displayed, with support for update propagation.
+        /// Simple, non-actionable item to be displayed, with support for update propagation.
         /// </summary>
-        public interface IDisplayElement
+        public interface IMenuItem
         {
             /// <summary>
             /// The content to be displayed.
@@ -17,7 +17,7 @@ namespace IngameScript
             /// <summary>
             /// Event that notifies subscribers when the content changes.
             /// </summary>
-            event Action<IDisplayElement> LabelChanged;
+            event Action<IMenuItem> LabelChanged;
         }
     }
 }

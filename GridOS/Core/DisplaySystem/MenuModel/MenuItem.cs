@@ -22,7 +22,7 @@ namespace IngameScript
         /// Basic node in composite pattern based tree structure, used for displaying non-interactive text content.
         /// Serves as a base class for other node types.
         /// </summary>
-        public class DisplayElement : IDisplayElement
+        public class MenuItem : IMenuItem
         {
             public string Label
             {
@@ -31,9 +31,9 @@ namespace IngameScript
             }
             protected string _label;
 
-            public event Action<IDisplayElement> LabelChanged;
+            public event Action<IMenuItem> LabelChanged;
 
-            public DisplayElement(string label)
+            public MenuItem(string label)
             {
                 _label = label;
             }

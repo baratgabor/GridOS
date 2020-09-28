@@ -27,7 +27,7 @@ namespace IngameScript
             protected int _selectedLine = 0;
             protected IScrollable _scrollableBox;
             protected int _startingPosition => _scrollableBox.LineInfo[_scrollableBox.VerticalOffset].StartPosition;
-            public event Action<IDisplayElement> ItemSelected;
+            public event Action<IMenuItem> ItemSelected;
 
             public NavigationFrame(INavConfig config, IScrollable scrollableBox) : base(scrollableBox)
             {
@@ -90,7 +90,7 @@ namespace IngameScript
                 if (_selectedLine > _scrollableBox.LineInfo.Count - 1)
                     return false;
 
-                ItemSelected?.Invoke(_scrollableBox.LineInfo[_selectedLine].ParentDisplayElement);
+                ItemSelected?.Invoke(_scrollableBox.LineInfo[_selectedLine].ParentMenuItem);
                 return true;
             }
 
@@ -108,7 +108,7 @@ namespace IngameScript
 
                 if (obj.PreviousContext != null)
                 {
-                    var lineInfo = _scrollableBox.LineInfo.FirstOrDefault(x => x.ParentDisplayElement == obj.PreviousContext);
+                    var lineInfo = _scrollableBox.LineInfo.FirstOrDefault(x => x.ParentMenuItem == obj.PreviousContext);
                     if (!object.Equals(lineInfo, default(LineInfo)))
                     {
                         _selectedLine = _scrollableBox.LineInfo.IndexOf(lineInfo);

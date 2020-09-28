@@ -21,52 +21,52 @@
 
             public Affix Prefixes_Unselected { get; set; } = new Affix()
             {
-                Element = " ",
+                Item = " ",
                 Command = "·",
                 Group = "·"
             };
 
             public Affix Suffixes_Unselected { get; set; } = new Affix()
             {
-                Element = "",
+                Item = "",
                 Command = "",
                 Group = "»"
             };
             public Affix Prefixes_Selected { get; set; } = new Affix()
             {
-                Element = " ",
+                Item = " ",
                 Command = "•",
                 Group = "•"
             };
             public Affix Suffixes_Selected { get; set; } = new Affix()
             {
-                Element = "",
+                Item = "",
                 Command = "",
                 Group = "»"
             };
 
-            public string GetPrefixFor(IDisplayElement element, bool selected)
+            public string GetPrefixFor(IMenuItem item, bool selected)
             {
-                if (selected) return GetAffix(element, selected, Prefixes_Selected);
-                else return GetAffix(element, selected, Prefixes_Unselected);
+                if (selected) return GetAffix(item, selected, Prefixes_Selected);
+                else return GetAffix(item, selected, Prefixes_Unselected);
             }
 
-            public string GetSuffixFor(IDisplayElement element, bool selected)
+            public string GetSuffixFor(IMenuItem item, bool selected)
             {
-                if (selected) return GetAffix(element, selected, Suffixes_Selected);
-                else return GetAffix(element, selected, Suffixes_Unselected);
+                if (selected) return GetAffix(item, selected, Suffixes_Selected);
+                else return GetAffix(item, selected, Suffixes_Unselected);
             }
 
-            protected string GetAffix(IDisplayElement element, bool selected, Affix affix)
+            protected string GetAffix(IMenuItem item, bool selected, Affix affix)
             {
                 string value = "";
 
-                if (element is IDisplayGroup)
+                if (item is IMenuGroup)
                     value = affix.Group;
-                else if (element is IDisplayCommand)
+                else if (item is IMenuCommand)
                     value = affix.Command;
                 else
-                    value = affix.Element;
+                    value = affix.Item;
 
                 return value;
             }
@@ -75,7 +75,7 @@
             {
                 public string Group;
                 public string Command;
-                public string Element;
+                public string Item;
             }
         }
     }

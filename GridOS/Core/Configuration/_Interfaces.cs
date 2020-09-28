@@ -6,11 +6,11 @@ namespace IngameScript
 	{
         struct ContentChangeInfo
         {
-            public readonly List<IDisplayElement> Content;
+            public readonly List<IMenuItem> Content;
             public readonly List<string> NavigationPath;
-            public readonly IDisplayGroup PreviousContext;
+            public readonly IMenuGroup PreviousContext;
 
-            public ContentChangeInfo(List<IDisplayElement> content, List<string> navigationPath, IDisplayGroup previousContext)
+            public ContentChangeInfo(List<IMenuItem> content, List<string> navigationPath, IMenuGroup previousContext)
             {
                 Content = content;
                 NavigationPath = navigationPath;
@@ -23,7 +23,7 @@ namespace IngameScript
             public string Prefix { get; set; }
             public string Suffix { get; set; }
             public List<LineInfo> LineInfo { get; set; }
-            public IDisplayElement Element { get; set; }
+            public IMenuItem Item { get; set; }
             public int CurrentOutputLength { get; set; }
         }
 
@@ -59,8 +59,8 @@ namespace IngameScript
 
         interface IAffixConfig
         {
-            string GetPrefixFor(IDisplayElement element, bool selected);
-            string GetSuffixFor(IDisplayElement element, bool selected);
+            string GetPrefixFor(IMenuItem item, bool selected);
+            string GetSuffixFor(IMenuItem item, bool selected);
         }
 
         interface IViewConfig_Writeable

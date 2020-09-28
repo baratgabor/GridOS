@@ -27,7 +27,7 @@ namespace IngameScript
             public string Name => _name;
             private string _name;
             private IView _view;
-            private DisplayViewModel _viewModel;
+            private MenuViewModel _viewModel;
             private ICommandDispatcher _commandDispatcher;
             private MyGridProgram _program;
 
@@ -35,7 +35,7 @@ namespace IngameScript
             private MenuContentBuilder _menuBuilder;
             private Breadcrumb _breadcrumb;
 
-            public DisplayController(string name, ICommandDispatcher commandDispatcher, SmartConfig config, IView view, DisplayViewModel viewModel, MyGridProgram program)
+            public DisplayController(string name, ICommandDispatcher commandDispatcher, SmartConfig config, IView view, MenuViewModel viewModel, MyGridProgram program)
             {
                 _name = name;
                 _program = program;
@@ -69,7 +69,7 @@ namespace IngameScript
                 _viewModel.PathChanged += _navigation.OnPathChanged;
                 //_viewModel.PathChanged += _menuBuilder.OnPathChanged; // _navigation handles all now
                 _viewModel.ContentChanged += _menuBuilder.OnContentChanged;
-                _viewModel.ElementChanged += _menuBuilder.OnElementChanged;
+                _viewModel.ItemChanged += _menuBuilder.OnItemChanged;
                 _navigation.ItemSelected += _viewModel.Execute;
                 
                 _commandDispatcher
