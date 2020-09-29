@@ -35,14 +35,22 @@ namespace IngameScript
                 if (clearOutput == true)
                     output.Clear();
 
-                output.Append(input + (args.Suffix.Length > 0 ? " " : "") + args.Suffix);
+                output.Append(input);
+                
+                if (args.Suffix != ' ')
+                {
+                    output
+                        .Append(' ')
+                        .Append(args.Suffix);
+                }
+
                 return output;
             }
 
             public void Process(StringBuilder inputOutput, ProcessingArgs args)
             {
-                if (args.Suffix.Length > 0)
-                    inputOutput.Append(" " + args.Suffix);
+                inputOutput.Append(' ');
+                inputOutput.Append(args.Suffix);
             }
         }
     }

@@ -21,46 +21,45 @@
 
             public Affix Prefixes_Unselected { get; set; } = new Affix()
             {
-                Item = " ",
-                Command = "·",
-                Group = "·"
+                Item = ' ',
+                Command = '·',
+                Group = '·'
             };
 
             public Affix Suffixes_Unselected { get; set; } = new Affix()
             {
-                Item = "",
-                Command = "",
-                Group = "»"
+                Item = ' ',
+                Command = ' ',
+                Group = '»'
             };
             public Affix Prefixes_Selected { get; set; } = new Affix()
             {
-                Item = " ",
-                Command = "•",
-                Group = "•"
+                Item = ' ',
+                Command = '•',
+                Group = '•'
             };
             public Affix Suffixes_Selected { get; set; } = new Affix()
             {
-                Item = "",
-                Command = "",
-                Group = "»"
+                Item = ' ',
+                Command = ' ',
+                Group = '»'
             };
 
-            public string GetPrefixFor(IMenuItem item, bool selected)
+            public char GetPrefixFor(IMenuItem item, bool selected)
             {
                 if (selected) return GetAffix(item, selected, Prefixes_Selected);
                 else return GetAffix(item, selected, Prefixes_Unselected);
             }
 
-            public string GetSuffixFor(IMenuItem item, bool selected)
+            public char GetSuffixFor(IMenuItem item, bool selected)
             {
                 if (selected) return GetAffix(item, selected, Suffixes_Selected);
                 else return GetAffix(item, selected, Suffixes_Unselected);
             }
 
-            protected string GetAffix(IMenuItem item, bool selected, Affix affix)
+            protected char GetAffix(IMenuItem item, bool selected, Affix affix)
             {
-                string value = "";
-
+                char value;
                 if (item is IMenuGroup)
                     value = affix.Group;
                 else if (item is IMenuCommand)
@@ -73,9 +72,9 @@
 
             public struct Affix
             {
-                public string Group;
-                public string Command;
-                public string Item;
+                public char Group;
+                public char Command;
+                public char Item;
             }
         }
     }

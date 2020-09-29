@@ -20,8 +20,8 @@ namespace IngameScript
 
         class ProcessingArgs
         {
-            public string Prefix { get; set; }
-            public string Suffix { get; set; }
+            public char Prefix { get; set; }
+            public char Suffix { get; set; }
             public List<LineInfo> LineInfo { get; set; }
             public IMenuItem Item { get; set; }
             public int CurrentOutputLength { get; set; }
@@ -59,8 +59,8 @@ namespace IngameScript
 
         interface IAffixConfig
         {
-            string GetPrefixFor(IMenuItem item, bool selected);
-            string GetSuffixFor(IMenuItem item, bool selected);
+            char GetPrefixFor(IMenuItem item, bool selected);
+            char GetSuffixFor(IMenuItem item, bool selected);
         }
 
         interface IViewConfig_Writeable
