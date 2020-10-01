@@ -2,10 +2,10 @@
 {
     partial class Program
     {
-        class SmartConfig : IWordWrappingConfig, IViewportConfig, IPaddingConfig, INavConfig, IAffixConfig, IBreadcrumbConfig, IViewConfig_Writeable
+        class SmartConfig : IMenuPresentationConfig, IBreadcrumbConfig, IViewConfig_Writeable
         {
             public int LineLength { get; set; }
-            public char[] Terminators { get; set; } = { ' ', '-' };
+            public char[] WordDelimiters { get; set; } = { ' ', '-' };
 
             public int LineHeight { get; set; }
 

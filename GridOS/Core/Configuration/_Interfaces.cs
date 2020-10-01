@@ -27,39 +27,25 @@ namespace IngameScript
             public int CurrentOutputLength { get; set; }
         }
 
-        interface IWordWrappingConfig
-        {
-            int LineLength { get; }
-            char[] Terminators { get; }
-        }
-
-        interface IViewportConfig
+        interface IMenuPresentationConfig
         {
             int LineHeight { get; }
-        }
-
-        interface IPaddingConfig
-        {
-            char PaddingChar { get; }
+            int LineLength { get; }
+            char[] WordDelimiters { get; }
             int PaddingLeft { get; }
+            char PaddingChar { get; }
+            char SelectionMarker { get; }
+            char GetPrefixFor(IMenuItem item, bool selected);
+            char GetSuffixFor(IMenuItem item, bool selected);
         }
 
-        interface IBreadcrumbConfig : IPaddingConfig
+        interface IBreadcrumbConfig
         {
             string PathSeparator { get; }
             string SeparatorLineTop { get; }
             string SeparatorLineBottom { get; }
-        }
-
-        interface INavConfig
-        {
-            char SelectionMarker { get; }
-        }
-
-        interface IAffixConfig
-        {
-            char GetPrefixFor(IMenuItem item, bool selected);
-            char GetSuffixFor(IMenuItem item, bool selected);
+            int PaddingLeft { get; }
+            char PaddingChar { get; }
         }
 
         interface IViewConfig_Writeable

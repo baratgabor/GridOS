@@ -26,9 +26,9 @@ namespace IngameScript
         class LineInfoExtractor : ITextProcessor
         {
             protected StringBuilder _buffer = new StringBuilder();
-            protected IPaddingConfig _config;
+            protected IMenuPresentationConfig _config;
 
-            public LineInfoExtractor(IPaddingConfig config)
+            public LineInfoExtractor(IMenuPresentationConfig config)
             {
                 _config = config;
             }

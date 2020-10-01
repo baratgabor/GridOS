@@ -27,11 +27,11 @@ namespace IngameScript
             protected int _paddingLeft;
             protected char _paddingChar;
             protected string _paddingString;
-            protected IPaddingConfig _config;
+            protected IMenuPresentationConfig _config;
 
             protected string _paddingString_FirstLine;
 
-            public PadAllLines(IPaddingConfig config)
+            public PadAllLines(IMenuPresentationConfig config)
             {
                 _config = config;
             }

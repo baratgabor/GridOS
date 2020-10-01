@@ -23,13 +23,13 @@ namespace IngameScript
         /// </summary>
         class NavigationFrame : Frame
         {
-            protected INavConfig _config;
+            protected IMenuPresentationConfig _config;
             protected int _selectedLine = 0;
             protected IScrollable _scrollableBox;
             protected int _startingPosition => _scrollableBox.LineInfo[_scrollableBox.VerticalOffset].StartPosition;
             public event Action<IMenuItem> ItemSelected;
 
-            public NavigationFrame(INavConfig config, IScrollable scrollableBox) : base(scrollableBox)
+            public NavigationFrame(IMenuPresentationConfig config, IScrollable scrollableBox) : base(scrollableBox)
             {
                 _config = config;
                 _scrollableBox = scrollableBox;

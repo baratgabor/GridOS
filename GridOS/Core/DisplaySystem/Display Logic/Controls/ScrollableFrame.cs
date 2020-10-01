@@ -29,10 +29,10 @@ namespace IngameScript
             public List<LineInfo> LineInfo => _source.LineInfo;
 
             protected int _verticalOffset = 0;
-            protected IViewportConfig _config;
+            protected IMenuPresentationConfig _config;
             protected ILineInfoProviderControl _source;
 
-            public ScrollableFrame(IViewportConfig config, ILineInfoProviderControl source) : base(source)
+            public ScrollableFrame(IMenuPresentationConfig config, ILineInfoProviderControl source) : base(source)
             {
                 _config = config;
                 _source = source;

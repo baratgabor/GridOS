@@ -20,11 +20,11 @@ namespace IngameScript
             protected StringBuilder _menuBuffer = new StringBuilder();
             protected StringBuilder _itemBuffer = new StringBuilder();
 
-            protected IAffixConfig _config;
+            protected IMenuPresentationConfig _config;
             protected ProcessingArgs _processingArgs = new ProcessingArgs();
             protected List<LineInfo> _lineInfo = new List<LineInfo>();
 
-            public MenuContentBuilder(IAffixConfig config)
+            public MenuContentBuilder(IMenuPresentationConfig config)
             {
                 _config = config;
                 _processingArgs.LineInfo = _lineInfo;

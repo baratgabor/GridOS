@@ -24,9 +24,9 @@ namespace IngameScript
         class WordWrap_NonAllocating : ITextProcessor
         {
             protected StringBuilder _buffer = new StringBuilder();
-            protected IWordWrappingConfig _config;
+            protected IMenuPresentationConfig _config;
 
-            public WordWrap_NonAllocating(IWordWrappingConfig config)
+            public WordWrap_NonAllocating(IMenuPresentationConfig config)
             {
                 _config = config;
             }
@@ -47,7 +47,7 @@ namespace IngameScript
                 string inputString = input.ToString(); // This does in fact allocate, but this processing pathway will be replaced soon anyway.
                 int maxLineLength = _config.LineLength;
 
-                foreach (var line in StringHelpers.WordWrap(inputString, maxLineLength, _config.Terminators))
+                foreach (var line in StringHelpers.WordWrap(inputString, maxLineLength, _config.WordDelimiters))
                 {
                     output.Append(inputString, line.Start, line.Length);
                     output.Append(Environment.NewLine);
