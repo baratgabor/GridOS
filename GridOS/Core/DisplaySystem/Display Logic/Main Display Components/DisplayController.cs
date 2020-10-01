@@ -49,7 +49,7 @@ namespace IngameScript
                 _menuBuilder = new MenuContentBuilder(config);
                 _menuBuilder.ContentSource = () => _viewModel.Content;
                 _menuBuilder
-                    .AddProcessor(new WordWrap_BreakPresearchStrategy(config))
+                    .AddProcessor(new WordWrap_NonAllocating(config))
                     .AddProcessor(new AddPrefix())
                     .AddProcessor(new AddSuffix())
                     .AddProcessor(new PadAllLines(config))

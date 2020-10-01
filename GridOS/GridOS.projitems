@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IMenuContentPublisher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IUpdateSubscriber.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\StringHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\ObservableT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\UpdateExecution\ObservableUpdateFrequency.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuModel\IMenuCommand.cs" />
@@ -34,7 +35,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Display Logic\Main Display Components\DisplayView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Display Logic\Main Display Components\MenuViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Display Logic\Main Display Components\_obsolete_DisplayElementMenuHandler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Display Logic\TextProcessors\WordWrap_BreakPresearchStrategy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Display Logic\TextProcessors\WordWrap_NonAllocating.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Display Logic\TextProcessors\PadAllLines.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Display Logic\TextProcessors\LineInfoExtractor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Display Logic\TextProcessors\AddPrefix.cs" />
