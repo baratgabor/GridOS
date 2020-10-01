@@ -11,7 +11,6 @@
 
             public char PaddingChar { get; set; } = ' ';
             public int PaddingLeft { get; set; } = 0;
-            public int PaddingLeft_FirstLine { get; set; }
 
             public string PathSeparator { get; set; } = "›";
             public string SeparatorLineTop { get; set; }

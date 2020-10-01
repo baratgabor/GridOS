@@ -50,8 +50,7 @@ namespace IngameScript
                 _config.LineHeight = _maxLineNum;
 
                 _config.PaddingChar = ' ';
-                _config.PaddingLeft = 5;
-                _config.PaddingLeft_FirstLine = 3;
+                _config.PaddingLeft = 3;
                 _config.SeparatorLineTop = new String(_lineSeparatorCharTop, _maxLineWidth * 2);
                 _config.SeparatorLineBottom = new String(_lineSeparatorCharBottom, _maxLineWidth * 2);
             }

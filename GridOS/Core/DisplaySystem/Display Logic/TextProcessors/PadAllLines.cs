@@ -25,7 +25,6 @@ namespace IngameScript
         {
             protected StringBuilder _builder = new StringBuilder();
             protected int _paddingLeft;
-            protected int _paddingLeft_FirstLine;
             protected char _paddingChar;
             protected string _paddingString;
             protected IPaddingConfig _config;
@@ -97,16 +96,13 @@ namespace IngameScript
             {
                 _paddingChar = _config.PaddingChar;
                 _paddingLeft = _config.PaddingLeft;
-                _paddingLeft_FirstLine = _config.PaddingLeft_FirstLine;
 
-                _paddingString = new string(_paddingChar, _paddingLeft);
-                _paddingString_FirstLine = new string(_paddingChar, _paddingLeft_FirstLine);
+                _paddingString = new string(_paddingChar, _paddingLeft + 2); // To account for fixed length Prefix on the 1st line of menu items. Leaky abstraction, but this processing pathway will be obsoleted soon anyway.
+                _paddingString_FirstLine = new string(_paddingChar, _paddingLeft);
             }
 
             protected bool PaddingChanged()
-                => (_config.PaddingChar != _paddingChar
-                 || _config.PaddingLeft != _paddingLeft
-                 || _config.PaddingLeft_FirstLine != _paddingLeft_FirstLine);
+                => (_config.PaddingChar != _paddingChar || _config.PaddingLeft != _paddingLeft);
         }
     }
 }

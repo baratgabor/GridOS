@@ -42,7 +42,6 @@ namespace IngameScript
         {
             char PaddingChar { get; }
             int PaddingLeft { get; }
-            int PaddingLeft_FirstLine { get; }
         }
 
         interface IBreadcrumbConfig : IPaddingConfig
@@ -69,7 +68,6 @@ namespace IngameScript
             int LineHeight { get; set; }
             char PaddingChar { get; set; }
             int PaddingLeft { get; set; }
-            int PaddingLeft_FirstLine { get; set; }
             string PathSeparator { get; set; }
             char SelectionMarker { get; set; }
             string SeparatorLineTop { get; set; }
