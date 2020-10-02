@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Linq;
 
 namespace GridOS.UnitTests
@@ -6,6 +7,8 @@ namespace GridOS.UnitTests
     [TestFixture]
     public class StringHelpersTests
     {
+        private static string nl = Environment.NewLine;
+
         [Test]
         public void WordWrap_StringShorterThanLineLength_SameAsInput()
         {
@@ -53,7 +56,7 @@ namespace GridOS.UnitTests
         [Test]
         public void WordWrap_StringWithNewLine_NewLineIsPreserved()
         {
-            var test = "Test1\r\nTest2";
+            var test = $"Test1{nl}Test2";
 
             var res = IngameScript.Program.StringHelpers.WordWrap(test, test.Length + 10, new[] { ' ' });
 
@@ -67,7 +70,7 @@ namespace GridOS.UnitTests
         [Test]
         public void WordWrap_StringWithMultipleNewLines_NewLinesArePreserved()
         {
-            var test = "Test1\r\n\r\n\r\n\r\nTest2";
+            var test = $"Test1{nl}{nl}{nl}{nl}Test2";
 
             var res = IngameScript.Program.StringHelpers.WordWrap(test, test.Length + 10, new[] { ' ' });
 
@@ -113,7 +116,7 @@ namespace GridOS.UnitTests
         [Test]
         public void WordWrap_ComplexString_WrappedProperly()
         {
-            var test = "ABCDEFGHIJKLMNOPQRSTUVWXYZ\r\n\r\n\r\nWord Word Word 0123456789 Word1-Word2";
+            var test = $"ABCDEFGHIJKLMNOPQRSTUVWXYZ{nl}{nl}{nl}Word Word Word 0123456789 Word1-Word2";
 
             var res = IngameScript.Program.StringHelpers.WordWrap(test, 10, new[] { ' ', '-' });
 
