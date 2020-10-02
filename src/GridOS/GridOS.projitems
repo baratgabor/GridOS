@@ -12,11 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\CommandExecution\ICommandDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\_Interfaces.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\SmartConfig.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Display Logic\Controls\Menu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Display Logic\Main Display Components\IView.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Infrastructure\MenuItemPresenter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\Infrastructure\MenuLine.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuModel\MenuModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\ICommandPublisher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IMenuContentPublisher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IModule.cs" />
