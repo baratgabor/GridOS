@@ -4,4 +4,4 @@ install:
   - nuget restore GridOS.sln
 script:
   - msbuild /p:Configuration=Release GridOS.sln
-  - mono ./packages/NUnit.ConsoleRunner.3.10.0/tools/nunit3-console.exe ./tests/GridOS.UnitTests/bin/Release/GridOS.UnitTests.dll
+  - mono ./packages/NUnit.ConsoleRunner.3.11.1/tools/nunit3-console.exe ./tests/GridOS.UnitTests/bin/Release/GridOS.UnitTests.dll
