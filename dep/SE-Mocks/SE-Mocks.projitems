@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>c35afc12-6f74-4e80-904e-79b3b4129641</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>SE_Mocks</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)IMyCubeBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyEntity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyTerminalBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyTextSurface.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyGridProgram.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyGridTerminalSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyGridProgramRuntimeInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UpdateFrequency.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UpdateType.cs" />
+  </ItemGroup>
+</Project>

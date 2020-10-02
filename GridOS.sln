@@ -7,9 +7,13 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "GridOS", "src\GridOS\GridOS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GridOS.UnitTests", "tests\GridOS.UnitTests\GridOS.UnitTests.csproj", "{FC697A97-A8B7-4CCB-A6F5-D856C41B9CF2}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SE-Mocks", "dep\SE-Mocks\SE-Mocks.shproj", "{C35AFC12-6F74-4E80-904E-79B3B4129641}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\GridOS\GridOS.projitems*{1ec535ae-8123-4319-8921-b9cf5e62559e}*SharedItemsImports = 13
+		dep\SE-Mocks\SE-Mocks.projitems*{c35afc12-6f74-4e80-904e-79b3b4129641}*SharedItemsImports = 13
+		dep\SE-Mocks\SE-Mocks.projitems*{fc697a97-a8b7-4ccb-a6f5-d856c41b9cf2}*SharedItemsImports = 4
 		src\GridOS\GridOS.projitems*{fc697a97-a8b7-4ccb-a6f5-d856c41b9cf2}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
