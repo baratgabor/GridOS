@@ -8,6 +8,9 @@ namespace IngameScript
     {
         public class StringHelpers
         {
+            /// <summary>
+            /// Returns the input string broken into lines based on the specified line length and word boundary characters, in a non-allocating manner.
+            /// </summary>
             public static IEnumerable<StringSegment> WordWrap(string input, int maxLineLength, char[] breakableCharacters)
             {
                 int lastBreakIndex = 0;
@@ -17,7 +20,7 @@ namespace IngameScript
                     var nextForcedLineBreak = lastBreakIndex + maxLineLength;
 
                     // If there are native new lines in the range of the next line (or the remainder), yield all new lines.
-                    int nativeNewlineIndex = input.IndexOf(Environment.NewLine, lastBreakIndex, Math.Min(nextForcedLineBreak, input.Length - lastBreakIndex));
+                    int nativeNewlineIndex = input.IndexOf(Environment.NewLine, lastBreakIndex, Math.Min(maxLineLength, input.Length - lastBreakIndex));
                     if (nativeNewlineIndex > -1)
                     {
                         yield return new StringSegment(input, lastBreakIndex, nativeNewlineIndex - lastBreakIndex);
@@ -25,7 +28,7 @@ namespace IngameScript
                         continue;
                     }
 
-                    // If the remainder is shorter than the allowed line-length, return the remainder. Short-circuits instantly for strings shorter than line-length.
+                    // If the remainder is shorter than the allowed line-length, return the remainder. Short-circuits instantly for simple strings shorter than line-length.
                     if (nextForcedLineBreak >= input.Length)
                     {
                         yield return new StringSegment(input, lastBreakIndex, input.Length - lastBreakIndex);
