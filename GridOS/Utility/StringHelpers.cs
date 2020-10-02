@@ -16,6 +16,15 @@ namespace IngameScript
                 {
                     var nextForcedLineBreak = lastBreakIndex + maxLineLength;
 
+                    // If there are native new lines in the range of the next line (or the remainder), yield all new lines.
+                    int nativeNewlineIndex = input.IndexOf(Environment.NewLine, lastBreakIndex, Math.Min(nextForcedLineBreak, input.Length - lastBreakIndex));
+                    if (nativeNewlineIndex > -1)
+                    {
+                        yield return new StringSegment(input, lastBreakIndex, nativeNewlineIndex - lastBreakIndex);
+                        lastBreakIndex = nativeNewlineIndex + Environment.NewLine.Length;
+                        continue;
+                    }
+
                     // If the remainder is shorter than the allowed line-length, return the remainder. Short-circuits instantly for strings shorter than line-length.
                     if (nextForcedLineBreak >= input.Length)
                     {
@@ -23,14 +32,7 @@ namespace IngameScript
                         yield break;
                     }
 
-                    // If there are native new lines before the next forced break position, use the last native new line as the starting position of our next line.
-                    int nativeNewlineIndex = input.LastIndexOf(Environment.NewLine, nextForcedLineBreak, maxLineLength);
-                    if (nativeNewlineIndex > -1)
-                    {
-                        nextForcedLineBreak = nativeNewlineIndex + Environment.NewLine.Length + maxLineLength;
-                    }
-
-                    // Find the last breakable point preceding the next forced break position (and include the breakable character, which might be a hypen).
+                    // Find the last breakable point preceding the next forced break position.
                     var nextBreakIndex = input.LastIndexOfAny(breakableCharacters, nextForcedLineBreak, maxLineLength) + 1;
 
                     // If there is no breakable point, which means a word is longer than line length, force-break it.
