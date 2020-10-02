@@ -1,22 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System;
-using VRage.Game.ModAPI.Ingame.Utilities;
 
 namespace IngameScript
 {
     partial class Program
 	{
-
-
-        static class NonAllocatingWordWrapper
-        {
-            public static IEnumerable<StringSegment> Wrap(string input, int lineLength)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         /// <summary>
         /// Wraps the provided string or StringBuilder according to the settings given.
         /// Break-presearch strategy: proactively searches for first breakable character, copies substrings instead of char array iteration.
@@ -53,7 +41,7 @@ namespace IngameScript
                     output.Append(Environment.NewLine);
                 }
 
-                output.TrimEnd(Environment.NewLine.Length);
+                output.Length -= Environment.NewLine.Length; // Trim trailing newline.
 
                 return output;
             }

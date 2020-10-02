@@ -1,5 +1,3 @@
-﻿using Sandbox.ModAPI.Ingame;
-
 namespace IngameScript
 {
     partial class Program

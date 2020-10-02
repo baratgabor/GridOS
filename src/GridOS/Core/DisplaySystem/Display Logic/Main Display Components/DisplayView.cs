@@ -1,18 +1,6 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
 using System;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
-using VRageMath;
 
 namespace IngameScript
 {
@@ -84,7 +72,7 @@ namespace IngameScript
             {
                 target.Font = _targetFont;
                 target.FontSize = _targetFontSize;
-                target.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+                target.ContentType = ContentType.TEXT_AND_IMAGE;
             }
 
             private int DetermineMaxLineLength()

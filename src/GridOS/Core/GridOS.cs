@@ -1,5 +1,4 @@
-﻿using Sandbox.ModAPI.Ingame;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System;
 
 namespace IngameScript
@@ -12,7 +11,7 @@ namespace IngameScript
         /// </summary>
         class GridOS
         {
-            private MyGridProgram _p;
+            private IMyGridProgram _p;
             private Action<string> _echo;
             private IMyGridProgramRuntimeInfo _runtime;
 
@@ -29,7 +28,7 @@ namespace IngameScript
             // Main module storage
             private List<IModule> _moduleList = new List<IModule>();
 
-            public GridOS(MyGridProgram p)
+            public GridOS(IMyGridProgram p)
             {
                 _p = p;
                 _echo = _p.Echo;

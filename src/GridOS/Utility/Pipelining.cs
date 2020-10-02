@@ -1,18 +1,4 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using System;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
-using VRageMath;
+﻿using System.Collections.Generic;
 
 namespace IngameScript
 {
@@ -48,10 +34,10 @@ namespace IngameScript
 
             public TOut Process(TIn input, TOut output = default(TOut))
             {
-                TOut value = _cache.GetValueOrDefault(input);
-
+                TOut value;
+                
                 // If not cached, get fresh one and cache it
-                if (value.Equals(default(TOut)))
+                if (_cache.TryGetValue(input, out value) == false)
                 {
                     value = _decorated.Process(input, output);
                     AddToCache(input, value);

@@ -1,19 +1,3 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using System;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
-using VRageMath;
-
 namespace IngameScript
 {
     partial class Program
@@ -29,13 +13,13 @@ namespace IngameScript
             private IView _view;
             private MenuViewModel _viewModel;
             private ICommandDispatcher _commandDispatcher;
-            private MyGridProgram _program;
+            private IMyGridProgram _program;
 
             private NavigationFrame _navigation;
             private MenuContentBuilder _menuBuilder;
             private Breadcrumb _breadcrumb;
 
-            public DisplayController(string name, ICommandDispatcher commandDispatcher, SmartConfig config, IView view, MenuViewModel viewModel, MyGridProgram program)
+            public DisplayController(string name, ICommandDispatcher commandDispatcher, SmartConfig config, IView view, MenuViewModel viewModel, IMyGridProgram program)
             {
                 _name = name;
                 _program = program;

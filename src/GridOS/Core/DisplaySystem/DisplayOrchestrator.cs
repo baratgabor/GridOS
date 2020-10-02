@@ -1,18 +1,5 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
-using VRageMath;
 
 namespace IngameScript
 {
@@ -36,9 +23,9 @@ namespace IngameScript
             private int _controllerCounter = 0;
 
             private ICommandDispatcher _commandDispatcher;
-            private MyGridProgram _program;
+            private IMyGridProgram _program;
 
-            public DisplayOrchestrator(ICommandDispatcher commandDispatcher, MyGridProgram program)
+            public DisplayOrchestrator(ICommandDispatcher commandDispatcher, IMyGridProgram program)
             {
                 _commandDispatcher = commandDispatcher;
                 _program = program;
