@@ -30,7 +30,8 @@ namespace IngameScript
                     // If the remainder is shorter than the allowed line-length, return the remainder. Short-circuits instantly for simple strings shorter than line-length.
                     if (nextForcedLineBreak >= input.Length)
                     {
-                        yield return new StringSegment(input, lastBreakIndex, input.Length - lastBreakIndex);
+                        if(lastBreakIndex < input.Length) // Yield only if there is something to yield. Because string can end with newline, leaving no remainder.
+                            yield return new StringSegment(input, lastBreakIndex, input.Length - lastBreakIndex);
                         yield break;
                     }
 

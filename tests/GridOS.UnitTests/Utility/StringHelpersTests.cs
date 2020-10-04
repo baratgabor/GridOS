@@ -1,6 +1,8 @@
 ﻿using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using static IngameScript.Program;
 
 namespace GridOS.UnitTests
 {
@@ -110,6 +112,24 @@ namespace GridOS.UnitTests
                 Assert.AreEqual("ABCDEFGHIJ", res.ElementAt(0).ToString());
                 Assert.AreEqual("KLMNOPQRST", res.ElementAt(1).ToString());
                 Assert.AreEqual("UVWXYZ"    , res.ElementAt(2).ToString());
+            });
+        }
+
+        [Test]
+        public void WordWrap_StringWithOnlyNewLines_AllNewLinesAreReturned()
+        {
+            var test = $"{nl}{nl}{nl}{nl}{nl}{nl}";
+            IEnumerable<StringSegment> res = null;
+
+            Assert.DoesNotThrow(() => {
+                res = StringHelpers.WordWrap(test, 10, new[] { ' ' })
+                    .ToList();
+            });
+
+            Assert.Multiple(() =>
+            {
+                Assert.AreEqual(6, res.Count(), "All newlines should be returned as separate lines.");
+                Assert.IsTrue(res.All(x => x.Length == 0), "All newlines should be returned as empty string.");
             });
         }
 
