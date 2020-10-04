@@ -16,7 +16,8 @@ namespace GridOS.UnitTests
         {
             var test = "Test Test Test";
             
-            var res = IngameScript.Program.StringHelpers.WordWrap(test, test.Length + 10, new[] { ' ' });
+            var res = StringHelpers.WordWrap(test, test.Length + 10, new[] { ' ' })
+                .ToList();
 
             Assert.Multiple(() => {
                 Assert.AreEqual(1, res.Count(), "Single line expected.");
@@ -29,7 +30,8 @@ namespace GridOS.UnitTests
         {
             var test = "Test Test Test";
 
-            var res = IngameScript.Program.StringHelpers.WordWrap(test, test.Length, new[] { ' ' });
+            var res = StringHelpers.WordWrap(test, test.Length, new[] { ' ' })
+                .ToList();
 
             Assert.Multiple(() => {
                 Assert.AreEqual(1, res.Count(), "Single line expected.");
@@ -43,7 +45,8 @@ namespace GridOS.UnitTests
             var test = "Test Test Test Test Test";
             var lineLength = test.Length - 1;
 
-            var res = IngameScript.Program.StringHelpers.WordWrap(test, lineLength, new[] { ' ' });
+            var res = StringHelpers.WordWrap(test, lineLength, new[] { ' ' })
+                .ToList();
 
             Assert.AreEqual(2, res.Count(), "Two lines expected.");
             Assert.Multiple(() =>
@@ -60,7 +63,8 @@ namespace GridOS.UnitTests
         {
             var test = $"Test1{nl}Test2";
 
-            var res = IngameScript.Program.StringHelpers.WordWrap(test, test.Length + 10, new[] { ' ' });
+            var res = StringHelpers.WordWrap(test, test.Length + 10, new[] { ' ' })
+                .ToList();
 
             Assert.AreEqual(2, res.Count(), "Two lines are expected.");
             Assert.Multiple(() => {
@@ -74,7 +78,8 @@ namespace GridOS.UnitTests
         {
             var test = $"Test1{nl}{nl}{nl}{nl}Test2";
 
-            var res = IngameScript.Program.StringHelpers.WordWrap(test, test.Length + 10, new[] { ' ' });
+            var res = StringHelpers.WordWrap(test, test.Length + 10, new[] { ' ' })
+                .ToList();
 
             Assert.AreEqual(5, res.Count(), "Five lines are expected.");
             Assert.Multiple(() => {
@@ -91,7 +96,8 @@ namespace GridOS.UnitTests
         {
             var test = "ABCDEFGHIJKLMNOPQRST";
 
-            var res = IngameScript.Program.StringHelpers.WordWrap(test, 15, new[] { ' ' });
+            var res = StringHelpers.WordWrap(test, 15, new[] { ' ' })
+                .ToList();
 
             Assert.AreEqual(2, res.Count(), "Two lines are expected.");
             Assert.Multiple(() => {
@@ -105,7 +111,8 @@ namespace GridOS.UnitTests
         {
             var test = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-            var res = IngameScript.Program.StringHelpers.WordWrap(test, 10, new[] { ' ' });
+            var res = StringHelpers.WordWrap(test, 10, new[] { ' ' })
+                .ToList();
 
             Assert.AreEqual(3, res.Count(), "Three lines are expected.");
             Assert.Multiple(() => {
@@ -138,7 +145,8 @@ namespace GridOS.UnitTests
         {
             var test = $"ABCDEFGHIJKLMNOPQRSTUVWXYZ{nl}{nl}{nl}Word Word Word 0123456789 Word1-Word2";
 
-            var res = IngameScript.Program.StringHelpers.WordWrap(test, 10, new[] { ' ', '-' });
+            var res = StringHelpers.WordWrap(test, 10, new[] { ' ', '-' })
+                .ToList();
 
             Assert.AreEqual(10, res.Count(), "Ten lines are expected.");
             Assert.Multiple(() => {
