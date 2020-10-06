@@ -33,6 +33,6 @@
         // Summary:
         //     Search for inventory component with maching index.
         //IMyInventory GetInventory(int index);
-        //Vector3D GetPosition();
+        Vector3D GetPosition();
     }
 }

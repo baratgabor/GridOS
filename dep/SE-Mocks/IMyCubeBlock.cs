@@ -60,7 +60,7 @@ namespace IngameScript
         //
         // Summary:
         //     Grid in which the block is placed
-        //IMyCubeGrid CubeGrid { get; }
+        IMyCubeGrid CubeGrid { get; }
         bool CheckConnectionAllowed { get; }
         //SerializableDefinitionId BlockDefinition { get; }
         //
