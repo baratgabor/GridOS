@@ -9,20 +9,25 @@
     <Import_RootNamespace>SE_Mocks</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)IMyCameraBlock.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IMyCubeBlock.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IMyCubeGrid.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IMyEntity.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IMyFunctionalBlock.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IMyTerminalBlock.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IMyTextSurface.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IMyGridProgram.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IMyGridTerminalSystem.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IMyGridProgramRuntimeInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IMyTextSurfaceProvider.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MyDetectedEntityInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UpdateFrequency.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UpdateType.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Vector3D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyProgrammableBlock.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MyGridProgram.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMotorStator.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyCameraBlock.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyCubeBlock.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyCubeGrid.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyEntity.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyFunctionalBlock.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyOreDetector.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyTerminalBlock.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyTextPanel.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyTextSurface.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyGridProgram.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyGridTerminalSystem.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyGridProgramRuntimeInfo.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyTextSurfaceProvider.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MyDetectedEntityInfo.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UpdateFrequency.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UpdateType.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector3D.debug.cs" />
   </ItemGroup>
 </Project>
