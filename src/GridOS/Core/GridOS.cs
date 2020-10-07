@@ -11,7 +11,7 @@ namespace IngameScript
         /// </summary>
         class GridOS
         {
-            private IMyGridProgram _p;
+            private MyGridProgram _p;
             private Action<string> _echo;
             private IMyGridProgramRuntimeInfo _runtime;
 
@@ -28,7 +28,7 @@ namespace IngameScript
             // Main module storage
             private List<IModule> _moduleList = new List<IModule>();
 
-            public GridOS(IMyGridProgram p)
+            public GridOS(MyGridProgram p)
             {
                 _p = p;
                 _echo = _p.Echo;

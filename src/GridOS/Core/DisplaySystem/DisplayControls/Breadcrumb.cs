@@ -31,20 +31,30 @@ namespace IngameScript
                 return _buffer;
             }
 
-            public void OnPathChanged(ContentChangeInfo obj)
-            {
-                var newPath = obj.NavigationPath;
-
+            public void OnPathChanged(IEnumerable<string> path)
+            { 
                 _buffer.Clear();
-                _buffer.Append(_config.SeparatorLineTop + Environment.NewLine);
-                for (int i = 0; i < newPath.Count; i++)
-                {
-                    _buffer.Append((i == 0 ? _padding : " ") + newPath[i] + (i < newPath.Count - 1 ? " " + _config.PathSeparator : ""));
-                }
-                _buffer.Append(Environment.NewLine + _config.SeparatorLineBottom);
 
-                // Doesn't invoke RedrawRequired, because other component does that pertaining to path/folder change.
-                // But this should be corrected instead with some aggregation mechanism (to avoid multiple consequent redraws).
+                _buffer.Append(_config.SeparatorLineTop);
+                _buffer.AppendLine();
+
+                _buffer.Append(_padding);
+                
+                foreach (var name in path)
+                {
+                    _buffer.Append(name);
+                    _buffer.Append(' ');
+                    _buffer.Append(_config.PathSeparator);
+                    _buffer.Append(' ');
+                }
+
+                _buffer.Length -= 3; // Trim trailing path separator.
+
+                _buffer.AppendLine();
+                _buffer.Append(_config.SeparatorLineBottom);
+
+                // TODO: Implement path string shortening if it exceeds a certain length (i.e. line length)
+                RedrawRequired?.Invoke(_buffer);
             }
         }
     }

@@ -14,14 +14,12 @@ namespace IngameScript
             protected IMyTextSurface _target;
             protected IMyGridProgramRuntimeInfo _runtime;
             protected string _targetFont = "Debug";
-            protected float _targetFontSize = 0.5f;
+            protected float _targetFontSize = 1f;
             protected int _maxLineWidth;
-            protected int _maxLineNum = 15; // TODO: Check this max line number, and make it scale dynamically based on font size
+            protected int _maxLineNum = 10; // TODO: Check this max line number, and make it scale dynamically based on font size
 
             protected StringBuilder _buffer = new StringBuilder();
             protected List<IControl> _controls = new List<IControl>();
-            protected List<string> _controls_cache = new List<string>();
-            protected List<int> _controls_BufferStartPositions = new List<int>(); // Possible strategy for replacing only a single changed item, instead of rebuilding the buffer
 
             protected const char _lineSeparatorCharTop = '.';
             protected const char _lineSeparatorCharBottom = '˙';
@@ -83,19 +81,15 @@ namespace IngameScript
 
             public void Redraw(StringBuilder content)
             {
-                // TODO: Make the event payload meaningful; e.g. it needs to ID the source at least.
-                // Currently we are simply ignoring the event payload (content), and requesting it again
-                // But that's okay actually, since it's supposed to be cached
-
-                // TODO: possibly implement caching, by using _controls_cache, if that improves the runtime due to eliminating one reference; but probably the diff. is negligible
                 _buffer.Clear();
-                //_controls_BufferStartPositions.Clear();
-                for (int i = 0, pos = 0; i < _controls.Count; i++)
+
+                for (int i = 0; i < _controls.Count; i++)
                 {
-                    //_controls_BufferStartPositions.Add(pos);
-                    _buffer.Append(_controls[i].GetContent() + (i < _controls.Count-1 ? Environment.NewLine : ""));
-                    //pos += _buffer.Length;
-                }             
+                    _buffer.Append(_controls[i].GetContent());
+                    _buffer.AppendLine();
+                }
+
+                _buffer.Length -= Environment.NewLine.Length; // Trim last newline.
 
                 // TODO: Should we do line number checks on the control outputs?
                 // MaxLineNum is textsurface settings dependent, so this View will decide on that

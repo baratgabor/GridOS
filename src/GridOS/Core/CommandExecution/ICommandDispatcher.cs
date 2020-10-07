@@ -30,6 +30,11 @@ namespace IngameScript
             void AddCommands_OverwriteExisting(IEnumerable<CommandItem> commands);
 
             /// <summary>
+            /// Removes a command from the list of executable commands.
+            /// </summary>
+            void RemoveCommand(CommandItem command);
+
+            /// <summary>
             /// Removes a list of commands.
             /// </summary>
             void RemoveCommands(IEnumerable<CommandItem> commands);

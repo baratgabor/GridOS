@@ -1,4 +1,6 @@
-﻿namespace IngameScript
+﻿using System;
+
+namespace IngameScript
 {
     partial class Program
     {
@@ -20,6 +22,12 @@
 
             public StringSegment(string text, int start, int length)
             {
+                if (start > text.Length - 1)
+                    throw new Exception(nameof(start));
+
+                if (start + length > text.Length)
+                    throw new Exception(nameof(length));
+
                 _string = text;
                 Start = start;
                 Length = length;
@@ -28,6 +36,7 @@
 
             public bool IsEmpty => _string == null;
             public bool IsCached => _stringSegmentCache != null;
+            public bool IsEndOfString => Start + Length == _string.Length;
 
             public override string ToString()
             {

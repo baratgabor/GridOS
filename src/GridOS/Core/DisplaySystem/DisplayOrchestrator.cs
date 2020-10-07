@@ -23,9 +23,9 @@ namespace IngameScript
             private int _controllerCounter = 0;
 
             private ICommandDispatcher _commandDispatcher;
-            private IMyGridProgram _program;
+            private MyGridProgram _program;
 
-            public DisplayOrchestrator(ICommandDispatcher commandDispatcher, IMyGridProgram program)
+            public DisplayOrchestrator(ICommandDispatcher commandDispatcher, MyGridProgram program)
             {
                 _commandDispatcher = commandDispatcher;
                 _program = program;
@@ -47,13 +47,12 @@ namespace IngameScript
                         NextControllerName(),
                         _commandDispatcher,
                         config,
+                        _program,
                         new DisplayView(
                             textSurface,
                             config,
                             _program.Runtime),
-                        new MenuViewModel(
-                            _menuRoot),
-                        _program)
+                        _menuRoot)
                     );
                 }
                 catch (Exception e)

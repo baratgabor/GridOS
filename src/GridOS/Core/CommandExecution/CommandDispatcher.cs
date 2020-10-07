@@ -53,14 +53,16 @@ namespace IngameScript
                 return s;
             }
 
+            public void RemoveCommand(CommandItem command)
+            {
+                _commands.Remove(command.CommandName);
+            }
+
             public void RemoveCommands(IEnumerable<CommandItem> commands)
             {
                 foreach (CommandItem c in commands)
                 {
-                    if (_commands.ContainsValue(c))
-                    {
-                        _commands.Remove(c.CommandName);
-                    }
+                    _commands.Remove(c.CommandName);
                 }
             }
 
