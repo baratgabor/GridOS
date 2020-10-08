@@ -10,6 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Core\CommandExecution\ICommandDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\GlobalEventDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\IGlobalEvents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\_Interfaces.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\SmartConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\Menu.cs" />

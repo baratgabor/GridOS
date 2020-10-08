@@ -30,9 +30,14 @@ namespace IngameScript
             public IReadOnlyList<IMenuItem> CurrentView => _currentView;
 
             /// <summary>
-            /// Notifies when an item has changed in the currenty group.
+            /// Notifies when an item was added to, or removed from, the currently open group.
             /// </summary>
             public event Action<IEnumerable<IMenuItem>> CurrentViewChanged;
+
+            /// <summary>
+            /// Notifies when an item has changed in the currently open group.
+            /// </summary>
+            public event Action<IMenuItem> MenuItemChanged;
 
             /// <summary>
             /// Notifies when another group has been opened.
@@ -109,8 +114,8 @@ namespace IngameScript
             private void CloseActiveGroup()
             {
                 _activeGroup.LabelChanged -= Handle_GroupTitleChanged;
-                _activeGroup.ChildrenChanged -= Handle_ContentChanged;
-                _activeGroup.ChildLabelChanged -= Handle_ContentChanged;
+                _activeGroup.ChildrenChanged -= Handle_ListChanged;
+                _activeGroup.ChildLabelChanged -= Handle_ItemChanged;
                 _activeGroup.Close();
                 _activeGroup = null;
 
@@ -122,8 +127,8 @@ namespace IngameScript
                 _navigationStack.Add(group);
                 group.Open();
                 group.LabelChanged += Handle_GroupTitleChanged;
-                group.ChildrenChanged += Handle_ContentChanged;
-                group.ChildLabelChanged += Handle_ContentChanged;
+                group.ChildrenChanged += Handle_ListChanged;
+                group.ChildLabelChanged += Handle_ItemChanged;
                 _activeGroup = group;
 
                 BuildCurrentView();
@@ -150,9 +155,14 @@ namespace IngameScript
                 CurrentTitleChanged?.Invoke(group.Label);
             }
 
-            private void Handle_ContentChanged(IMenuItem _)
+            private void Handle_ListChanged(IMenuItem _)
             {
                 CurrentViewChanged?.Invoke(CurrentView);
+            }
+
+            private void Handle_ItemChanged(IMenuItem item)
+            {
+                MenuItemChanged?.Invoke(item);
             }
         }
     }

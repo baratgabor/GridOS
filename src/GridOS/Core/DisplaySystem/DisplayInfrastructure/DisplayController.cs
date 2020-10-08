@@ -15,6 +15,7 @@ namespace IngameScript
             private readonly ICommandDispatcher _commandDispatcher;
             private readonly MyGridProgram _program;
             private readonly IView _view;
+            private readonly IGlobalEvents _globalEvents;
             private readonly Breadcrumb _breadcrumb;
             private readonly Menu _menu;
 
@@ -22,12 +23,15 @@ namespace IngameScript
             private readonly CommandItem _downCommand;
             private readonly CommandItem _selectCommand;
 
-            public DisplayController(string name, ICommandDispatcher commandDispatcher, SmartConfig config, MyGridProgram program, IView view, IMenuGroup menuRoot)
+            public DisplayController(string name, ICommandDispatcher commandDispatcher, SmartConfig config, MyGridProgram program, IView view, IMenuGroup menuRoot, IGlobalEvents globalEvents)
             {
                 Name = name;
                 _view = view;
                 _program = program;
                 _commandDispatcher = commandDispatcher;
+                _globalEvents = globalEvents;
+
+                _globalEvents.ExecutionWillFinish += DisplayTick;
 
                 _upCommand = new CommandItem($"{Name}Up", OnMoveUp);
                 _downCommand = new CommandItem($"{Name}Down", OnMoveDown);
@@ -54,6 +58,7 @@ namespace IngameScript
 
             public void Dispose()
             {
+                _globalEvents.ExecutionWillFinish -= DisplayTick;
                 _commandDispatcher.RemoveCommand(_upCommand);
                 _commandDispatcher.RemoveCommand(_downCommand);
                 _commandDispatcher.RemoveCommand(_selectCommand);
@@ -67,6 +72,9 @@ namespace IngameScript
 
             private void OnSelect(CommandItem _, string __)
                 => _menu.Select();
+
+            private void DisplayTick()
+                => _view.Redraw();
         }
     }
 }

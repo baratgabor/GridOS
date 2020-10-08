@@ -43,29 +43,27 @@ namespace IngameScript
 
                 _menuLines_alt = new MenuLine[_linesToDisplay];
 
-                model.CurrentViewChanged += OnModelChange;
+                model.CurrentViewChanged += OnListChanged;
+                model.MenuItemChanged += OnItemChanged;
                 model.NavigatedTo += OnNavigatedTo;
             }
 
             public void Dispose()
             {
-                _model.CurrentViewChanged -= OnModelChange;
+                _model.CurrentViewChanged -= OnListChanged;
+                _model.MenuItemChanged -= OnItemChanged;
                 _model.NavigatedTo -= OnNavigatedTo;
             }
 
             public StringBuilder GetContent(bool FlushCache = false)
             {
-                if (FlushCache)
-                {
-                    BuildContent();
-                }
+                BuildContent();
 
                 return _content;
             }
 
             public void PushUpdate()
             {
-                BuildContent();
                 NavigationPathChanged?.Invoke(_model.NavigationPath);
                 RedrawRequired?.Invoke(this);
             }
@@ -83,7 +81,6 @@ namespace IngameScript
                     _selectedLineIndex--;
                 }
 
-                BuildContent();
                 RedrawRequired?.Invoke(this);
             }
 
@@ -100,7 +97,6 @@ namespace IngameScript
                     _selectedLineIndex++;
                 }
 
-                BuildContent();
                 RedrawRequired?.Invoke(this);
             }
 
@@ -146,9 +142,17 @@ namespace IngameScript
                 }
             }
 
-            private void OnModelChange(IEnumerable<IMenuItem> _)
+            private void OnListChanged(IEnumerable<IMenuItem> _)
             {
-                BuildContent();
+                RedrawRequired?.Invoke(this);
+            }
+
+            private void OnItemChanged(IMenuItem changedMenuItem)
+            {
+                // Update only if the changed menu item has at least a single line visible in viewport.
+                if (!_menuLines.Any(x => x.BackingMenuItem == changedMenuItem))
+                    return;
+
                 RedrawRequired?.Invoke(this);
             }
 

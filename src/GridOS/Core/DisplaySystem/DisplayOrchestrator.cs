@@ -24,12 +24,13 @@ namespace IngameScript
 
             private ICommandDispatcher _commandDispatcher;
             private MyGridProgram _program;
+            private readonly IGlobalEvents _globalEvents;
 
-            public DisplayOrchestrator(ICommandDispatcher commandDispatcher, MyGridProgram program)
+            public DisplayOrchestrator(ICommandDispatcher commandDispatcher, MyGridProgram program, IGlobalEvents globalEvents)
             {
                 _commandDispatcher = commandDispatcher;
                 _program = program;
-
+                _globalEvents = globalEvents;
                 _menuRoot.AddChild(new HelpMenu());
             }
 
@@ -52,7 +53,8 @@ namespace IngameScript
                             textSurface,
                             config,
                             _program.Runtime),
-                        _menuRoot)
+                        _menuRoot,
+                        _globalEvents)
                     );
                 }
                 catch (Exception e)

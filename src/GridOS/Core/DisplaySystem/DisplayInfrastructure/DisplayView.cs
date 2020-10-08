@@ -18,7 +18,8 @@ namespace IngameScript
             protected int _maxLineWidth;
             protected int _maxLineNum = 10; // TODO: Check this max line number, and make it scale dynamically based on font size
 
-            protected StringBuilder _buffer = new StringBuilder();
+            protected bool _contentDirty = true;
+            protected StringBuilder _content = new StringBuilder();
             protected List<IControl> _controls = new List<IControl>();
 
             protected const char _lineSeparatorCharTop = '.';
@@ -66,6 +67,28 @@ namespace IngameScript
                 _controls.Clear();
             }
 
+            public void Redraw()
+            {
+                if (!_contentDirty)
+                    return;
+
+                _content.Clear();
+
+                for (int i = 0; i < _controls.Count; i++)
+                {
+                    _content.Append(_controls[i].GetContent());
+                    _content.AppendLine();
+                }
+
+                _content.Length -= Environment.NewLine.Length; // Trim last newline.
+
+                // TODO: Should we do line number checks on the control outputs?
+                // MaxLineNum is textsurface settings dependent, so this View will decide on that
+                _target.WriteText(_content.ToString());
+
+                _contentDirty = false;
+            }
+
             private void SetupTarget(IMyTextSurface target)
             {
                 target.Font = _targetFont;
@@ -79,26 +102,9 @@ namespace IngameScript
                 return (int)Math.Truncate(40 / _targetFontSize);
             }
 
-            public void Redraw()
+            private void OnRedrawRequired(IControl control)
             {
-                OnRedrawRequired(null); // TODO: Temporary
-            }
-
-            public void OnRedrawRequired(IControl control)
-            {
-                _buffer.Clear();
-
-                for (int i = 0; i < _controls.Count; i++)
-                {
-                    _buffer.Append(_controls[i].GetContent());
-                    _buffer.AppendLine();
-                }
-
-                _buffer.Length -= Environment.NewLine.Length; // Trim last newline.
-
-                // TODO: Should we do line number checks on the control outputs?
-                // MaxLineNum is textsurface settings dependent, so this View will decide on that
-                _target.WriteText(_buffer.ToString());
+                _contentDirty = true;
             }
         }
     }

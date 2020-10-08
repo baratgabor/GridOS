@@ -14,6 +14,7 @@ namespace IngameScript
             private MyGridProgram _p;
             private Action<string> _echo;
             private IMyGridProgramRuntimeInfo _runtime;
+            private GlobalEventDispatcher _executionEvents;
 
             private IUpdateDispatcher _updateDispatcher;
             private ICommandDispatcher _commandDispatcher;
@@ -33,13 +34,14 @@ namespace IngameScript
                 _p = p;
                 _echo = _p.Echo;
                 _runtime = _p.Runtime;
+                _executionEvents = new GlobalEventDispatcher();
 
                 Func<UpdateFrequency> _updateFrequencyGetter = () => _runtime.UpdateFrequency;
                 Action<UpdateFrequency> _updateFrequencySetter = (x) => _runtime.UpdateFrequency = x;
 
                 _commandDispatcher = new CommandDispatcher();
                 _updateDispatcher = new UpdateDispatcher_v1(_echo, _updateFrequencyGetter, _updateFrequencySetter);
-                _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, p);
+                _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, p, _executionEvents);
 
                 _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
                 _commandDispatcher.AddCommand(new CommandItem("DisableUpdates", CommandHandler_DisableUpdates));
@@ -86,6 +88,8 @@ namespace IngameScript
             /// <param name="argument">The argument received in Main().</param>
             public void Main(string argument, UpdateType updateType)
             {
+                _executionEvents.ExecutionStarted();
+
                 // TODO: Get rid of this ad-hoc diagnostics, move it somewhere sane
                 _totalExecTime += _runtime.LastRunTimeMs;
                 _numOfExec++;
@@ -117,6 +121,7 @@ namespace IngameScript
                     _echo(e.ToString());
                 }
 
+                _executionEvents.ExecutionFinishing();
                 _lastInstrCount = _runtime.CurrentInstructionCount;
             }
 
