@@ -73,7 +73,7 @@ namespace IngameScript
                 if (_openedBy <= 0)
                     return;
 
-                ChildLabelChanged?.Invoke(this);
+                ChildLabelChanged?.Invoke(item);
             }
         }
     }
