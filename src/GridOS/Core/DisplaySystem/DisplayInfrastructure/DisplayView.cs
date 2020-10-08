@@ -44,7 +44,7 @@ namespace IngameScript
             public DisplayView AddControl(IControl control)
             {
                 _controls.Add(control);
-                control.RedrawRequired += Redraw;
+                control.RedrawRequired += OnRedrawRequired;
                 return this;
             }
 
@@ -53,7 +53,7 @@ namespace IngameScript
             {
                 if (_controls.Contains(control))
                 {
-                    control.RedrawRequired -= Redraw;
+                    control.RedrawRequired -= OnRedrawRequired;
                     _controls.Remove(control);
                 }
             }
@@ -61,7 +61,7 @@ namespace IngameScript
             public void ClearControls()
             {
                 foreach (var c in _controls)
-                    c.RedrawRequired -= Redraw;
+                    c.RedrawRequired -= OnRedrawRequired;
 
                 _controls.Clear();
             }
@@ -79,7 +79,12 @@ namespace IngameScript
                 return (int)Math.Truncate(40 / _targetFontSize);
             }
 
-            public void Redraw(StringBuilder content)
+            public void Redraw()
+            {
+                OnRedrawRequired(null); // TODO: Temporary
+            }
+
+            public void OnRedrawRequired(IControl control)
             {
                 _buffer.Clear();
 

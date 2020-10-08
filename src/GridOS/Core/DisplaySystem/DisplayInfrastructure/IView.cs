@@ -9,7 +9,7 @@ namespace IngameScript
             DisplayView AddControl(IControl control);
             void RemoveControl(IControl control);
             void ClearControls();
-            void Redraw(StringBuilder content);
+            void Redraw();
         }
     }
 }

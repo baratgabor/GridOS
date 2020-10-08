@@ -14,7 +14,7 @@ namespace IngameScript
         /// </summary>
         class Menu : IControl, IDisposable
         {
-            public event Action<StringBuilder> RedrawRequired;
+            public event Action<IControl> RedrawRequired;
             public event Action<IEnumerable<string>> NavigationPathChanged;
 
             private int _firstMenuItemNumber;
@@ -67,7 +67,7 @@ namespace IngameScript
             {
                 BuildContent();
                 NavigationPathChanged?.Invoke(_model.NavigationPath);
-                RedrawRequired?.Invoke(_content);
+                RedrawRequired?.Invoke(this);
             }
 
             public void MoveUp()
@@ -84,7 +84,7 @@ namespace IngameScript
                 }
 
                 BuildContent();
-                RedrawRequired?.Invoke(_content);
+                RedrawRequired?.Invoke(this);
             }
 
             public void MoveDown()
@@ -101,7 +101,7 @@ namespace IngameScript
                 }
 
                 BuildContent();
-                RedrawRequired?.Invoke(_content);
+                RedrawRequired?.Invoke(this);
             }
 
             public void Select()
@@ -149,7 +149,7 @@ namespace IngameScript
             private void OnModelChange(IEnumerable<IMenuItem> _)
             {
                 BuildContent();
-                RedrawRequired?.Invoke(_content);
+                RedrawRequired?.Invoke(this);
             }
 
             private void OnNavigatedTo(MenuModel.NavigationPayload navPayload)
@@ -176,7 +176,7 @@ namespace IngameScript
                 }
 
                 NavigationPathChanged?.Invoke(_model.NavigationPath);
-                RedrawRequired?.Invoke(_content);
+                RedrawRequired?.Invoke(this);
             }
 
             // TODO: Refactor. Implementing -1 magic int in _firstMenuItemOffset to signal above-viewport line inclusion disintegrated the structure of this method.

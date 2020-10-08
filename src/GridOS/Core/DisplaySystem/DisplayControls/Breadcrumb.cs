@@ -12,11 +12,11 @@ namespace IngameScript
         /// </summary>
         class Breadcrumb : IControl
         {
+            public event Action<IControl> RedrawRequired;
+
             protected StringBuilder _buffer = new StringBuilder();
             protected string _padding = String.Empty;
             protected IBreadcrumbConfig _config;
-
-            public event Action<StringBuilder> RedrawRequired;
 
             public Breadcrumb(IBreadcrumbConfig config)
             {
@@ -54,7 +54,7 @@ namespace IngameScript
                 _buffer.Append(_config.SeparatorLineBottom);
 
                 // TODO: Implement path string shortening if it exceeds a certain length (i.e. line length)
-                RedrawRequired?.Invoke(_buffer);
+                RedrawRequired?.Invoke(this);
             }
         }
     }

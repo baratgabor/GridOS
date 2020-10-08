@@ -7,7 +7,7 @@ namespace IngameScript
 	{
         interface IControl
         {
-            event Action<StringBuilder> RedrawRequired;
+            event Action<IControl> RedrawRequired;
             StringBuilder GetContent(bool FlushCache = false);
         }
     }

@@ -11,7 +11,7 @@ namespace IngameScript
             protected ProgressIndicator2 _spinner = new ProgressIndicator2();
             IMyGridProgramRuntimeInfo _runtime;
 
-            public event Action<StringBuilder> RedrawRequired;
+            public event Action<IControl> RedrawRequired;
 
             public DisplayHeader(IBreadcrumbConfig config, IMyGridProgramRuntimeInfo runtime)
             {
