@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace IngameScript
 {
@@ -8,7 +9,7 @@ namespace IngameScript
     //     in this class are directly available for use in your scripts. If you use Visual
     //     Studio or other external editors to write your scripts, you can derive directly
     //     from this class and have a compatible script template.
-    public abstract class MyGridProgram : IMyGridProgram
+    public class MyGridProgram : IMyGridProgram
     {
         //
         // Summary:
@@ -27,7 +28,7 @@ namespace IngameScript
         //
         // Summary:
         //     Gets runtime information for the running grid program.
-        public IMyGridProgramRuntimeInfo Runtime { get; protected set; }
+        public IMyGridProgramRuntimeInfo Runtime { get; set; }
         //
         // Summary:
         //     Allows you to store data between game sessions.
@@ -35,23 +36,11 @@ namespace IngameScript
         //
         // Summary:
         //     Prints out text onto the currently running programmable block's detail info area.
-        public Action<string> Echo { get; protected set; }
+        public Action<string> Echo => (s) => Debug.WriteLine(s);
 
-        public bool HasMainMethod
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public bool HasMainMethod => true;
 
-        public bool HasSaveMethod
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public bool HasSaveMethod => true;
 
         IMyGridTerminalSystem IMyGridProgram.GridTerminalSystem
         {
