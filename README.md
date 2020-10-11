@@ -34,10 +34,10 @@ Functional overview of GridOS:
 	* **Update Dispatcher** for executing the scheduled recurring runs of modules (if any).
 	* **Display Orchestrator** for signaling views, at the end of execution, to pull and push updated content if any prior change notification was received.
 	
-* **Display stack:** The display subsystem of GridOS follows a loosely layered GUI design that uses the notion of `controllers`, `views`, `controls`, `models`, etc. A Display Orchestrator governs the list of Display Controllers, all of which represent a separate display stack that drive menu display on a specific ingame `TextSurface`.
+* **Display stack:** The display subsystem of GridOS follows a loosely layered GUI design that uses the notion of `controllers`, `views`, `controls`, `models`, etc. A Display Orchestrator governs the list of Display Controllers, all of which represent a separate display stack that drives menu display on a specific ingame `TextSurface`.
 	* **Efficient display population:** I reworked the menu display pipeline so that, instead of the traditional "render the full content, then limit it with a viewport" approach, it only processes and renders the menu lines it actually needs to display, and 'scrolling' is imitated by maintaining a line offset relative to the menu item in focus.
 	* **Advanced update propagation:** Any displayable change in the menu system automatically propagates to the display in an intelligent manner. Each display stack has a menu model that maintains the currently open menu group, and transmits their change notifications to the menu control. *The menu control executes an update only if the change pertains to a menu item that is actually visible in the viewport.*
-	* **Update aggregation:** The changes of individual menu items aren't just pushed to the displays, because this would lead to multiple redraws per cycle if multiple items changed. Instead, the view simply notes that an update is required, and executes the update only once at the end of the execution cycle.
+	* **Update aggregation:** The changes of individual menu items aren't just blindly pushed to the displays, because this would lead to multiple redraws per cycle if multiple items changed. Instead, the view simply notes that an update is required, and executes the update only once at the end of the execution cycle.
 	* **No string allocations:** The entire processing pipeline – including word wrapping, item prefix/suffix addition, assembly of final content, etc. – is carefully designed to avoid string allocations. It uses cached `StringBuilders`, the temporary entities are all `structs`, and multiple pipeline methods stream `IEnumerables` instead of relying on collections (but collections are also cached everywhere of course).
 	
 * **Composite menu system:** The model part of the display system is mostly based on the Composite pattern, which means that it's a node-based hierarchical structure where nodes can contain additional nodes, creating a tree structure.
@@ -46,6 +46,8 @@ Functional overview of GridOS:
 		* All menu node types expose various events to facilitate the implementation event-driven functionality, including groups emitting aggregate notifications on behalf of their children (which in turn drives the update propagation of displays).
 
 ## How can you use it
+
+GridOS basically uses the concept of 'modules'. You have to create a module (or multiple) and put your menu items, commands and update method inside. Then you can register an instance of your module via GridOS's `RegisterModule()` method.
 
 - Each module is a separate class that implements the `IModule` interface. Implementing this interface is what makes you able to register the module in the `GridOS` instance. But `IModule` alone doesn't do anything; you need to indicate which features you want to use, by implementing any/all of the following interfaces:
 
