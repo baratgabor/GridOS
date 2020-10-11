@@ -4,166 +4,174 @@ using System.Linq;
 
 namespace IngameScript
 {
-    partial class Program
+    class MenuModel
     {
-        class MenuModel
+        public struct NavigationPayload
         {
-            public struct NavigationPayload
+            public IMenuGroup NavigatedTo;
+            public IMenuGroup NavigatedFrom;
+        }
+
+        /// <summary>
+        /// The title of the menu group currently open.
+        /// </summary>
+        public string CurrentTitle => _activeGroup.Label;
+
+        /// <summary>
+        /// Notifies when the title of the currently opened group changes.
+        /// </summary>
+        public event Action<string> CurrentTitleChanged;
+
+        /// <summary>
+        /// The content of the menu group currently open.
+        /// </summary>
+        public IReadOnlyList<IMenuItem> CurrentView => _currentView;
+
+        /// <summary>
+        /// Notifies when an item was added to, or removed from, the currently open group.
+        /// </summary>
+        public event Action<IEnumerable<IMenuItem>> CurrentViewChanged;
+
+        /// <summary>
+        /// Notifies when an item has changed in the currently open group.
+        /// </summary>
+        public event Action<IMenuItem> MenuItemChanged;
+
+        /// <summary>
+        /// Notifies when another group has been opened.
+        /// </summary>
+        public event Action<NavigationPayload> NavigatedTo;
+
+        /// <summary>
+        /// The path of the group currently open.
+        /// </summary>
+        public IEnumerable<string> NavigationPath => _navigationStack.Select(x => x.Label);
+
+        private readonly List<IMenuItem> _currentView;
+        private readonly IMenuGroup _rootGroup;
+        private IMenuGroup _activeGroup;
+
+        private readonly List<IMenuGroup> _navigationStack = new List<IMenuGroup>(); // Navigation history for back traversal. List is used, because Stack is enumerated backwards, and would be less performant to convert it to FIFO NavigationPath.
+        private readonly MenuCommand _backCommandTop;
+        private readonly MenuCommand _backCommandBottom; // Separate instance; top and bottom back command shouldn't evaluate to equal.
+
+        public MenuModel(IMenuGroup menuRoot)
+        {
+            _rootGroup = menuRoot;
+            _currentView = new List<IMenuItem>();
+            _backCommandTop = new MenuCommand("Back «", MoveBack);
+            _backCommandBottom = new MenuCommand("Back «", MoveBack);
+            NavigateTo(_rootGroup);
+        }
+
+        public bool Select(IMenuItem item)
+        {
+            if (item == null || !CurrentView.Contains(item))
             {
-                public IMenuGroup NavigatedTo;
-                public IMenuGroup NavigatedFrom;
+                return false;
             }
 
-            /// <summary>
-            /// The title of the menu group currently open.
-            /// </summary>
-            public string CurrentTitle => _activeGroup.Label;
-
-            /// <summary>
-            /// Notifies when the title of the currently opened group changes.
-            /// </summary>
-            public event Action<string> CurrentTitleChanged;
-
-            /// <summary>
-            /// The content of the menu group currently open.
-            /// </summary>
-            public IReadOnlyList<IMenuItem> CurrentView => _currentView;
-
-            /// <summary>
-            /// Notifies when an item was added to, or removed from, the currently open group.
-            /// </summary>
-            public event Action<IEnumerable<IMenuItem>> CurrentViewChanged;
-
-            /// <summary>
-            /// Notifies when an item has changed in the currently open group.
-            /// </summary>
-            public event Action<IMenuItem> MenuItemChanged;
-
-            /// <summary>
-            /// Notifies when another group has been opened.
-            /// </summary>
-            public event Action<NavigationPayload> NavigatedTo;
-
-            /// <summary>
-            /// The path of the group currently open.
-            /// </summary>
-            public IEnumerable<string> NavigationPath => _navigationStack.Select(x => x.Label);
-
-            private readonly List<IMenuItem> _currentView;
-            private readonly IMenuGroup _rootGroup;
-            private IMenuGroup _activeGroup;
-
-            private readonly List<IMenuGroup> _navigationStack = new List<IMenuGroup>(); // Navigation history for back traversal. List is used, because Stack is enumerated backwards, and would be less performant to convert it to FIFO NavigationPath.
-            private readonly MenuCommand _backCommandTop;
-            private readonly MenuCommand _backCommandBottom; // Separate instance; top and bottom back command shouldn't evaluate to equal.
-
-            public MenuModel(IMenuGroup menuRoot)
+            if (item is IMenuGroup)
             {
-                _rootGroup = menuRoot;
-                _currentView = new List<IMenuItem>();
-                _backCommandTop = new MenuCommand("Back «", MoveBack);
-                _backCommandBottom = new MenuCommand("Back «", MoveBack);
-                NavigateTo(_rootGroup);
+                NavigateTo(item as IMenuGroup);
+                return true;
             }
 
-            public void Select(IMenuItem item)
+            if (item is IMenuCommand)
             {
-                if (item == null || !CurrentView.Contains(item))
-                    return;
-
-                if (item is IMenuGroup)
-                {
-                    NavigateTo(item as IMenuGroup);
-                }
-                else if (item is IMenuCommand)
-                {
-                    (item as IMenuCommand).Execute();
-                }
+                (item as IMenuCommand).Execute();
+                return true;
             }
 
-            public int GetIndexOf(IMenuItem item)
-            {
-                return _currentView.IndexOf(item);
-            }
+            return false;
+        }
 
-            private void NavigateTo(IMenuGroup group)
-            {
-                var navPayload = new NavigationPayload()
-                { 
-                    NavigatedTo = group,
-                    NavigatedFrom = _activeGroup
-                };
+        public int GetIndexOf(IMenuItem item)
+        {
+            return _currentView.IndexOf(item);
+        }
 
-                if (_activeGroup != null)
-                    CloseActiveGroup();
+        public void MoveBack()
+        {
+            if (_navigationStack.Count <= 1) // First item is Root.
+                return;
 
-                OpenGroup(group);
+            _navigationStack.RemoveAt(_navigationStack.Count - 1); // Pop last group.
+            var previousGroup = _navigationStack.Last();
+            _navigationStack.RemoveAt(_navigationStack.Count - 1); // Pop previous group too, to be able to treat it as a new navigation target.
 
-                NavigatedTo?.Invoke(navPayload);
-            }
+            NavigateTo(previousGroup);
+        }
 
-            private void MoveBack()
-            {
-                _navigationStack.RemoveAt(_navigationStack.Count - 1); // Pop last group.
-                var previousGroup = _navigationStack.Last(); 
-                _navigationStack.RemoveAt(_navigationStack.Count - 1); // Pop previous group too, to be able to treat it as a new navigation target.
+        private void NavigateTo(IMenuGroup group)
+        {
+            var navPayload = new NavigationPayload()
+            { 
+                NavigatedTo = group,
+                NavigatedFrom = _activeGroup
+            };
 
-                NavigateTo(previousGroup);
-            }
+            if (_activeGroup != null)
+                CloseActiveGroup();
 
-            private void CloseActiveGroup()
-            {
-                _activeGroup.LabelChanged -= Handle_GroupTitleChanged;
-                _activeGroup.ChildrenChanged -= Handle_ListChanged;
-                _activeGroup.ChildLabelChanged -= Handle_ItemChanged;
-                _activeGroup.Close();
-                _activeGroup = null;
+            OpenGroup(group);
 
-                BuildCurrentView();
-            }
+            NavigatedTo?.Invoke(navPayload);
+            CurrentTitleChanged?.Invoke(_activeGroup.Label);
+        }
 
-            private void OpenGroup(IMenuGroup group)
-            {
-                _navigationStack.Add(group);
-                group.Open();
-                group.LabelChanged += Handle_GroupTitleChanged;
-                group.ChildrenChanged += Handle_ListChanged;
-                group.ChildLabelChanged += Handle_ItemChanged;
-                _activeGroup = group;
+        private void CloseActiveGroup()
+        {
+            _activeGroup.LabelChanged -= Handle_GroupTitleChanged;
+            _activeGroup.ChildrenChanged -= Handle_ListChanged;
+            _activeGroup.ChildLabelChanged -= Handle_ItemChanged;
+            _activeGroup.Close();
+            _activeGroup = null;
 
-                BuildCurrentView();
-            }
+            BuildCurrentView();
+        }
 
-            private void BuildCurrentView()
-            {
-                _currentView.Clear();
+        private void OpenGroup(IMenuGroup group)
+        {
+            _navigationStack.Add(group);
+            group.Open();
+            group.LabelChanged += Handle_GroupTitleChanged;
+            group.ChildrenChanged += Handle_ListChanged;
+            group.ChildLabelChanged += Handle_ItemChanged;
+            _activeGroup = group;
 
-                if (_activeGroup == null)
-                    return;
+            BuildCurrentView();
+        }
 
-                if (_activeGroup != _rootGroup)
-                    _currentView.Add(_backCommandTop);
+        private void BuildCurrentView()
+        {
+            _currentView.Clear();
 
-                _currentView.AddRange(_activeGroup.GetChildren());
+            if (_activeGroup == null)
+                return;
 
-                if (_activeGroup.ShowBackCommandAtBottom)
-                    _currentView.Add(_backCommandBottom);
-            }
+            if (_activeGroup != _rootGroup)
+                _currentView.Add(_backCommandTop);
 
-            private void Handle_GroupTitleChanged(IMenuItem group)
-            {
-                CurrentTitleChanged?.Invoke(group.Label);
-            }
+            _currentView.AddRange(_activeGroup.GetChildren());
 
-            private void Handle_ListChanged(IMenuItem _)
-            {
-                CurrentViewChanged?.Invoke(CurrentView);
-            }
+            if (_activeGroup.ShowBackCommandAtBottom)
+                _currentView.Add(_backCommandBottom);
+        }
 
-            private void Handle_ItemChanged(IMenuItem item)
-            {
-                MenuItemChanged?.Invoke(item);
-            }
+        private void Handle_GroupTitleChanged(IMenuItem group)
+        {
+            CurrentTitleChanged?.Invoke(group.Label);
+        }
+
+        private void Handle_ListChanged(IMenuItem _)
+        {
+            CurrentViewChanged?.Invoke(CurrentView);
+        }
+
+        private void Handle_ItemChanged(IMenuItem item)
+        {
+            MenuItemChanged?.Invoke(item);
         }
     }
 }

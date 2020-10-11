@@ -49,6 +49,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\DisplaySystem\MenuModel\MenuCommandTests.cs" />
+    <Compile Include="Core\DisplaySystem\MenuModel\MenuGroupTests.cs" />
+    <Compile Include="Core\DisplaySystem\MenuModel\MenuItemTests.cs" />
+    <Compile Include="Core\DisplaySystem\MenuModel\MenuModelTests.cs" />
     <Compile Include="Utility\StringHelpersTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
