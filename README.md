@@ -27,6 +27,8 @@ From time to time expect some breaking changes to the consumer-facing interfaces
 
 Functional overview of GridOS:
 
+*(Note that this solution interprets concepts rather pragmatically, and some industry standard practices, like using abstractions and dependency injection everywhere, don't really add value in this limited/constrained runtime environment.)*
+
 ![GridOS components overview](docs/GridOS-diagram.png)
 
 * **GridOS facade:** The main GridOS class (the one you're instantiating) is a simple facade or front controller that handles all features under the hood via a single entry point (`Main()`), with the help of multiple dispatcher units, namely:
