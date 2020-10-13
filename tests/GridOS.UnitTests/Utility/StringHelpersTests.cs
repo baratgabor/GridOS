@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
+﻿using IngameScript;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static IngameScript.Program;
 
 namespace GridOS.UnitTests
 {
