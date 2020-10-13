@@ -72,14 +72,14 @@ namespace IngameScript
             if (_selectedLineIndex == 0)
             {
                 ScrollUp();
+                RedrawRequired?.Invoke(this);
             }
             // If the selected line is larger than zero, it trivially follows that we can move up the selection.
             else
             {
+                RedrawRequired?.Invoke(this);
                 _selectedLineIndex--;
             }
-
-            RedrawRequired?.Invoke(this);
         }
 
         public void MoveDown()
@@ -88,14 +88,15 @@ namespace IngameScript
             if (_selectedLineIndex == _linesToDisplay - 2)
             {
                 ScrollDown();
+                RedrawRequired?.Invoke(this);
             }
             // Move the selected line down, but only if we have a menu item there to select.
             else if (_menuLines.Count > _selectedLineIndex + 1)
             {
                 _selectedLineIndex++;
+                RedrawRequired?.Invoke(this);
             }
 
-            RedrawRequired?.Invoke(this);
         }
 
         public void Select()
