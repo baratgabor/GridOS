@@ -32,7 +32,6 @@ namespace IngameScript
 
         public void AppendTo(StringBuilder stringBuilder, bool isSelected)
         {
-            stringBuilder.AppendLine();
             stringBuilder.Append(LeftPadding);
             stringBuilder.Append(isSelected ? SelectionMarker : ' ');
             stringBuilder.Append(Prefix + " ");

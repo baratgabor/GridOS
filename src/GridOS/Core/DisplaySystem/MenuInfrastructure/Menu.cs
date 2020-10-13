@@ -234,6 +234,7 @@ namespace IngameScript
                     _menuLines.Add(line);
                     line.AppendTo(_content, linesGenerated == _selectedLineIndex);
                     linesGenerated++;
+                    if (linesGenerated < _linesToDisplay) _content.AppendLine();
                 }
             }
 
@@ -311,107 +312,7 @@ namespace IngameScript
                 }
                 else
                 {
-                    _menuLines_alt[i].AppendTo(_content, i == _selectedLineIndex);
-                }
-            }
-
-            // Maintain compatibility with previous system
-            _firstMenuItemNumber = _model.GetIndexOf(_menuLines_alt[0].BackingMenuItem);
-            _menuLines.Clear();
-
-            foreach (var line in _menuLines_alt)
-            {
-                if (line.BackingMenuItem != null)
-                    _menuLines.Add(line);
-            }
-
-            _firstMenuItemOffset = _menuLines_alt[0].LineIndex;
-            //
-        }
-
-        private void BuildContentFromSelectedLine_Experimental()
-        {
-            _content.Clear();
-            _menuLines.Clear();
-            Array.Clear(_menuLines_alt, 0, _menuLines_alt.Length);
-
-            var itemList = _model.CurrentView;
-            var itemCount = itemList.Count();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            // Populate lines upwards from the selected line, until reacing end of content or viewport boundary.
-            var insertPosition = _selectedLineIndex;
-            var lineCount = 0;
-            for (int i = _selectedMenuItemIndex - 1; i >= 0; i--)
-            {
-                var lines = _lineGenerator.GetLines(itemList[i]);
-
-                for (int n = lines.Count - 1; n >= 0; n--)
-                {
-                    insertPosition = _selectedLineIndex - 1 - lineCount;
-
-                    if (insertPosition < 0)
-                        goto BreakOut1;
-
-                    _menuLines_alt[insertPosition] = lines[n];
-                    lineCount++;
-                }
-            }
-
-        BreakOut1:
-
-            // If viewport didn't get filled (i.e. there are empty lines at the top), move content to the top.
-            if (insertPosition > 0)
-            {
-                Array.Copy(_menuLines_alt, insertPosition, _menuLines_alt, 0, _linesToDisplay - insertPosition);
-                _selectedLineIndex -= insertPosition;
-            }
-
-            // Populate lines downwards from the selected line (including selected line), until reaching end of content or viewport boundary.
-            lineCount = 0;
-            for (int i = _selectedMenuItemIndex; i < itemCount; i++)
-            {
-                foreach (var line in _lineGenerator.StreamLines(itemList[i]))
-                {
-                    insertPosition = _selectedLineIndex + lineCount;
-
-                    if (insertPosition >= _linesToDisplay)
-                        goto BreakOut2;
-
-                    _menuLines_alt[insertPosition] = line;
-                    lineCount++;
-                }
-            }
-
-        BreakOut2:
-
-            for (int i = 0; i < _linesToDisplay; i++)
-            {
-                if (_menuLines_alt[i].BackingMenuItem == null)
-                {
-                    _content.AppendLine();
-                }
-                else
-                {
+                    if (i != 0) _content.AppendLine();
                     _menuLines_alt[i].AppendTo(_content, i == _selectedLineIndex);
                 }
             }
