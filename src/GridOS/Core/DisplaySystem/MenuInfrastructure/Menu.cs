@@ -232,9 +232,9 @@ namespace IngameScript
                     }
 
                     _menuLines.Add(line);
+                    if (linesGenerated > 0) _content.AppendLine();
                     line.AppendTo(_content, linesGenerated == _selectedLineIndex);
                     linesGenerated++;
-                    if (linesGenerated < _linesToDisplay) _content.AppendLine();
                 }
             }
 
