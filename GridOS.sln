@@ -11,9 +11,13 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SE-Mocks", "dep\SE-Mocks\SE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GridOS.DeployTest", "tests\GridOS.DeployTest\GridOS.DeployTest.csproj", "{6A125558-D132-41C4-BF62-54209C2C2907}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GridOS.ConsoleTest", "tests\GridOS.ConsoleTest\GridOS.ConsoleTest.csproj", "{5E2E2FFF-577F-416D-A340-A5CE3EF6B58F}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\GridOS\GridOS.projitems*{1ec535ae-8123-4319-8921-b9cf5e62559e}*SharedItemsImports = 13
+		dep\SE-Mocks\SE-Mocks.projitems*{5e2e2fff-577f-416d-a340-a5ce3ef6b58f}*SharedItemsImports = 4
+		src\GridOS\GridOS.projitems*{5e2e2fff-577f-416d-a340-a5ce3ef6b58f}*SharedItemsImports = 4
 		dep\SE-Mocks\SE-Mocks.projitems*{6a125558-d132-41c4-bf62-54209c2c2907}*SharedItemsImports = 4
 		src\GridOS\GridOS.projitems*{6a125558-d132-41c4-bf62-54209c2c2907}*SharedItemsImports = 4
 		dep\SE-Mocks\SE-Mocks.projitems*{c35afc12-6f74-4e80-904e-79b3b4129641}*SharedItemsImports = 13
@@ -41,6 +45,14 @@ Global
 		{6A125558-D132-41C4-BF62-54209C2C2907}.Release|Any CPU.ActiveCfg = Debug|x64
 		{6A125558-D132-41C4-BF62-54209C2C2907}.Release|x64.ActiveCfg = Debug|x64
 		{6A125558-D132-41C4-BF62-54209C2C2907}.Release|x64.Build.0 = Debug|x64
+		{5E2E2FFF-577F-416D-A340-A5CE3EF6B58F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E2E2FFF-577F-416D-A340-A5CE3EF6B58F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E2E2FFF-577F-416D-A340-A5CE3EF6B58F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5E2E2FFF-577F-416D-A340-A5CE3EF6B58F}.Debug|x64.Build.0 = Debug|Any CPU
+		{5E2E2FFF-577F-416D-A340-A5CE3EF6B58F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E2E2FFF-577F-416D-A340-A5CE3EF6B58F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E2E2FFF-577F-416D-A340-A5CE3EF6B58F}.Release|x64.ActiveCfg = Release|Any CPU
+		{5E2E2FFF-577F-416D-A340-A5CE3EF6B58F}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
