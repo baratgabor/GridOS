@@ -193,7 +193,7 @@ namespace IngameScript
             var linesGenerated = 0;
 
             // Menu content can change dynamically; normalize first menu item to display if it has become out of range.
-            if (_firstMenuItemNumber >= itemCount)
+            if (_firstMenuItemNumber >= itemCount && itemCount > 0)
             {
                 _firstMenuItemNumber = itemCount - 1;
             }
@@ -240,7 +240,7 @@ namespace IngameScript
 
             while (linesGenerated < _linesToDisplay)
             {
-                _content.AppendLine();
+                if (linesGenerated > 0) _content.AppendLine();
                 linesGenerated++;
             }
         }
