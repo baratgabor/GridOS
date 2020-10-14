@@ -11,8 +11,7 @@ namespace IngameScript
         private readonly List<MenuLine> _menuLineBuffer = new List<MenuLine>();
         private readonly List<StringSegment> _segmentBuffer = new List<StringSegment>();
 
-            public MenuLineGenerator
-            (IMenuPresentationConfig presentationConfig)
+        public MenuLineGenerator(IMenuPresentationConfig presentationConfig)
         {
             _config = presentationConfig;
 
@@ -22,24 +21,13 @@ namespace IngameScript
 
         public IEnumerable<MenuLine> StreamLines(IMenuItem item)
         {
-            var counter = 0;
+            var lineIndex = 0;
 
             foreach (var line in StringHelpers.WordWrap(item.Label, _lineLength, _config.WordDelimiters))
             {
-                yield return new MenuLine()
-                {
-                    BackingMenuItem = item,
-                    LeftPadding = _leftPadding,
-                    Prefix = line.Start == 0 ? _config.GetPrefixFor(item, false) : ' ',
-                    Suffix = line.IsEndOfString ? _config.GetSuffixFor(item, false) : ' ',
-                    MenuItemString = item.Label,
-                    LineStartIndex = line.Start,
-                    LineLength = line.Length,
-                    LineIndex = counter,
-                    SelectionMarker = _config.SelectionMarker
-                };
+                yield return CreateMenuLine(item, line, lineIndex);
 
-                counter++;
+                lineIndex++;
             }
         }
 
@@ -58,21 +46,70 @@ namespace IngameScript
             for (int i = startIndex; i < segmentCount; i++)
             {
                 var line = _segmentBuffer[i];
-                _menuLineBuffer.Add(new MenuLine()
-                {
-                    BackingMenuItem = item,
-                    LeftPadding = _leftPadding,
-                    Prefix = line.Start == 0 ? _config.GetPrefixFor(item, false) : ' ',
-                    Suffix = line.IsEndOfString ? _config.GetSuffixFor(item, false) : ' ',
-                    MenuItemString = item.Label,
-                    LineStartIndex = line.Start,
-                    LineLength = line.Length,
-                    LineIndex = i,
-                    SelectionMarker = _config.SelectionMarker
-                });
+                _menuLineBuffer.Add(
+                    CreateMenuLine(item, line, i));
             }
 
             return _menuLineBuffer;
+        }
+
+        private MenuLine CreateMenuLine(IMenuItem item, StringSegment itemLine, int lineIndex)
+        {
+            return new MenuLine()
+            {
+                BackingMenuItem = item,
+                LeftPadding = _leftPadding,
+                UnselectedPrefix = GetUnselectedPrefixFor(item, lineIndex),
+                SelectedPrefix = GetSelectedPrefixFor(item, lineIndex),
+                Suffix = GetSuffixFor(item, itemLine.IsEndOfString),
+                MenuItemString = item.Label,
+                LineStartIndex = itemLine.Start,
+                LineLength = itemLine.Length,
+                LineIndex = lineIndex
+            };
+        }
+
+        private char GetSelectedPrefixFor(IMenuItem item, int lineIndex)
+        {
+            char prefix;
+
+            if (lineIndex > 0)
+                prefix = _config.SelectionMarker;
+            else if (item is IMenuGroup)
+                prefix = _config.Prefixes_Selected.Group;
+            else if (item is IMenuCommand)
+                prefix = _config.Prefixes_Selected.Command;
+            else
+                prefix = _config.Prefixes_Selected.Item;
+
+            if (prefix == ' ') // Lack of special selection prefix still should display line selection marker.
+                return _config.SelectionMarker;
+
+            return prefix;
+        }
+
+        private char GetUnselectedPrefixFor(IMenuItem item, int lineIndex)
+        {
+            if (lineIndex > 0)
+                return ' ';
+            if (item is IMenuGroup)
+                return _config.Prefixes_Unselected.Group;
+            if (item is IMenuCommand)
+                return _config.Prefixes_Unselected.Command;
+            
+            return _config.Prefixes_Unselected.Item;
+        }
+
+        private char GetSuffixFor(IMenuItem item, bool isEndOfString)
+        {
+            if (!isEndOfString)
+                return ' ';
+            if (item is IMenuGroup)
+                return _config.Suffixes_Unselected.Group;
+            if (item is IMenuCommand)
+                return _config.Suffixes_Unselected.Command;
+
+            return _config.Suffixes_Unselected.Item;
         }
     }
 }

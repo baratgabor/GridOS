@@ -8,8 +8,11 @@
         int PaddingLeft { get; }
         char PaddingChar { get; }
         char SelectionMarker { get; }
-        char GetPrefixFor(IMenuItem item, bool selected);
-        char GetSuffixFor(IMenuItem item, bool selected);
+        
+        AffixConfig Prefixes_Unselected { get; }
+        AffixConfig Prefixes_Selected { get; }
+        AffixConfig Suffixes_Unselected { get; }
+        AffixConfig Suffixes_Selected { get; }
     }
 
     interface IBreadcrumbConfig

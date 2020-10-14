@@ -23,7 +23,7 @@ namespace IngameScript
             private readonly CommandItem _downCommand;
             private readonly CommandItem _selectCommand;
 
-            public DisplayController(string name, ICommandDispatcher commandDispatcher, SmartConfig config, MyGridProgram program, IView view, IMenuGroup menuRoot, IGlobalEvents globalEvents)
+            public DisplayController(string name, ICommandDispatcher commandDispatcher, MainConfig config, MyGridProgram program, IView view, IMenuGroup menuRoot, IGlobalEvents globalEvents)
             {
                 Name = name;
                 _view = view;

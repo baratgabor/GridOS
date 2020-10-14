@@ -41,7 +41,7 @@ namespace IngameScript
 
                 try
                 {
-                    var config = new SmartConfig();
+                    var config = new MainConfig();
 
                     _controllers.Add(
                     new DisplayController(

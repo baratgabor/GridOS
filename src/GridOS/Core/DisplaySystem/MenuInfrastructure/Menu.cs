@@ -31,7 +31,7 @@ namespace IngameScript
         private readonly MenuLineGenerator _lineGenerator;
         private readonly StringBuilder _content = new StringBuilder();
 
-        public Menu(MenuModel model, SmartConfig config)
+        public Menu(MenuModel model, MainConfig config)
         {
             this._model = model;
 
