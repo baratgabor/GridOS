@@ -25,13 +25,13 @@ namespace IngameScript
         private int _selectedMenuItemOffset;
         //
 
-        private readonly MenuModel _model;
+        private readonly IMenuModel _model;
         private readonly int _linesToDisplay;
         private readonly List<MenuLine> _menuLines;
         private readonly MenuLineGenerator _lineGenerator;
         private readonly StringBuilder _content = new StringBuilder();
 
-        public Menu(MenuModel model, MainConfig config)
+        public Menu(IMenuModel model, MainConfig config)
         {
             this._model = model;
 
@@ -148,14 +148,15 @@ namespace IngameScript
 
         private void OnItemChanged(IMenuItem changedMenuItem)
         {
-            // Update only if the changed menu item has at least a single line visible in viewport.
-            if (!_menuLines.Any(x => x.BackingMenuItem == changedMenuItem))
+            // Update only if the changed menu item has at least a single line visible in the already built viewport.
+            // Empty collection means content is not built yet, so we can't reason about whether an item is visible or not.
+            if (_menuLines.Count > 0 && !_menuLines.Any(x => x.BackingMenuItem == changedMenuItem))
                 return;
 
             RedrawRequired?.Invoke(this);
         }
 
-        private void OnNavigatedTo(MenuModel.NavigationPayload navPayload)
+        private void OnNavigatedTo(NavigationPayload navPayload)
         {
             // Ensure that new view is displayed from the top.
             _selectedLineIndex = 0;

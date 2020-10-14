@@ -241,7 +241,7 @@ namespace GridOS.UnitTests
         public void Select_WhenSelectingValidGroup_ReturnsTrueAndNavigationIsCompleted()
         {
             var called = 0;
-            MenuModel.NavigationPayload sentPayload = default;
+            NavigationPayload sentPayload = default;
             var menuModel = new MenuModel(menuRoot);
             menuModel.NavigatedTo += (x) => { called++; sentPayload = x; };
 

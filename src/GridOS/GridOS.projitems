@@ -19,6 +19,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayInfrastructure\IView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\MenuLineGenerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\MenuLine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\NavigationPayload.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuModel\IMenuModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuModel\MenuModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\ICommandPublisher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IMenuContentPublisher.cs" />

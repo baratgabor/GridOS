@@ -5,7 +5,7 @@ namespace IngameScript
     /// <summary>
     /// Extends the basic menu item with the option to execute a command that is bound to the item.
     /// </summary>
-    interface IMenuCommand : IMenuItem
+    public interface IMenuCommand : IMenuItem
     {
         /// <summary>
         /// Notification dispatched after successful execution.

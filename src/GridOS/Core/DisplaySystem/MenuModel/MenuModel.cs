@@ -4,14 +4,8 @@ using System.Linq;
 
 namespace IngameScript
 {
-    class MenuModel
+    class MenuModel : IMenuModel
     {
-        public struct NavigationPayload
-        {
-            public IMenuGroup NavigatedTo;
-            public IMenuGroup NavigatedFrom;
-        }
-
         /// <summary>
         /// The title of the menu group currently open.
         /// </summary>

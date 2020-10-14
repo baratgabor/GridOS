@@ -7,7 +7,7 @@ namespace IngameScript
     /// Extends the basic menu item with composite behavior, i.e. the addition and removal of other items as children.
     /// Used for grouping items together to display contextually related aggregates.
     /// </summary>
-    interface IMenuGroup : IMenuItem
+    public interface IMenuGroup : IMenuItem
     {
         /// <summary>
         /// Adds a child under this group.
