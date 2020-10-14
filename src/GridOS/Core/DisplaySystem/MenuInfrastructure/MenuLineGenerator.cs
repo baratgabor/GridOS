@@ -105,11 +105,11 @@ namespace IngameScript
             if (!isEndOfString)
                 return ' ';
             if (item is IMenuGroup)
-                return _config.Suffixes_Unselected.Group;
+                return _config.Suffixes.Group;
             if (item is IMenuCommand)
-                return _config.Suffixes_Unselected.Command;
+                return _config.Suffixes.Command;
 
-            return _config.Suffixes_Unselected.Item;
+            return _config.Suffixes.Item;
         }
     }
 }

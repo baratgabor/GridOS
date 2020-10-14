@@ -23,19 +23,14 @@
             Group = '·'
         };
 
-        public AffixConfig Suffixes_Unselected { get; set; } = new AffixConfig()
-        {
-            Item = ' ',
-            Command = ' ',
-            Group = '»'
-        };
         public AffixConfig Prefixes_Selected { get; set; } = new AffixConfig()
         {
             Item = ' ',
             Command = '•',
             Group = '•'
         };
-        public AffixConfig Suffixes_Selected { get; set; } = new AffixConfig()
+
+        public AffixConfig Suffixes { get; set; } = new AffixConfig()
         {
             Item = ' ',
             Command = ' ',

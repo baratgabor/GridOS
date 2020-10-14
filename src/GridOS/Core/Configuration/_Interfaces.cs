@@ -11,8 +11,7 @@
         
         AffixConfig Prefixes_Unselected { get; }
         AffixConfig Prefixes_Selected { get; }
-        AffixConfig Suffixes_Unselected { get; }
-        AffixConfig Suffixes_Selected { get; }
+        AffixConfig Suffixes { get; }
     }
 
     interface IBreadcrumbConfig
