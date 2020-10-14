@@ -4,10 +4,6 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Configuration;
-using Castle.DynamicProxy.Generators.Emitters;
 
 namespace GridOS.UnitTests
 {
@@ -59,7 +55,6 @@ namespace GridOS.UnitTests
             var called = 0;
             var sut = new Menu(mockModel.Object, config);
             sut.RedrawRequired += (_) => called++;
-            sut.GetContent(); // Initializing content.
 
             // Act
             mockModel.Raise(x => x.MenuItemChanged += null, (object)firstMenuItem);
@@ -73,7 +68,7 @@ namespace GridOS.UnitTests
             var called = 0;
             var sut = new Menu(mockModel.Object, config);
             sut.RedrawRequired += (_) => called++;
-            sut.GetContent(); // Initializing content.
+            sut.GetContent(); // Initializing content. Without this it will invoke the redraw request, because it cannot determine the item's visiblity. This is expected behavior.
 
             // Act
             mockModel.Raise(x => x.MenuItemChanged += null, (object)seventhMenuItem);
@@ -98,7 +93,6 @@ namespace GridOS.UnitTests
         public void MoveUp_WhenSelectionIsAtTop_ShouldNotThrow()
         {
             var sut = new Menu(mockModel.Object, config);
-            sut.GetContent(); // Initializing content.
 
             // Act
             TestDelegate act = () =>
@@ -120,7 +114,6 @@ namespace GridOS.UnitTests
                 new MenuItem("Item2"),
             });
             var sut = new Menu(mockModel.Object, config);
-            sut.GetContent(); // Initializing content.
 
             // Act
             TestDelegate act = () =>

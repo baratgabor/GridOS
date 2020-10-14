@@ -68,6 +68,9 @@ namespace IngameScript
 
         public void MoveUp()
         {
+            if (_content.Length == 0)
+                BuildContent();
+
             // If the topmost line is selected already, try to scroll up instead.
             if (_selectedLineIndex == 0)
             {
@@ -84,6 +87,9 @@ namespace IngameScript
 
         public void MoveDown()
         {
+            if (_content.Length == 0)
+                BuildContent();
+
             // If the selected line is near the end of the menu, try to scroll down instead.
             if (_selectedLineIndex == _linesToDisplay - 2)
             {
@@ -101,6 +107,9 @@ namespace IngameScript
 
         public void Select()
         {
+            if (_content.Length == 0)
+                BuildContent();
+
             _model.Select(_menuLines[_selectedLineIndex].BackingMenuItem);
         }
 
