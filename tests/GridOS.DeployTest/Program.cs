@@ -1,4 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using EmptyKeys.UserInterface.Generated.DataTemplatesStoreBlock_Bindings;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using VRage.Game.GUI.TextPanel;
+using VRage.Utils;
+using VRageMath;
 
 namespace IngameScript
 {
@@ -70,10 +76,15 @@ namespace IngameScript
             gridOS.Main(argument, updateSource);
         }
 
-        public class TestModule : IModule, IMenuContentPublisher
+        public class TestModule : IModule, IMenuContentPublisher, IUpdateSubscriber
         {
             public IEnumerable<IMenuItem> MenuItems => menuItems;
             public string ModuleDisplayName => "TestModule1";
+
+            public ObservableUpdateFrequency Frequency => new ObservableUpdateFrequency(UpdateFrequency.Update100);
+
+            private readonly MenuItem _updatingMenuItem = new MenuItem("Updating");
+            private readonly Random _rnd = new Random();
 
             private readonly List<IMenuItem> menuItems = new List<IMenuItem>()
             {
@@ -84,6 +95,17 @@ namespace IngameScript
                 new MenuItem("Test5"),
                 new MenuItem("This is a longer text to test word wrapping in the menu.")
             };
+
+            public TestModule()
+            {
+                menuItems.Add(_updatingMenuItem);
+            }
+
+            public void Update(UpdateType updateType)
+            {
+                // Showcase/test menu item updating.
+                _updatingMenuItem.Label = $"Updating {_rnd.Next(0, 100)}";
+            }
         }
     }
 }
