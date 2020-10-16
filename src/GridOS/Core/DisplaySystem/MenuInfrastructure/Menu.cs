@@ -9,37 +9,57 @@ namespace IngameScript
     /// Draws a scrollable menu, and exposes menu navigation commands. Very deliberately not layered into traditional full content creation + offsetting, for performance reasons.
     /// This implementation efficiently fills only the menu lines displayed in the viewport, skipping the processing of all other out-of-viewport elements.
     /// This class has multiple responsibilities, arguably violates SRP, but this degree of feature density allows for an optimized solution to a specific problem.
+    /// Also, I included plenty of comments to aid maintenability, since the code here is less self-explanatory than normally.
     /// </summary>
     class Menu : IControl, IDisposable
     {
         public event Action<IControl> RedrawRequired;
         public event Action<IEnumerable<string>> NavigationPathChanged;
 
-        private int _firstMenuItemNumber;
-        private int _firstMenuItemOffset;
-        private int _selectedLineIndex;
+        /// <summary>
+        /// Indicates if the content has been already built to reflect current model state and/or the requested navigational operations.
+        /// </summary>
+        private bool _isStateDirty = true;
 
-        // Alternative content generation pertaining to BuildContentFromSelectedLine(). See related TODOs.
-        private readonly MenuLine[] _menuLines_alt;
+        // Menu display context is stored by the combination of selected line, item in selected line, and item offset (in case of word-wrapped items).
+        // This allows us to ensure stable selection even if the menu items are changing.
+        // TODO: Track menu item instance too to ensure stability if menu items are removed.
+        // TODO: Add correction logic if selected item is changed and line offset becomes invalid.
+        private int _selectedLineIndex;
         private int _selectedMenuItemIndex;
         private int _selectedMenuItemOffset;
-        //
+
+        /// <summary>
+        /// Stores each line of the menu with all necessary metadata.
+        /// </summary>
+        private readonly MenuLine[] _menuLines;
+
+        /// <summary>
+        /// Stores the final string representation of the menu.
+        /// </summary>
+        private readonly StringBuilder _menuContent = new StringBuilder();
+
+        /// <summary>
+        /// Specifies how many menu lines to produce. If menu content is shorter, it will be padded by empty lines.
+        /// </summary>
+        private readonly int _lineHeight;
+        private const int MinimumLineHeight = 3;
 
         private readonly IMenuModel _model;
-        private readonly int _linesToDisplay;
-        private readonly List<MenuLine> _menuLines;
         private readonly MenuLineGenerator _lineGenerator;
-        private readonly StringBuilder _content = new StringBuilder();
 
         public Menu(IMenuModel model, MainConfig config)
         {
-            this._model = model;
+            _model = model;
 
-            _linesToDisplay = config.LineHeight;
+            if (config.LineHeight < MinimumLineHeight)
+            {
+                throw new Exception($"{nameof(MainConfig)}.{nameof(MainConfig.LineHeight)} must be at least {MinimumLineHeight}. Current value is {config.LineHeight}.");
+            }
+
+            _lineHeight = config.LineHeight;
             _lineGenerator = new MenuLineGenerator(config);
-            _menuLines = new List<MenuLine>(_linesToDisplay);
-
-            _menuLines_alt = new MenuLine[_linesToDisplay];
+            _menuLines = new MenuLine[_lineHeight];
 
             model.CurrentViewChanged += OnListChanged;
             model.MenuItemChanged += OnItemChanged;
@@ -57,7 +77,7 @@ namespace IngameScript
         {
             BuildContent();
 
-            return _content;
+            return _menuContent;
         }
 
         public void PushUpdate()
@@ -66,92 +86,144 @@ namespace IngameScript
             RedrawRequired?.Invoke(this);
         }
 
+        /// <summary>
+        /// Moves up in the menu, if possible, either by moving the line selector up, or scrolling the content up.
+        /// </summary>
         public void MoveUp()
         {
-            if (_content.Length == 0)
+            // Selection only resides in the first line if we're at the very top of the menu.
+            if (_selectedLineIndex == 0)
+                return;
+
+            // Navigation requires fresh menu content to work with.
+            if (_isStateDirty)
                 BuildContent();
 
-            // If the topmost line is selected already, try to scroll up instead.
-            if (_selectedLineIndex == 0)
+            // Second line from the top is designated for scrolling upwards.
+            if (_selectedLineIndex == 1)
             {
-                ScrollUp();
-                RedrawRequired?.Invoke(this);
+                // TODO: Add condition not to scroll when there are no items above viewport. Currently the arraycopy in BuildContent corrects this.
+                if (ScrollUp())
+                {
+                    _isStateDirty = true;
+                    RedrawRequired?.Invoke(this);
+                }
             }
-            // If the selected line is larger than zero, it trivially follows that we can move up the selection.
+            // Selected line > 1 means we'll move the selection up, either by decreasing the offset, or jumping to the last line of the preceding item.
             else
-            {
-                RedrawRequired?.Invoke(this);
+            {                
+                // Moving the cursor up to the previous item/line is the combination of
+                // selecting the previous line plus decrementing the selection index.
+                SelectPreviousLine();
                 _selectedLineIndex--;
+
+                _isStateDirty = true;
+                RedrawRequired?.Invoke(this);
             }
         }
 
+        /// <summary>
+        /// Moves down in the menu, if possible, either by moving the line selector down, or scrolling the content down.
+        /// </summary>
         public void MoveDown()
         {
-            if (_content.Length == 0)
+            if (_isStateDirty)
                 BuildContent();
 
-            // If the selected line is near the end of the menu, try to scroll down instead.
-            if (_selectedLineIndex == _linesToDisplay - 2)
+            // Next-to-last line is designated for scrolling downwards.
+            if (_selectedLineIndex == _lineHeight - 2)
             {
-                ScrollDown();
-                RedrawRequired?.Invoke(this);
+                if (ScrollDown())
+                {
+                    _isStateDirty = true;
+                    RedrawRequired?.Invoke(this);
+                }
             }
             // Move the selected line down, but only if we have a menu item there to select.
-            else if (_menuLines.Count > _selectedLineIndex + 1)
+            else if (_menuLines[_selectedLineIndex + 1].BackingMenuItem != null)
             {
+                // Moving the cursor down to the next item/line is the combination of
+                // selecting the next line plus incrementing the selection index.
+                SelectNextLine();
                 _selectedLineIndex++;
+
+                _isStateDirty = true;
                 RedrawRequired?.Invoke(this);
             }
-
         }
 
+        /// <summary>
+        /// Tries to execute the currently selected menu item.
+        /// </summary>
         public void Select()
         {
-            if (_content.Length == 0)
+            if (_isStateDirty)
                 BuildContent();
 
             _model.Select(_menuLines[_selectedLineIndex].BackingMenuItem);
         }
 
-        private void ScrollDown()
+        /// <summary>
+        /// Moves the selection downwards by keeping the same line selected and scrolling the content by one line.
+        /// </summary>
+        private bool ScrollDown()
         {
-            // Check if all the menu lines are populated. If not, we cannot scroll further.
-            if (_menuLines.Count < _linesToDisplay)
-            {
-                return;
-            }
-
-            // If the first and second menu line belongs to the same menu item (word wrapped), we cut off a line from it at the top of the view.
-            if (_menuLines[0].BackingMenuItem == _menuLines[1].BackingMenuItem)
-            {
-                _firstMenuItemOffset++;
-            }
-            // If the first and second menu line has different menu item, we remove the first item from the top of the view.
-            else
-            {
-                _firstMenuItemOffset = 0;
-                _firstMenuItemNumber++;
-            }
+            // Scrolling is an easier to understand concept, but technically what happens is that
+            // we select the next line while keeping the selection index the same.
+            return SelectNextLine();
         }
 
-        private void ScrollUp()
+        /// <summary>
+        /// Moves the selection upwards by keeping the same line selected and scrolling the content by one line.
+        /// </summary>
+        private bool ScrollUp()
         {
-            // If the topmost menu item displayed has lines cut off, we put back a line.
-            if (_firstMenuItemOffset > 0)
+            // Scrolling is an easier to understand concept, but technically what happens is that
+            // we select the previous line while keeping the selection index the same.
+            return SelectPreviousLine();
+        }
+
+        private bool SelectPreviousLine()
+        {
+            // If the currently selected menu item is offsetted, simply decrease the offset to imitate scrolling upward by a line.
+            if (_selectedMenuItemOffset > 0)
             {
-                _firstMenuItemOffset--;
+                _selectedMenuItemOffset--;
+                return true;
             }
-            // If we have more menu items above our topmost menu item shown, display the last line of the previous menu item.
-            else if (_firstMenuItemNumber > 0)
+            // If it's not offsetted, but we have a menu item above, set the selection to the last line of the preceding menu item.
+            else if (_selectedMenuItemIndex > 0)
             {
-                // TODO: Identify the number of lines of the previous menu item, and set firstMenuItemOffset to that value.
-                //firstMenuItemNumber--;
-                _firstMenuItemOffset = -1;
+                _selectedMenuItemIndex--;
+                _selectedMenuItemOffset = _menuLines[_selectedLineIndex - 1].LineIndex;
+                return true;
             }
+
+            return false;
+        }
+
+        private bool SelectNextLine()
+        {
+            // If current and next line belong to the same multi-line menu item, increase the line offset to imitate line-by-line scrolling.
+            if (_menuLines[_selectedLineIndex].BackingMenuItem == _menuLines[_selectedLineIndex + 1].BackingMenuItem)
+            {
+                _selectedMenuItemOffset++;
+                return true;
+            }
+            // If the next line belongs to the next menu item, set the selection to the first line of the next menu item.
+            else if (_selectedMenuItemIndex < _model.CurrentView.Count - 1)
+            {
+                _selectedMenuItemOffset = 0;
+                _selectedMenuItemIndex++;
+                return true;
+            }
+
+            return false;
         }
 
         private void OnListChanged(IEnumerable<IMenuItem> _)
         {
+            _isStateDirty = true;
             RedrawRequired?.Invoke(this);
         }
 
@@ -159,9 +231,10 @@ namespace IngameScript
         {
             // Update only if the changed menu item has at least a single line visible in the already built viewport.
             // Empty collection means content is not built yet, so we can't reason about whether an item is visible or not.
-            if (_menuLines.Count > 0 && !_menuLines.Any(x => x.BackingMenuItem == changedMenuItem))
+            if (_menuContent.Length > 0 && !_menuLines.Any(x => x.BackingMenuItem == changedMenuItem))
                 return;
 
+            _isStateDirty = true;
             RedrawRequired?.Invoke(this);
         }
 
@@ -169,176 +242,108 @@ namespace IngameScript
         {
             // Ensure that new view is displayed from the top.
             _selectedLineIndex = 0;
-            _firstMenuItemNumber = 0;
-            _firstMenuItemOffset = 0;
+            _selectedMenuItemIndex = 0;
+            _selectedMenuItemOffset = 0;
 
             // Except when navigating backwards. In that case highlight the previously opened menu group label in the list.
             var previouslyOpenedGroupIndex = _model.GetIndexOf(navPayload.NavigatedFrom);
             if (previouslyOpenedGroupIndex > -1)
             {
-                _selectedLineIndex = _linesToDisplay - 2; // Next to last line. Looks better if it's not at the bottom.
+                _selectedLineIndex = _lineHeight - 2; // Next to last line. Looks better if it's not at the bottom.
                 _selectedMenuItemIndex = previouslyOpenedGroupIndex;
-                _firstMenuItemNumber = 0;
-                _firstMenuItemOffset = 0;
-
-                BuildContentFromSelectedLine();
-            }
-            else
-            {
-                BuildContent();
             }
 
             NavigationPathChanged?.Invoke(_model.NavigationPath);
+            _isStateDirty = true;
             RedrawRequired?.Invoke(this);
         }
 
-        // TODO: Refactor. Implementing -1 magic int in _firstMenuItemOffset to signal above-viewport line inclusion disintegrated the structure of this method.
+        /// This appears to be fairly overcomplicated, but it's the cost of optimization.
+        /// With this way of rendering, the time complexity of rendering is decoupled from the actual length of the menu.
+        /// Simple sequential, top to bottom viewport filling wasn't an option, because when navigating backwards, we need to select the previously opened group in the list (preferably not at the top of the viewport), without knowing how long the predecing part of the menu is.
+        /// The only thing that can throw performance off is to have an extremely long (high line number) menu item hanging into the view from the top.
         private void BuildContent()
         {
-            _content.Clear();
-            _menuLines.Clear();
+            _menuContent.Clear();
+            Array.Clear(_menuLines, 0, _menuLines.Length);
 
             var itemList = _model.CurrentView;
-            var itemCount = itemList.Count();
-            var linesGenerated = 0;
+            var itemCount = itemList.Count;
+            var selectedMenuItemRenderStartIndex = _selectedLineIndex - _selectedMenuItemOffset;
+            var insertionIndex = selectedMenuItemRenderStartIndex;
 
-            // Menu content can change dynamically; normalize first menu item to display if it has become out of range.
-            if (_firstMenuItemNumber >= itemCount && itemCount > 0)
+            // Step 1: Fill viewport upwards from above the selected menu item (if necessary).
+            if (_selectedMenuItemIndex > 0)
             {
-                _firstMenuItemNumber = itemCount - 1;
-            }
-
-            if (_firstMenuItemOffset == -1)
-            {
-                _firstMenuItemNumber--;
-            }
-
-            for (int i = _firstMenuItemNumber; i < itemCount; i++)
-            {
-                IEnumerable<MenuLine> menuItemLines;
-
-                if (_firstMenuItemOffset == -1)
+                insertionIndex = selectedMenuItemRenderStartIndex - 1;
+                if (selectedMenuItemRenderStartIndex > 0)
                 {
-                    menuItemLines = _lineGenerator.GetLines(itemList[i], 1);
-
-                    _firstMenuItemOffset = menuItemLines.First().LineIndex;
-                }
-                else
-                {
-                    menuItemLines = _lineGenerator.StreamLines(itemList[i]);
-
-                    // Special case for the first item in viewport: skip the designated number of lines to imitate continuous scrolling.
-                    if (i == _firstMenuItemNumber)
+                    for (int itemIndex = _selectedMenuItemIndex - 1; itemIndex >= 0; itemIndex--)
                     {
-                        menuItemLines = menuItemLines.Skip(_firstMenuItemOffset);
+                        var lines = _lineGenerator.GetLines(itemList[itemIndex]);
+
+                        for (int lineIndex = lines.Count - 1; lineIndex >= 0; lineIndex--)
+                        {
+                            if (insertionIndex < 0)
+                            {
+                                itemIndex = -1;
+                                break;
+                            }
+
+                            _menuLines[insertionIndex] = lines[lineIndex];
+                            insertionIndex--;
+                        }
                     }
                 }
-
-                foreach (var line in menuItemLines)
-                {
-                    if (linesGenerated >= _linesToDisplay)
-                    {
-                        return;
-                    }
-
-                    _menuLines.Add(line);
-                    if (linesGenerated > 0) _content.AppendLine();
-                    line.AppendTo(_content, linesGenerated == _selectedLineIndex);
-                    linesGenerated++;
-                }
             }
 
-            while (linesGenerated < _linesToDisplay)
+            // Step 2: If Step 1 resulted in empty lines at the top of the menu, move everything up. Only when we don't know how long the menu is above our selected element.
+            if (insertionIndex > 0)
             {
-                if (linesGenerated > 0) _content.AppendLine();
-                linesGenerated++;
-            }
-        }
-
-        // TODO: Try switching to this selectedline-based content rendering instead of maintaining a hybrid solution. Also try to refactor/clean up this method for better maintainability. Oh, and menu item offsetting support still needs to be implemented.
-        /// <summary>
-        /// Builds content starting at the selected menu line, and working downwards and upwards separately to fill the whole viewport.
-        /// </summary>
-        private void BuildContentFromSelectedLine()
-        {
-            _content.Clear();
-            _menuLines.Clear();
-            Array.Clear(_menuLines_alt, 0, _menuLines_alt.Length);
-
-            var itemList = _model.CurrentView;
-            var itemCount = itemList.Count();
-
-            // Populate lines upwards from the selected line, until reacing end of content or viewport boundary.
-            var insertPosition = _selectedLineIndex;
-            var lineCount = 0;
-            for (int i = _selectedMenuItemIndex - 1; i >= 0; i--)
-            {
-                var lines = _lineGenerator.GetLines(itemList[i]);
-
-                for (int n = lines.Count - 1; n >= 0; n--)
-                {
-                    insertPosition = _selectedLineIndex - 1 - lineCount;
-                        
-                    if (insertPosition < 0)
-                        goto BreakOut1;
-
-                    _menuLines_alt[insertPosition] = lines[n];
-                    lineCount++;
-                }
+                Array.Copy(_menuLines, insertionIndex, _menuLines, 0, _lineHeight - insertionIndex);
+                _selectedLineIndex -= insertionIndex;
+                selectedMenuItemRenderStartIndex -= insertionIndex;
             }
 
-            BreakOut1:
-
-            // If viewport didn't get filled (i.e. there are empty lines at the top), move content to the top.
-            if (insertPosition > 0)
-            {
-                Array.Copy(_menuLines_alt, insertPosition, _menuLines_alt, 0, _linesToDisplay - insertPosition);
-                _selectedLineIndex -= insertPosition;
-            }
-
-            // Populate lines downwards from the selected line (including selected line), until reaching end of content or viewport boundary.
-            lineCount = 0;
+            // Step 3: Fill menu lines downwards starting from the selected item. Only this executes if selection is at the top (or offsetted above the top).
+            insertionIndex = selectedMenuItemRenderStartIndex;
             for (int i = _selectedMenuItemIndex; i < itemCount; i++)
             {
                 foreach (var line in _lineGenerator.StreamLines(itemList[i]))
                 {
-                    insertPosition = _selectedLineIndex + lineCount;
+                    // Menu item offsetting can result in the beginning of the item residing above-viewport. Skip writing these lines.
+                    if (insertionIndex < 0)
+                    {
+                        insertionIndex++;
+                        continue;
+                    }
 
-                    if (insertPosition >= _linesToDisplay)
-                        goto BreakOut2;
+                    _menuLines[insertionIndex] = line;
+                    insertionIndex++;
 
-                    _menuLines_alt[insertPosition] = line;
-                    lineCount++;
+                    if (insertionIndex >= _lineHeight)
+                    {
+                        i = itemCount;
+                        break;
+                    }
                 }
             }
 
-            BreakOut2:
-
-            for (int i = 0; i < _linesToDisplay; i++)
+            // Step 4: Sequentially render all above assembled lines into output, adding empty lines if needed to satisfy the required number of lines.
+            for (int i = 0; i < _lineHeight; i++)
             {
-                if (_menuLines_alt[i].BackingMenuItem == null)
+                if (_menuLines[i].BackingMenuItem == null)
                 {
-                    _content.AppendLine();
+                    if (i != 0) _menuContent.AppendLine();
                 }
                 else
                 {
-                    if (i != 0) _content.AppendLine();
-                    _menuLines_alt[i].AppendTo(_content, i == _selectedLineIndex);
+                    if (i != 0) _menuContent.AppendLine();
+                    _menuLines[i].AppendTo(_menuContent, i == _selectedLineIndex);
                 }
             }
 
-            // Maintain compatibility with previous system
-            _firstMenuItemNumber = _model.GetIndexOf(_menuLines_alt[0].BackingMenuItem);
-            _menuLines.Clear();
-
-            foreach (var line in _menuLines_alt)
-            {
-                if (line.BackingMenuItem != null)
-                    _menuLines.Add(line);
-            }
-
-            _firstMenuItemOffset = _menuLines_alt[0].LineIndex;
-            //
+            _isStateDirty = false;
         }
     }
 }
