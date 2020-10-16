@@ -162,7 +162,7 @@ namespace GridOS.UnitTests
         }
 
         [Test]
-        public void MoveDown_WhenSelectionIsAtTop_ShouldNotThrow()
+        public void MoveDown_WhenSelectionIsAtBottom_ShouldNotThrow()
         {
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { 
                 new MenuItem("Item1"),
@@ -207,6 +207,82 @@ namespace GridOS.UnitTests
             Assert.AreEqual("Item4", lines[0].Trim(), "First menu line is expected to contain the next-to-last menu item, without anything else.");
             StringAssert.Contains(menuSelectionMarker + " Item5", lines[1], "Second menu line is expected to contain the last menu item, preceded by a selection mark.");
             Assert.AreEqual(string.Empty, lines[2], "Last menu line is expected to be empty. This is to visually communicate that the end of the menu is reached.");
+        }
+
+        [Test]
+        public void MoveDown_WhenViewportIsLongerThanMenu_SelectionStopsAtLastMenuItem()
+        {
+            config.LineHeight = 10;
+            mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuItem("Item1"), new MenuItem("Item2") });
+            var sut = new Menu(mockModel.Object, config);
+
+            // Act
+            sut.MoveDown();
+            sut.MoveDown();
+            sut.MoveDown();
+
+            var lines = sut.GetContent().ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            StringAssert.StartsWith(menuSelectionMarker.ToString(), lines[1], "Last menu item (in second line) must be selected even when trying to move down further.");
+        }
+
+        [Test]
+        public void MoveDown_WhenViewportIsShorterThanMenu_SelectionStopsAtLastMenuItem()
+        {
+            config.LineHeight = 3;
+            mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuItem("Item1"), new MenuItem("Item2"), new MenuItem("Item3"), new MenuItem("Item4"), new MenuItem("Item5") });
+            var sut = new Menu(mockModel.Object, config);
+
+            // Act
+            sut.MoveDown();
+            sut.MoveDown();
+            sut.MoveDown();
+            sut.MoveDown();
+            sut.MoveDown();
+            sut.MoveDown();
+
+            StringAssert.Contains(menuSelectionMarker + " Item5", sut.GetContent().ToString(), "Last item (Item5) must be selected even when trying to move down further. This fail most likely means scrolling doesn't stop when it should.");
+        }
+
+        [Test]
+        public void MoveDown_MoveUp_WithMultiLineItems_NavigatesCorrectly()
+        {
+            config.LineHeight = 4; // Shorten than items/lines.
+            config.LineLength = 10; // Forces breaking some items into two lines.
+            mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() {
+                new MenuItem("Line0 Line1"),
+                new MenuItem("Line2"),
+                new MenuItem("Line3 Line4"),
+                new MenuItem("Line5"),
+                new MenuItem("Line6"),
+                new MenuItem("Line7 Line8"),
+                new MenuItem("Line9 Line10"),
+                new MenuItem("Line11"),
+            });
+            var sut = new Menu(mockModel.Object, config);
+
+            // Act/Assert. Unconventional, buy hey, it does the job.
+            sut.MoveDown();
+            sut.MoveDown();
+            StringAssert.Contains(menuSelectionMarker + " Line2", sut.GetContent().ToString(), "Line2 was expected to be selected.");
+            sut.MoveDown();
+            sut.MoveDown();
+            sut.MoveDown();
+            sut.MoveDown();
+            StringAssert.Contains(menuSelectionMarker + " Line6", sut.GetContent().ToString(), "Line6 was expected to be selected.");
+            sut.MoveDown();
+            sut.MoveDown();
+            sut.MoveDown();
+            sut.MoveDown();
+            StringAssert.Contains(menuSelectionMarker + " Line10", sut.GetContent().ToString(), "Line10 was expected to be selected.");
+            sut.MoveUp();
+            sut.MoveUp();
+            sut.MoveUp();
+            StringAssert.Contains(menuSelectionMarker + " Line7", sut.GetContent().ToString(), "Line7 was expected to be selected.");
+            sut.MoveUp();
+            sut.MoveUp();
+            sut.MoveUp();
+            sut.MoveUp();
+            StringAssert.Contains(menuSelectionMarker + " Line3", sut.GetContent().ToString(), "Line3 was expected to be selected.");
         }
 
         [Test]
