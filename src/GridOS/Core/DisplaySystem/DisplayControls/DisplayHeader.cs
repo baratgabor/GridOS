@@ -25,7 +25,7 @@ namespace IngameScript
                 _buffer.Append(" ::GridOS:: ");
                 _buffer.Append(_spinner.Get());
                 _buffer.Append(" LRT: ");
-                _buffer.AppendFormat("{0}:G3ms", _runtime.LastRunTimeMs);
+                _buffer.AppendFormat("{0:G3}ms", _runtime.LastRunTimeMs);
                 return _buffer;
             }
         }
