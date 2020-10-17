@@ -28,6 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)MyDetectedEntityInfo.debug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UpdateFrequency.debug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UpdateType.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector2.debug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Vector3D.debug.cs" />
   </ItemGroup>
 </Project>

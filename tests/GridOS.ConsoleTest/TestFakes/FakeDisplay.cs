@@ -23,6 +23,16 @@ namespace IngameScript
         public string DisplayName { get; set; }
 
         public string CurrentlyShownImage { get; set; }
+        public Color ScriptForegroundColor { get; set; }
+        public Color ScriptBackgroundColor { get; set; }
+
+        public Vector2 TextureSize => new Vector2() { X = 100, Y = 100 };
+
+        public Vector2 SurfaceSize => new Vector2() { X = 100, Y = 100 };
+
+        public TextAlignment Alignment { get; set; } = TextAlignment.LEFT;
+        public Color BackgroundColor { get; set; } = Color.Black;
+        public Color FontColor { get; set; } = Color.White;
 
         public void AddImagesToSelection(List<string> ids, bool checkExistence = false)
         {
@@ -88,6 +98,11 @@ namespace IngameScript
         {
             TextWritten?.Invoke(value);
             return true;
+        }
+
+        public Vector2 MeasureStringInPixels(StringBuilder text, string font, float scale)
+        {
+            throw new NotImplementedException();
         }
     }
 }
