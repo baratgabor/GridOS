@@ -12,7 +12,6 @@ namespace IngameScript
         class DisplayView : IView
         {
             protected IMyTextSurface _target;
-            protected IMyGridProgramRuntimeInfo _runtime;
             protected string _targetFont = "Debug";
             protected float _targetFontSize = 1f;
             protected int _maxLineWidth;
@@ -26,9 +25,8 @@ namespace IngameScript
             protected const char _lineSeparatorCharBottom = '˙';
             protected IViewConfig_Writeable _config;
 
-            public DisplayView(IMyTextSurface target, IViewConfig_Writeable fillable_config, IMyGridProgramRuntimeInfo runtime)
+            public DisplayView(IMyTextSurface target, IViewConfig_Writeable fillable_config)
             {
-                _runtime = runtime;
                 _target = target;
                 _config = fillable_config;
 

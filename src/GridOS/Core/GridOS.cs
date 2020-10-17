@@ -11,37 +11,31 @@ namespace IngameScript
         /// </summary>
         class GridOS
         {
-            private MyGridProgram _p;
-            private Action<string> _echo;
-            private IMyGridProgramRuntimeInfo _runtime;
-            private GlobalEventDispatcher _executionEvents;
+            private readonly MyGridProgram _p;
+            private readonly GlobalEventDispatcher _executionEvents;
+            private readonly IDiagnosticServiceController _diagnostics;
 
-            private IUpdateDispatcher _updateDispatcher;
-            private ICommandDispatcher _commandDispatcher;
-            private DisplayOrchestrator _displayOrchestrator;
+            private readonly IUpdateDispatcher _updateDispatcher;
+            private readonly ICommandDispatcher _commandDispatcher;
+            private readonly DisplayOrchestrator _displayOrchestrator;
 
             private const string _systemName = "GridOS Experimental";
-            private double _totalExecTime = 0;
-            private int _numOfExec = 0;
-            private int _lastInstrCount = 0;
-            private bool _initialPeriodExceeded = false;
 
             // Main module storage
-            private List<IModule> _moduleList = new List<IModule>();
+            private readonly List<IModule> _moduleList = new List<IModule>();
 
             public GridOS(MyGridProgram p)
             {
                 _p = p;
-                _echo = _p.Echo;
-                _runtime = _p.Runtime;
                 _executionEvents = new GlobalEventDispatcher();
+                _diagnostics = new GridProgramDiagnostics(_p) { LoggingLevel = LogLevel.Debug };
 
-                Func<UpdateFrequency> _updateFrequencyGetter = () => _runtime.UpdateFrequency;
-                Action<UpdateFrequency> _updateFrequencySetter = (x) => _runtime.UpdateFrequency = x;
+                Func<UpdateFrequency> _updateFrequencyGetter = () => _p.Runtime.UpdateFrequency;
+                Action<UpdateFrequency> _updateFrequencySetter = (x) => _p.Runtime.UpdateFrequency = x;
 
                 _commandDispatcher = new CommandDispatcher();
-                _updateDispatcher = new UpdateDispatcher_v1(_echo, _updateFrequencyGetter, _updateFrequencySetter);
-                _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, p, _executionEvents);
+                _updateDispatcher = new UpdateDispatcher_v1((ILogger)_diagnostics, _updateFrequencyGetter, _updateFrequencySetter);
+                _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _diagnostics, _executionEvents);
 
                 _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
                 _commandDispatcher.AddCommand(new CommandItem("DisableUpdates", CommandHandler_DisableUpdates));
@@ -82,47 +76,42 @@ namespace IngameScript
             }
 
             /// <summary>
-            /// Entry point for each update cycle. Call it from Main().
+            /// This method should receive control from the script's Main() method.
             /// </summary>
-            /// <param name="updateType">The UpdateType received in Main().</param>
-            /// <param name="argument">The argument received in Main().</param>
+            /// <param name="updateType">The UpdateType received in the script's Main() method.</param>
+            /// <param name="argument">The argument received in the script's Main() method.</param>
             public void Main(string argument, UpdateType updateType)
             {
+                _diagnostics.RecordExecution(logExecutionStats: true);
                 _executionEvents.ExecutionStarted();
 
-                // TODO: Get rid of this ad-hoc diagnostics, move it somewhere sane
-                _totalExecTime += _runtime.LastRunTimeMs;
-                _numOfExec++;
-                double _avgExecTime = _totalExecTime / _numOfExec;
-
-                if (_numOfExec == 10 && _initialPeriodExceeded == false)
+                // Dispatch updates.
+                if (updateType >= UpdateType.Update1)
                 {
-                    _totalExecTime = 0;
-                    _numOfExec = 0;
-                    _initialPeriodExceeded = true;
+                    try
+                    {
+                        _updateDispatcher.Dispatch(updateType);
+                    }
+                    catch (Exception e)
+                    {
+                        _diagnostics.Log(LogLevel.Error, $"Error dispatching update type '{updateType}'. Message: {e.Message}");
+                    }
                 }
-
-                //_echo("ExecuteCycle invoked.");
-                _echo("Last Instr. Count: " + _lastInstrCount);
-                _echo($"Last Execusion Time: {_runtime.LastRunTimeMs:G3}");
-                _echo($"Average Execusion Time: {_avgExecTime:G3}");
-
-                // TODO: Structure exception handling properly
-                _updateDispatcher.Dispatch(updateType);
-                try
+                
+                // Dispatch commands.
+                if (argument != "")
                 {
-                    if (argument != "")
+                    try
                     {
                         _commandDispatcher.TryDispatch(argument.Trim());
                     }
-                }
-                catch(Exception e)
-                {
-                    _echo(e.ToString());
+                    catch (Exception e)
+                    {
+                        _diagnostics.Log(LogLevel.Error, $"Error processing argument '{argument}'. Message: {e.Message}");
+                    }
                 }
 
                 _executionEvents.ExecutionFinishing();
-                _lastInstrCount = _runtime.CurrentInstructionCount;
             }
 
             /// <summary>

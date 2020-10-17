@@ -15,21 +15,21 @@ namespace IngameScript
             // What to do if non-empty item is removed? Remove all children, or put them somewhere else? How to react if we're displaying items below a group node that is removed?
 
             // Root group displayed by default, parent of all other items/groups
-            private IMenuGroup _menuRoot = new MenuGroup("Main");
+            private readonly IMenuGroup _menuRoot = new MenuGroup("Main");
 
-            private List<IMyTextSurface> _registeredTextSurfaces = new List<IMyTextSurface>();
-            private List<DisplayController> _controllers = new List<DisplayController>();
+            private readonly List<IMyTextSurface> _registeredTextSurfaces = new List<IMyTextSurface>();
+            private readonly List<DisplayController> _controllers = new List<DisplayController>();
             private const string _controllerNameTemplate = "Display";
             private int _controllerCounter = 0;
 
-            private ICommandDispatcher _commandDispatcher;
-            private MyGridProgram _program;
+            private readonly ICommandDispatcher _commandDispatcher;
+            private readonly IDiagnosticService _diagnostics;
             private readonly IGlobalEvents _globalEvents;
 
-            public DisplayOrchestrator(ICommandDispatcher commandDispatcher, MyGridProgram program, IGlobalEvents globalEvents)
+            public DisplayOrchestrator(ICommandDispatcher commandDispatcher, IDiagnosticService diagnostics, IGlobalEvents globalEvents)
             {
                 _commandDispatcher = commandDispatcher;
-                _program = program;
+                _diagnostics = diagnostics;
                 _globalEvents = globalEvents;
                 _menuRoot.AddChild(new HelpMenu());
             }
@@ -48,11 +48,10 @@ namespace IngameScript
                         NextControllerName(),
                         _commandDispatcher,
                         config,
-                        _program,
+                        _diagnostics,
                         new DisplayView(
                             textSurface,
-                            config,
-                            _program.Runtime),
+                            config),
                         _menuRoot,
                         _globalEvents)
                     );

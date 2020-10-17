@@ -13,7 +13,7 @@ namespace IngameScript
             public string Name { get; }
 
             private readonly ICommandDispatcher _commandDispatcher;
-            private readonly MyGridProgram _program;
+            private readonly IDiagnosticService _diagnostics;
             private readonly IView _view;
             private readonly IGlobalEvents _globalEvents;
             private readonly Breadcrumb _breadcrumb;
@@ -23,11 +23,11 @@ namespace IngameScript
             private readonly CommandItem _downCommand;
             private readonly CommandItem _selectCommand;
 
-            public DisplayController(string name, ICommandDispatcher commandDispatcher, MainConfig config, MyGridProgram program, IView view, IMenuGroup menuRoot, IGlobalEvents globalEvents)
+            public DisplayController(string name, ICommandDispatcher commandDispatcher, MainConfig config, IDiagnosticService diagnostics, IView view, IMenuGroup menuRoot, IGlobalEvents globalEvents)
             {
                 Name = name;
                 _view = view;
-                _program = program;
+                _diagnostics = diagnostics;
                 _commandDispatcher = commandDispatcher;
                 _globalEvents = globalEvents;
 
@@ -44,7 +44,7 @@ namespace IngameScript
                 _menu.NavigationPathChanged += _breadcrumb.OnPathChanged;
 
                 _view
-                    .AddControl(new DisplayHeader(config, _program.Runtime))
+                    .AddControl(new DisplayHeader(config, _diagnostics))
                     .AddControl(_breadcrumb)
                     .AddControl(_menu);
 

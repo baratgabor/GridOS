@@ -13,8 +13,8 @@ namespace IngameScript
         class UpdateDispatcher_v1 : IUpdateDispatcher
         {
             // TODO: replace dictionary with List<KeyValuePair>, since we're iterating it now
-            private Dictionary<UpdateType, List<IUpdateSubscriber>> _moduleLists = new Dictionary<UpdateType, List<IUpdateSubscriber>>();
-            private List<UpdateFrequency> _allUpdateFrequencies = new List<UpdateFrequency>
+            private readonly Dictionary<UpdateType, List<IUpdateSubscriber>> _moduleLists = new Dictionary<UpdateType, List<IUpdateSubscriber>>();
+            private readonly List<UpdateFrequency> _allUpdateFrequencies = new List<UpdateFrequency>
             {
                 UpdateFrequency.Once,
                 UpdateFrequency.Update1,
@@ -22,15 +22,15 @@ namespace IngameScript
                 UpdateFrequency.Update100
             };
 
-            private Func<UpdateFrequency> _updateFrequencyGetter;
-            private Action<UpdateFrequency> _updateFrequencySetter;
+            private readonly Func<UpdateFrequency> _updateFrequencyGetter;
+            private readonly Action<UpdateFrequency> _updateFrequencySetter;
 
-            private Action<string> _echo;
-            private ProgressIndicator _progress = new ProgressIndicator();
+            private readonly ILogger _logger;
+            private readonly ProgressIndicator _progress = new ProgressIndicator();
 
-            public UpdateDispatcher_v1(Action<string> echo, Func<UpdateFrequency> updateFrequencyGetter, Action<UpdateFrequency> updateFrequencySetter)
+            public UpdateDispatcher_v1(ILogger logger, Func<UpdateFrequency> updateFrequencyGetter, Action<UpdateFrequency> updateFrequencySetter)
             {
-                _echo = echo;
+                _logger = logger;
                 _updateFrequencyGetter = updateFrequencyGetter;
                 _updateFrequencySetter = updateFrequencySetter;
             }
@@ -85,8 +85,8 @@ namespace IngameScript
                 if (updateType < UpdateType.Update1)
                     return;
 
-                _echo(_progress.Get() + " UpdateDispatcher reports:");
-                _echo($"# update tiers: {_moduleLists.Count}");
+                _logger.Log(LogLevel.Debug, "{0} UpdateDispatcher reports:\r\n", _progress.Get());
+                _logger.Log(LogLevel.Debug, "# update tiers: {0}", _moduleLists.Count);
 
                 foreach (var moduleListKeyValue in _moduleLists)
                 {
@@ -95,11 +95,19 @@ namespace IngameScript
                     // execute all modules in that list.
                     if ((updateType & moduleListKeyValue.Key) != 0)
                     {
-                        //_echo($"- Update tier engaged: {moduleListKeyValue.Key.ToString()}.");
+                        _logger.Log(LogLevel.Debug, "- Update tier engaged: {0}. Modules in tier: {1}.", moduleListKeyValue.Key, moduleListKeyValue.Value.Count);
                         foreach (var module in moduleListKeyValue.Value)
                         {
-                            module.Update(updateType);
-                            //_echo($"-- Dispatched to module: {((IModule)module).ModuleDisplayName}.");
+                            try
+                            {
+                                module.Update(updateType);
+                            }
+                            catch (Exception e)
+                            {
+                                _logger.Log(LogLevel.Error, "Error updating module {0}. Message: {1}.", ((IModule)module).ModuleDisplayName, e.Message);
+                            }
+
+                            _logger.Log(LogLevel.Debug, "- Updated module: {0}.", ((IModule)module).ModuleDisplayName);
                         }
                     }
                 }

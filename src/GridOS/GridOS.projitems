@@ -10,6 +10,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Core\CommandExecution\ICommandDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\GridProgramDiagnostics.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\IDiagnosticService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\IDiagnosticServiceController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\ILogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\LogLevel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\GlobalEventDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\IGlobalEvents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\AffixConfig.cs" />
