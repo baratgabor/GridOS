@@ -40,6 +40,8 @@ namespace IngameScript
                 _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
                 _commandDispatcher.AddCommand(new CommandItem("DisableUpdates", CommandHandler_DisableUpdates));
                 _commandDispatcher.AddCommand(new CommandItem("EnableUpdates", CommandHandler_EnableUpdates));
+
+                _displayOrchestrator.RegisterMenuItem(new SettingsMenu(_diagnostics));
             }
 
             /// <summary>

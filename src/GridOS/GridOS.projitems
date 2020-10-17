@@ -9,6 +9,7 @@
     <Import_RootNamespace>GridOS</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\SettingsMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\CommandExecution\ICommandDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\GridProgramDiagnostics.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\IDiagnosticService.cs" />
