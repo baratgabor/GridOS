@@ -61,6 +61,9 @@ namespace IngameScript
 
         private void LogExecutionStatistics()
         {
+            if (LoggingLevel > LogLevel.Information)
+                return;
+
             _program.Echo(string.Format("Execution no. {0}.\r\nAverage Execution Time: {1:G3}ms", NumberOfRuns, AverageRunTimeMs));
         }
 

@@ -6,6 +6,7 @@
         {
             Label = "Settings";
             
+            AddChild(new LogLevelCommand(diagnostics));
         }
     }
 }
