@@ -48,17 +48,17 @@ namespace IngameScript
         private readonly IMenuModel _model;
         private readonly MenuLineGenerator _lineGenerator;
 
-        public Menu(IMenuModel model, MainConfig config)
+        public Menu(IMenuModel model, IMenuPresentationConfig config, IWordWrapper wordWrapper)
         {
             _model = model;
 
-            if (config.LineHeight < MinimumLineHeight)
+            if (config.MenuLines < MinimumLineHeight)
             {
-                throw new Exception($"{nameof(MainConfig)}.{nameof(MainConfig.LineHeight)} must be at least {MinimumLineHeight}. Current value is {config.LineHeight}.");
+                throw new Exception($"The minimum supported number of displayed menu lines is {MinimumLineHeight}. Configuration setting '{nameof(IMenuPresentationConfig.MenuLines)}' is currently set to {config.MenuLines}.");
             }
 
-            _lineHeight = config.LineHeight;
-            _lineGenerator = new MenuLineGenerator(config);
+            _lineHeight = config.MenuLines;
+            _lineGenerator = new MenuLineGenerator(config, wordWrapper);
             _menuLines = new MenuLine[_lineHeight];
 
             model.CurrentViewChanged += OnListChanged;

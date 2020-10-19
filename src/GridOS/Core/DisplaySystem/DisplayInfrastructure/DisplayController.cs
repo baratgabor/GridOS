@@ -38,8 +38,9 @@ namespace IngameScript
                 _selectCommand = new CommandItem($"{Name}Select", OnSelect);
 
                 _menu = new Menu(
-                    config);
                     new MenuModel(menuRoot, this),
+                    config,
+                    new TextSurfaceWordWrapper(config));
                 _breadcrumb = new Breadcrumb(config);
                 _menu.NavigationPathChanged += _breadcrumb.OnPathChanged;
 
@@ -75,6 +76,15 @@ namespace IngameScript
 
             private void DisplayTick()
                 => _view.Redraw();
+
+            private void SetFontSize(float fontSize)
+                => _view.SetFontSize(fontSize);
+
+            private void SetFontColor(Color color)
+                => _view.SetFontColor(color);
+
+            private void SetBackgroundColor(Color color)
+                => _view.SetBackgroundColor(color);
         }
     }
 }

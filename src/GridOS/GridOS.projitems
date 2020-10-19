@@ -19,6 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\LogLevel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\GlobalEventDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\IGlobalEvents.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\WordWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\AffixConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\_Interfaces.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\MainConfig.cs" />

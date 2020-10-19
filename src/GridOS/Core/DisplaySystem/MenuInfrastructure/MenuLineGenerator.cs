@@ -6,24 +6,25 @@ namespace IngameScript
     class MenuLineGenerator
     {
         private readonly IMenuPresentationConfig _config;
+        private readonly IWordWrapper _wordWrapper;
         private readonly string _leftPadding;
-        private readonly int _lineLength;
         private readonly List<MenuLine> _menuLineBuffer = new List<MenuLine>();
         private readonly List<StringSegment> _segmentBuffer = new List<StringSegment>();
+        private readonly float _linePrefixInPixels;
 
-        public MenuLineGenerator(IMenuPresentationConfig presentationConfig)
+        public MenuLineGenerator(IMenuPresentationConfig presentationConfig, IWordWrapper wordWrapper)
         {
             _config = presentationConfig;
-
-            _lineLength = _config.LineLength - 2 - _config.PaddingLeft;
+            _wordWrapper = wordWrapper;
             _leftPadding = new string(_config.PaddingChar, _config.PaddingLeft);
+            _linePrefixInPixels = wordWrapper.MeasureStringWidthInPixels(_leftPadding + "  "); // TODO: Find a cleaner solution to incorporate prefix correction into line length calculation.
         }
 
         public IEnumerable<MenuLine> StreamLines(IMenuItem item)
         {
             var lineIndex = 0;
 
-            foreach (var line in StringHelpers.WordWrap(item.Label, _lineLength, _config.WordDelimiters))
+            foreach (var line in _wordWrapper.WordWrap(item.Label, -_linePrefixInPixels))
             {
                 yield return CreateMenuLine(item, line, lineIndex);
 
@@ -37,7 +38,7 @@ namespace IngameScript
             _segmentBuffer.Clear();
 
             _segmentBuffer.AddRange(
-                StringHelpers.WordWrap(item.Label, _lineLength, _config.WordDelimiters)
+                _wordWrapper.WordWrap(item.Label, -_linePrefixInPixels)
             );
 
             var segmentCount = _segmentBuffer.Count;

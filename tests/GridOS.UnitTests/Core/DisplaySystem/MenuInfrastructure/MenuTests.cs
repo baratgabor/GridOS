@@ -14,8 +14,8 @@ namespace GridOS.UnitTests
     {
         const char menuSelectionMarker = '►';
         const int lineHeight = 5;
-        const int lineLength = 25;
         readonly Mock<IMenuModel> mockModel = new Mock<IMenuModel>();
+        readonly Mock<IWordWrapper> mockWordWrapper = new Mock<IWordWrapper>();
         MainConfig config;
         readonly MenuItem firstMenuItem = new MenuItem("Item1");
         readonly MenuItem seventhMenuItem = new MenuItem("item7");
@@ -23,7 +23,7 @@ namespace GridOS.UnitTests
         [SetUp]
         public void SetUp()
         {
-            config = new MainConfig() { LineHeight = lineHeight, LineLength = lineLength, SelectionMarker = menuSelectionMarker, PaddingLeft = 0 };
+            config = new MainConfig() { MenuLines = lineHeight, SelectionMarker = menuSelectionMarker, PaddingLeft = 0 };
 
             mockModel.Setup(x => x.CurrentView)
                 .Returns(new List<IMenuItem>() {
@@ -36,13 +36,17 @@ namespace GridOS.UnitTests
                     seventhMenuItem,
                     new MenuItem("Item8"),
                 });
+
+            // Naive mock setup to return everything as single line.
+            mockWordWrapper.Setup(x => x.WordWrap(It.IsAny<string>(), It.IsAny<float>()))
+                .Returns((string s, object _) => new List<StringSegment>() { new StringSegment(s, 0, s.Length) });
         }
 
         [Test]
         public void ModelChange_InInitialState_ShouldInvokeRedrawRequired()
         {
             var called = 0;
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
             sut.RedrawRequired += (_) => called++;
 
             // Act
@@ -55,7 +59,7 @@ namespace GridOS.UnitTests
         public void ModelChange_IfItemIsVisible_ShouldInvokeRedrawRequired()
         {
             var called = 0;
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
             sut.RedrawRequired += (_) => called++;
 
             // Act
@@ -68,7 +72,7 @@ namespace GridOS.UnitTests
         public void ModelChange_IfItemIsNotVisible_ShouldNotRequestRedraw()
         {
             var called = 0;
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
             sut.RedrawRequired += (_) => called++;
             sut.GetContent(); // Initializing content. Without this it will invoke the redraw request, because it cannot determine the item's visiblity. This is expected behavior.
 
@@ -82,7 +86,7 @@ namespace GridOS.UnitTests
         public void ModelListChange_AtAllConditions_ShouldInvokeRedrawRequired()
         {
             var called = 0;
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
             sut.RedrawRequired += (_) => called++;
 
             // Act
@@ -96,7 +100,7 @@ namespace GridOS.UnitTests
         {
             var redrawCalled = 0;
             var pathChangedCalled = 0;
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
             sut.RedrawRequired += (_) => redrawCalled++;
             sut.NavigationPathChanged += (_) => pathChangedCalled++;
 
@@ -110,7 +114,7 @@ namespace GridOS.UnitTests
         [Test]
         public void Navigating_ForwardNavigation_ShouldResetLineSelection()
         {
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
             sut.MoveDown(); // Selection moved down.
             sut.MoveDown();
             StringAssert.DoesNotStartWith(menuSelectionMarker.ToString(), sut.GetContent().ToString(), "Arrange failed to create necessary pre-test condition. Selection was expected to be moved down from the first element.");
@@ -124,7 +128,7 @@ namespace GridOS.UnitTests
         [Test]
         public void Navigating_BackNavigation_ShouldRestoreLineSelection()
         {
-            config.LineLength = 10;
+            //config.LineLength = 10;
             var expectedSelectedGroup = new MenuGroup("Group - long multi-line item to test if selection will be on the first line");
             var anotherGroup = new MenuGroup("AnotherGroup");
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() {
@@ -134,7 +138,7 @@ namespace GridOS.UnitTests
                 expectedSelectedGroup
             });
             mockModel.Setup(x => x.GetIndexOf(expectedSelectedGroup)).Returns(3); // Tells SUT the position of the item in the menu.
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
             StringAssert.StartsWith(menuSelectionMarker.ToString(), sut.GetContent().ToString(), "Arrange failed to create necessary pre-test condition. First line was expected to be selected.");
 
             // Act
@@ -147,7 +151,7 @@ namespace GridOS.UnitTests
         [Test]
         public void MoveUp_WhenSelectionIsAtTop_ShouldNotThrow()
         {
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             TestDelegate act = () =>
@@ -168,7 +172,7 @@ namespace GridOS.UnitTests
                 new MenuItem("Item1"),
                 new MenuItem("Item2"),
             });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             TestDelegate act = () =>
@@ -186,7 +190,7 @@ namespace GridOS.UnitTests
         [Test]
         public void MoveDown_WhenScrolling_ReachesCorrectStateAtBottom()
         {
-            config.LineHeight = 3;
+            config.MenuLines = 3;
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() {
                 new MenuItem("Item1"),
                 new MenuItem("Item2"),
@@ -194,7 +198,7 @@ namespace GridOS.UnitTests
                 new MenuItem("Item4"),
                 new MenuItem("Item5"),
             });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             sut.MoveDown();
@@ -212,9 +216,9 @@ namespace GridOS.UnitTests
         [Test]
         public void MoveDown_WhenViewportIsLongerThanMenu_SelectionStopsAtLastMenuItem()
         {
-            config.LineHeight = 10;
+            config.MenuLines = 10;
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuItem("Item1"), new MenuItem("Item2") });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             sut.MoveDown();
@@ -228,9 +232,9 @@ namespace GridOS.UnitTests
         [Test]
         public void MoveDown_WhenViewportIsShorterThanMenu_SelectionStopsAtLastMenuItem()
         {
-            config.LineHeight = 3;
+            config.MenuLines = 3;
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuItem("Item1"), new MenuItem("Item2"), new MenuItem("Item3"), new MenuItem("Item4"), new MenuItem("Item5") });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             sut.MoveDown();
@@ -246,8 +250,11 @@ namespace GridOS.UnitTests
         [Test]
         public void MoveDown_MoveUp_WithMultiLineItems_NavigatesCorrectly()
         {
-            config.LineHeight = 4; // Shorten than items/lines.
-            config.LineLength = 10; // Forces breaking some items into two lines.
+            config.MenuLines = 4; // Shorten than items/lines.
+            mockWordWrapper.Setup(x => x.WordWrap(It.IsAny<string>(), It.IsAny<float>()))
+                .Returns((string s, object _) => s
+                .Split(new[] { ' ' }, StringSplitOptions.None)
+                .Select((l, index) => new StringSegment(s, index == 0 ? 0 : 6, 5))); // All words in items are 5 char long. Return either one or two, starting from 0 or 6, respectively.
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() {
                 new MenuItem("Line0 Line1"),
                 new MenuItem("Line2"),
@@ -255,10 +262,10 @@ namespace GridOS.UnitTests
                 new MenuItem("Line5"),
                 new MenuItem("Line6"),
                 new MenuItem("Line7 Line8"),
-                new MenuItem("Line9 Line10"),
-                new MenuItem("Line11"),
+                new MenuItem("Line9 LineA"),
+                new MenuItem("LineB"),
             });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act/Assert. Unconventional, buy hey, it does the job.
             sut.MoveDown();
@@ -273,7 +280,7 @@ namespace GridOS.UnitTests
             sut.MoveDown();
             sut.MoveDown();
             sut.MoveDown();
-            StringAssert.Contains(menuSelectionMarker + " Line10", sut.GetContent().ToString(), "Line10 was expected to be selected.");
+            StringAssert.Contains(menuSelectionMarker + " LineA", sut.GetContent().ToString(), "LineA was expected to be selected.");
             sut.MoveUp();
             sut.MoveUp();
             sut.MoveUp();
@@ -288,9 +295,9 @@ namespace GridOS.UnitTests
         [Test]
         public void GetContent_WithBlankMenu_ShouldStillReturnCorrectNumberOfEmptyLines()
         {
-            config.LineHeight = 5;
+            config.MenuLines = 5;
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { /* Blank */ });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             var result = sut.GetContent().ToString();
@@ -304,7 +311,7 @@ namespace GridOS.UnitTests
         public void GetContent_WithOneMenuItem_ShouldReturnItemPlusEmptyLines()
         {
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuItem("First") });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             var result = sut.GetContent().ToString();
@@ -319,8 +326,8 @@ namespace GridOS.UnitTests
         [TestCase(20)]
         public void GetContent_WithDifferingLineHeights_AlwaysReturnsExpectedNumberOfLines(int expectedLineNumber)
         {
-            config.LineHeight = expectedLineNumber;
-            var sut = new Menu(mockModel.Object, config);
+            config.MenuLines = expectedLineNumber;
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             var result = sut.GetContent().ToString();
@@ -332,7 +339,7 @@ namespace GridOS.UnitTests
         [Test]
         public void GetContent_AtInitialState_FirstLineShouldStartWithSelectionMarker()
         {
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             var result = sut.GetContent().ToString();
@@ -346,7 +353,7 @@ namespace GridOS.UnitTests
         {
             config.Prefixes_Selected = new AffixConfig() { Item = '~' };
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuItem("Item") });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             var result = sut.GetContent().ToString();
@@ -359,7 +366,7 @@ namespace GridOS.UnitTests
         {
             config.Prefixes_Selected = new AffixConfig() { Command = '~' };
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuCommand("Command", null)});
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             var result = sut.GetContent().ToString();
@@ -372,7 +379,7 @@ namespace GridOS.UnitTests
         {
             config.Prefixes_Selected = new AffixConfig() { Group = '~' };
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuGroup("Group") });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             var result = sut.GetContent().ToString();
@@ -385,7 +392,7 @@ namespace GridOS.UnitTests
         {
             config.Prefixes_Unselected = new AffixConfig() { Item = '~' };
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuItem("Item"), new MenuItem("Item2") });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             sut.MoveDown(); // Unselects first item.
@@ -399,7 +406,7 @@ namespace GridOS.UnitTests
         {
             config.Prefixes_Unselected = new AffixConfig() { Command = '~' };
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuCommand("Command", null), new MenuItem("Item2") });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             sut.MoveDown(); // Unselects first item.
@@ -413,7 +420,7 @@ namespace GridOS.UnitTests
         {
             config.Prefixes_Unselected = new AffixConfig() { Group = '~' };
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuGroup("Group"), new MenuItem("Item2") });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             sut.MoveDown(); // Unselects first item.
@@ -427,7 +434,7 @@ namespace GridOS.UnitTests
         {
             config.Suffixes = new AffixConfig() { Item = '%' };
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuItem("Item") });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             var result = sut.GetContent().ToString();
@@ -441,7 +448,7 @@ namespace GridOS.UnitTests
         {
             config.Suffixes = new AffixConfig() { Group = '%' };
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuGroup("Group") });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             var result = sut.GetContent().ToString();
@@ -455,7 +462,7 @@ namespace GridOS.UnitTests
         {
             config.Suffixes = new AffixConfig() { Command = '%' };
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuCommand("Command", null) });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             var result = sut.GetContent().ToString();
@@ -469,7 +476,7 @@ namespace GridOS.UnitTests
         {
             config.Suffixes = new AffixConfig() { Item = ' ' };
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuItem("Item") });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             var result = sut.GetContent().ToString();
@@ -484,8 +491,8 @@ namespace GridOS.UnitTests
         [TestCase(4)]
         public void GetContent_UnderAllConditions_SelectedLineShouldStartWithSelectionMarker (int expectedSelectedLineIndex)
         {
-            config.LineHeight = 20;
-            var sut = new Menu(mockModel.Object, config);
+            config.MenuLines = 20;
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
             sut.GetContent();
             for (int i = 0; i < expectedSelectedLineIndex; i++)
             {
@@ -509,7 +516,7 @@ namespace GridOS.UnitTests
                 expectedCommand,
                 new MenuCommand("Command2",  null)
             });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             sut.MoveDown();
@@ -529,7 +536,7 @@ namespace GridOS.UnitTests
                 expectedGroup,
                 new MenuGroup("Group2")
             });
-            var sut = new Menu(mockModel.Object, config);
+            var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
             sut.MoveDown();
