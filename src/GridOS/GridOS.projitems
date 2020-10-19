@@ -22,6 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\AffixConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\_Interfaces.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\MainConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayInfrastructure\IDisplayContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\Menu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayInfrastructure\IView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\MenuLineGenerator.cs" />
