@@ -2,17 +2,14 @@
 
 namespace IngameScript
 {
-    partial class Program
+    /// <summary>
+    /// Specifies a GridOS module class as a publisher of display content.
+    /// </summary>
+    interface IMenuContentPublisher
     {
         /// <summary>
-        /// Specifies a GridOS module class as a publisher of display content.
+        /// The list of menu items to register and show in the display system of GridOS.
         /// </summary>
-        interface IMenuContentPublisher
-        {
-            /// <summary>
-            /// The list of menu items to register and show in the display system of GridOS.
-            /// </summary>
-            IEnumerable<IMenuItem> MenuItems { get; }
-        }
+        IEnumerable<IMenuItem> MenuItems { get; }
     }
 }

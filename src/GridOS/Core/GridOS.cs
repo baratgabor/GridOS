@@ -3,163 +3,160 @@ using System;
 
 namespace IngameScript
 {
-    partial class Program
+    /// <summary>
+    /// Modular multitasking and command handling system that can register and run multiple code modules.
+    /// Individual modules can contain components (via implementing the appropriate interface) for publishing commands and/or subscribing to recurring automatic execusion.
+    /// </summary>
+    class GridOS
     {
-        /// <summary>
-        /// Modular multitasking and command handling system that can register and run multiple code modules.
-        /// Individual modules can contain components (via implementing the appropriate interface) for publishing commands and/or subscribing to recurring automatic execusion.
-        /// </summary>
-        class GridOS
+        private readonly MyGridProgram _p;
+        private readonly GlobalEventDispatcher _executionEvents;
+        private readonly IDiagnosticServiceController _diagnostics;
+
+        private readonly IUpdateDispatcher _updateDispatcher;
+        private readonly ICommandDispatcher _commandDispatcher;
+        private readonly DisplayOrchestrator _displayOrchestrator;
+
+        private const string _systemName = "GridOS Experimental";
+
+        // Main module storage
+        private readonly List<IModule> _moduleList = new List<IModule>();
+
+        public GridOS(MyGridProgram p)
         {
-            private readonly MyGridProgram _p;
-            private readonly GlobalEventDispatcher _executionEvents;
-            private readonly IDiagnosticServiceController _diagnostics;
+            _p = p;
+            _executionEvents = new GlobalEventDispatcher();
+            _diagnostics = new GridProgramDiagnostics(_p) { LoggingLevel = LogLevel.Debug };
 
-            private readonly IUpdateDispatcher _updateDispatcher;
-            private readonly ICommandDispatcher _commandDispatcher;
-            private readonly DisplayOrchestrator _displayOrchestrator;
+            Func<UpdateFrequency> _updateFrequencyGetter = () => _p.Runtime.UpdateFrequency;
+            Action<UpdateFrequency> _updateFrequencySetter = (x) => _p.Runtime.UpdateFrequency = x;
 
-            private const string _systemName = "GridOS Experimental";
+            _commandDispatcher = new CommandDispatcher();
+            _updateDispatcher = new UpdateDispatcher_v1((ILogger)_diagnostics, _updateFrequencyGetter, _updateFrequencySetter);
+            _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _diagnostics, _executionEvents);
 
-            // Main module storage
-            private readonly List<IModule> _moduleList = new List<IModule>();
+            _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
+            _commandDispatcher.AddCommand(new CommandItem("DisableUpdates", CommandHandler_DisableUpdates));
+            _commandDispatcher.AddCommand(new CommandItem("EnableUpdates", CommandHandler_EnableUpdates));
 
-            public GridOS(MyGridProgram p)
+            _displayOrchestrator.RegisterMenuItem(new SettingsMenu(_diagnostics));
+
+            TryExecuteCustomData(_p.Me.CustomData);
+        }
+
+        /// <summary>
+        /// Registers a module.
+        /// </summary>
+        /// <param name="module"></param>
+        /// <returns>Returns true on success. Returns false if same module was already registed.</returns>
+        public bool RegisterModule(IModule module)
+        {
+            if (_moduleList.Contains(module))
+                return false;
+
+            _moduleList.Add(module);
+
+            if (module is IUpdateSubscriber)
             {
-                _p = p;
-                _executionEvents = new GlobalEventDispatcher();
-                _diagnostics = new GridProgramDiagnostics(_p) { LoggingLevel = LogLevel.Debug };
-
-                Func<UpdateFrequency> _updateFrequencyGetter = () => _p.Runtime.UpdateFrequency;
-                Action<UpdateFrequency> _updateFrequencySetter = (x) => _p.Runtime.UpdateFrequency = x;
-
-                _commandDispatcher = new CommandDispatcher();
-                _updateDispatcher = new UpdateDispatcher_v1((ILogger)_diagnostics, _updateFrequencyGetter, _updateFrequencySetter);
-                _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _diagnostics, _executionEvents);
-
-                _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
-                _commandDispatcher.AddCommand(new CommandItem("DisableUpdates", CommandHandler_DisableUpdates));
-                _commandDispatcher.AddCommand(new CommandItem("EnableUpdates", CommandHandler_EnableUpdates));
-
-                _displayOrchestrator.RegisterMenuItem(new SettingsMenu(_diagnostics));
-
-                TryExecuteCustomData(_p.Me.CustomData);
+                _updateDispatcher.Add(module as IUpdateSubscriber);
             }
 
-            /// <summary>
-            /// Registers a module.
-            /// </summary>
-            /// <param name="module"></param>
-            /// <returns>Returns true on success. Returns false if same module was already registed.</returns>
-            public bool RegisterModule(IModule module)
+            if (module is ICommandPublisher)
             {
-                if (_moduleList.Contains(module))
-                    return false;
-
-                _moduleList.Add(module);
-
-                if (module is IUpdateSubscriber)
-                {
-                    _updateDispatcher.Add(module as IUpdateSubscriber);
-                }
-
-                if (module is ICommandPublisher)
-                {
-                    _commandDispatcher.AddCommands((module as ICommandPublisher).Commands);
-                }
-
-                if (module is IMenuContentPublisher)
-                {
-                    foreach (var e in ((IMenuContentPublisher)module).MenuItems)
-                    {
-                        _displayOrchestrator.RegisterMenuItem(e);
-                    }
-                }
-
-                return true;
+                _commandDispatcher.AddCommands((module as ICommandPublisher).Commands);
             }
 
-            /// <summary>
-            /// This method should receive control from the script's Main() method.
-            /// </summary>
-            /// <param name="updateType">The UpdateType received in the script's Main() method.</param>
-            /// <param name="argument">The argument received in the script's Main() method.</param>
-            public void Main(string argument, UpdateType updateType)
+            if (module is IMenuContentPublisher)
             {
-                _diagnostics.RecordExecution(logExecutionStats: true);
-                _executionEvents.ExecutionStarted();
-
-                // Dispatch updates.
-                if (updateType >= UpdateType.Update1)
+                foreach (var e in ((IMenuContentPublisher)module).MenuItems)
                 {
-                    try
-                    {
-                        _updateDispatcher.Dispatch(updateType);
-                    }
-                    catch (Exception e)
-                    {
-                        _diagnostics.Log(LogLevel.Error, $"Error dispatching update type '{updateType}'. Message: {e.Message}");
-                    }
+                    _displayOrchestrator.RegisterMenuItem(e);
                 }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// This method should receive control from the script's Main() method.
+        /// </summary>
+        /// <param name="updateType">The UpdateType received in the script's Main() method.</param>
+        /// <param name="argument">The argument received in the script's Main() method.</param>
+        public void Main(string argument, UpdateType updateType)
+        {
+            _diagnostics.RecordExecution(logExecutionStats: true);
+            _executionEvents.ExecutionStarted();
+
+            // Dispatch updates.
+            if (updateType >= UpdateType.Update1)
+            {
+                try
+                {
+                    _updateDispatcher.Dispatch(updateType);
+                }
+                catch (Exception e)
+                {
+                    _diagnostics.Log(LogLevel.Error, $"Error dispatching update type '{updateType}'. Message: {e.Message}");
+                }
+            }
                 
-                // Dispatch commands.
-                if (argument != "")
+            // Dispatch commands.
+            if (argument != "")
+            {
+                try
                 {
-                    try
-                    {
-                        _commandDispatcher.TryDispatch(argument.Trim());
-                    }
-                    catch (Exception e)
-                    {
-                        _diagnostics.Log(LogLevel.Error, $"Error processing argument '{argument}'. Message: {e.Message}");
-                    }
+                    _commandDispatcher.TryDispatch(argument.Trim());
                 }
-
-                _executionEvents.ExecutionFinishing();
-            }
-
-            /// <summary>
-            /// Entry point for saving. Call it from Save().
-            /// </summary>
-            public void Save()
-            {
-                // TODO: Implement saving and exiting functionality
-            }
-
-            public void RegisterTextSurface(IMyTextSurface textSurface)
-            {
-                _displayOrchestrator.RegisterTextSurface(textSurface);
-            }
-
-            private void TryExecuteCustomData(string customData)
-            {
-                if (customData == string.Empty)
-                    return;
-
-                foreach (var line in customData.Split(new[] { Environment.NewLine, "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries))
+                catch (Exception e)
                 {
-                    _commandDispatcher.TryDispatch(line.Trim());
+                    _diagnostics.Log(LogLevel.Error, $"Error processing argument '{argument}'. Message: {e.Message}");
                 }
             }
 
-            private void CommandHandler_AddLcd(CommandItem sender, string param)
-            {
-                IMyTerminalBlock textSurface = _p.GridTerminalSystem.GetBlockWithName(param);
-                if ((textSurface == null) || !(textSurface is IMyTextSurface))
-                    return;
+            _executionEvents.ExecutionFinishing();
+        }
 
-                RegisterTextSurface(textSurface as IMyTextSurface);
-            }
+        /// <summary>
+        /// Entry point for saving. Call it from Save().
+        /// </summary>
+        public void Save()
+        {
+            // TODO: Implement saving and exiting functionality
+        }
 
-            private void CommandHandler_DisableUpdates(CommandItem sender, string param)
-            {
-                _updateDispatcher.DisableUpdates();
-            }
+        public void RegisterTextSurface(IMyTextSurface textSurface)
+        {
+            _displayOrchestrator.RegisterTextSurface(textSurface);
+        }
 
-            private void CommandHandler_EnableUpdates(CommandItem sender, string param)
+        private void TryExecuteCustomData(string customData)
+        {
+            if (customData == string.Empty)
+                return;
+
+            foreach (var line in customData.Split(new[] { Environment.NewLine, "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries))
             {
-                _updateDispatcher.EnableUpdates();
+                _commandDispatcher.TryDispatch(line.Trim());
             }
+        }
+
+        private void CommandHandler_AddLcd(CommandItem sender, string param)
+        {
+            IMyTerminalBlock textSurface = _p.GridTerminalSystem.GetBlockWithName(param);
+            if ((textSurface == null) || !(textSurface is IMyTextSurface))
+                return;
+
+            RegisterTextSurface(textSurface as IMyTextSurface);
+        }
+
+        private void CommandHandler_DisableUpdates(CommandItem sender, string param)
+        {
+            _updateDispatcher.DisableUpdates();
+        }
+
+        private void CommandHandler_EnableUpdates(CommandItem sender, string param)
+        {
+            _updateDispatcher.EnableUpdates();
         }
     }
 }

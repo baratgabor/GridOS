@@ -2,18 +2,15 @@
 
 namespace IngameScript
 {
-    partial class Program
+    /// <summary>
+    /// Specidies a GridOS module class to be a publisher of executable command line commands (received as a string parameter from the game).
+    /// </summary>
+    interface ICommandPublisher
     {
         /// <summary>
-        /// Specidies a GridOS module class to be a publisher of executable command line commands (received as a string parameter from the game).
+        /// The list of commands to register in GridOS.
+        /// After registration, commands can be executed by passing their command name to the Programmable Block.
         /// </summary>
-        interface ICommandPublisher
-        {
-            /// <summary>
-            /// The list of commands to register in GridOS.
-            /// After registration, commands can be executed by passing their command name to the Programmable Block.
-            /// </summary>
-            IEnumerable<CommandItem> Commands { get; }
-        }
+        IEnumerable<CommandItem> Commands { get; }
     }
 }

@@ -2,14 +2,14 @@
 
 namespace IngameScript
 {
-    partial class Program
+    interface IView
     {
-        interface IView
-        {
-            DisplayView AddControl(IControl control);
-            void RemoveControl(IControl control);
-            void ClearControls();
-            void Redraw();
-        }
+        DisplayView AddControl(IControl control);
+        void RemoveControl(IControl control);
+        void ClearControls();
+        void Redraw();
+        void SetFontSize(float fontSize);
+        void SetFontColor(Color color);
+        void SetBackgroundColor(Color color);
     }
 }
