@@ -33,18 +33,18 @@ namespace GridOS.UnitTests
             groupInRoot.AddChild(itemInGroup);
 
             commandInRootAction = null;
-            commandInRoot = new MenuCommand("MenuCommandInRoot", () => commandInRootAction()); // Action wrapped in lambda; Overridable in test cases.
+            commandInRoot = new MenuCommand("MenuCommandInRoot", (_) => commandInRootAction()); // Action wrapped in lambda; Overridable in test cases.
             menuRoot.AddChild(commandInRoot);
 
             commandInGroupAction = null;
-            commandInGroup = new MenuCommand("MenuCommandInGroup", () => commandInGroupAction()); // Action wrapped in lambda; Overridable in test cases.
+            commandInGroup = new MenuCommand("MenuCommandInGroup", (_) => commandInGroupAction()); // Action wrapped in lambda; Overridable in test cases.
             groupInRoot.AddChild(commandInGroup);
         }
 
         [Test]
         public void CurrentTitle_InRoot_EqualsRootLabel()
         {
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
 
             Assert.AreEqual(menuRoot.Label, menuModel.CurrentTitle);
         }
@@ -54,7 +54,7 @@ namespace GridOS.UnitTests
         {
             var called = 0;
             var sentValue = "";
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             menuModel.CurrentTitleChanged += (x) => { called++; sentValue = x; };
 
             // Act
@@ -69,7 +69,7 @@ namespace GridOS.UnitTests
         {
             var called = 0;
             var sentValue = "";
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             menuModel.Select(groupInRoot); // Navigation also invokes CurrentTitleChanged, so it needs to be placed before the subscription.
             menuModel.CurrentTitleChanged += (x) => { called++; sentValue = x; };
 
@@ -85,7 +85,7 @@ namespace GridOS.UnitTests
         {
             var called = 0;
             var sentValue = "";
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             menuModel.CurrentTitleChanged += (x) => { called++; sentValue = x; };
 
             // Act
@@ -99,7 +99,7 @@ namespace GridOS.UnitTests
         public void CurrentTitleChanged_WhenGroupIsNotOpen_ShouldNotBeInvoked()
         {
             var called = 0;
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             menuModel.Select(groupInRoot); // Navigation also invokes CurrentTitleChanged, so it needs to be placed before the subscription.
             menuModel.CurrentTitleChanged += (_) => called++;
 
@@ -114,7 +114,7 @@ namespace GridOS.UnitTests
         {
             var called = 0;
             IMenuItem changeOrigin = null;
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             menuModel.MenuItemChanged += (x) => { called++; changeOrigin = x; };
 
             // Act
@@ -129,7 +129,7 @@ namespace GridOS.UnitTests
         {
             var called = 0;
             IMenuItem changeOrigin = null;
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             menuModel.MenuItemChanged += (x) => { called++; changeOrigin = x; };
             menuModel.Select(groupInRoot);
 
@@ -144,7 +144,7 @@ namespace GridOS.UnitTests
         public void MenuItemChanged_WhenChangedItemIsNotInView_ShouldNotBeInvoked()
         {
             var called = 0;
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             menuModel.MenuItemChanged += (_) => called++;
 
             // Navigate away, back, and away again, to see if subscriptions/unsubscriptions are handled properly.
@@ -162,7 +162,7 @@ namespace GridOS.UnitTests
         public void CurrentViewChanged__InRoot_WhenItemAddedAndRemoved__ShouldGetInvocation()
         {
             var called = 0;
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             var child = new MenuItem("NewItem");
             menuModel.CurrentViewChanged += (_) => called++;
 
@@ -177,7 +177,7 @@ namespace GridOS.UnitTests
         public void CurrentViewChanged__InSubGroup_WhenItemAddedOrRemoved__ShouldGetInvocation()
         {
             var called = 0;
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             var child = new MenuItem("NewItem");
             menuModel.CurrentViewChanged += (_) => called++;
             menuModel.Select(groupInRoot);
@@ -193,7 +193,7 @@ namespace GridOS.UnitTests
         public void CurrentViewChanged_WhenChangesAreNotInView_ShouldNotBeInvoked()
         {
             var called = 0;
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             var child = new MenuItem("NewItem");
             menuModel.CurrentViewChanged += (x) => called++;
 
@@ -213,7 +213,7 @@ namespace GridOS.UnitTests
         public void Select_WhenCommandIsPartOfView_ReturnsTrueAndCommandIsExecuted()
         {
             var called = 0;
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             commandInRootAction = () => called++;
 
             // Act
@@ -227,7 +227,7 @@ namespace GridOS.UnitTests
         public void Select_WhenCommandIsNotPartOfView_ReturnsFalseAndCommandIsNotExecuted()
         {
             var called = 0;
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             commandInGroupAction = () => called++;
 
             // Act
@@ -242,7 +242,7 @@ namespace GridOS.UnitTests
         {
             var called = 0;
             NavigationPayload sentPayload = default;
-            var menuModel = new MenuModel(menuRoot);
+            var menuModel = new MenuModel(menuRoot, null);
             menuModel.NavigatedTo += (x) => { called++; sentPayload = x; };
 
             // Act

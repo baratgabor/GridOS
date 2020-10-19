@@ -10,17 +10,17 @@ namespace IngameScript
         public event Action<IMenuCommand> Executed;
         public event Action<IMenuCommand> BeforeExecute;
 
-        protected Action _command;
+        protected Action<object> _command;
 
-        public MenuCommand(string label, Action action) : base(label)
+        public MenuCommand(string label, Action<object> action) : base(label)
         {
             _command = action;
         }
 
-        public void Execute()
+        public virtual void Execute(object context)
         {
             BeforeExecute?.Invoke(this);
-            _command?.Invoke();
+            _command?.Invoke(context);
             Executed?.Invoke(this);
         }
     }

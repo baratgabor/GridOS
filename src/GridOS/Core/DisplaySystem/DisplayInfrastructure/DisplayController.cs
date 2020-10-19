@@ -8,7 +8,7 @@ namespace IngameScript
         /// Knows how to instantiate and wire together the full stack of classes needed for a working view system.
         /// Sets up and mediates the execution of display related commands.
         /// </summary>
-        class DisplayController : IDisposable
+        class DisplayController : IDisposable, IDisplayContext
         {
             public string Name { get; }
 

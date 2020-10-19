@@ -16,7 +16,7 @@ namespace GridOS.UnitTests
 
             // Act
             Assert.DoesNotThrow(
-                () => menuCommand.Execute(), "Command execution is not supposed to throw when action is null, to support the disabling of commands.");
+                () => menuCommand.Execute(null), "Command execution is not supposed to throw when action is null, to support the disabling of commands.");
         }
 
         [Test]
@@ -25,11 +25,11 @@ namespace GridOS.UnitTests
             var called = 0;
             var menuCommand = new MenuCommand(
                 label: "Label",
-                action: () => called++
+                action: (_) => called++
             );
 
             // Act
-            menuCommand.Execute();
+            menuCommand.Execute(null);
 
             Assert.AreEqual(1, called, "Command execution must invoke the command action once.");
         }
@@ -42,12 +42,12 @@ namespace GridOS.UnitTests
             var actualOrder = new List<string>();
             var menuCommand = new MenuCommand(
                 label: "Label",
-                action: () => actualOrder.Add("command"));
+                action: (_) => actualOrder.Add("command"));
             menuCommand.BeforeExecute += (x) => actualOrder.Add("before");
             menuCommand.Executed += (x) => actualOrder.Add("after");
 
             // Act
-            menuCommand.Execute();
+            menuCommand.Execute(null);
 
             CollectionAssert.AreEqual(expectedOrder, actualOrder);
         }

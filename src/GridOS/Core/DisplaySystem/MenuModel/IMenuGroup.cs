@@ -37,7 +37,8 @@ namespace IngameScript
         /// <summary>
         /// Marks this group as opened. This allows us to notify any components that are interested to know when the group is opened.
         /// </summary>
-        void Open();
+        /// <param name="context">Identifies which display instance this operation belongs to.</param>
+        void Open(object context);
 
         /// <summary>
         /// Notifies when the group is opened.
@@ -46,8 +47,9 @@ namespace IngameScript
 
         /// <summary>
         /// Marks this group as closed. This allows us to notify any components that are interested to know when the group is closed.
-        /// </summary>           
-        void Close();
+        /// </summary>
+        /// <param name="context">Identifies which display instance this operation belongs to.</param>
+        void Close(object context);
 
         /// <summary>
         /// Notifies when the group is closed.

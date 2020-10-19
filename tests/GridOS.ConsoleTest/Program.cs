@@ -110,7 +110,7 @@ namespace IngameScript
                 _updatingItem2.Label = $"UpdatingItem2 - {rnd.Next(1, 100)}";
             }
 
-            private void DoSomething()
+            private void DoSomething(object _)
             {
                 Debug.WriteLine($"Executed Command");
             }

@@ -49,9 +49,12 @@ namespace IngameScript
         private readonly MenuCommand _backCommandTop;
         private readonly MenuCommand _backCommandBottom; // Separate instance; top and bottom back command shouldn't evaluate to equal.
 
-        public MenuModel(IMenuGroup menuRoot)
+        private readonly IDisplayContext _displayContext;
+
+        public MenuModel(IMenuGroup menuRoot, IDisplayContext displayContext)
         {
             _rootGroup = menuRoot;
+            _displayContext = displayContext;
             _currentView = new List<IMenuItem>();
             _backCommandTop = new MenuCommand("Back «", MoveBack);
             _backCommandBottom = new MenuCommand("Back «", MoveBack);
@@ -73,7 +76,7 @@ namespace IngameScript
 
             if (item is IMenuCommand)
             {
-                (item as IMenuCommand).Execute();
+                (item as IMenuCommand).Execute(_displayContext);
                 return true;
             }
 
@@ -86,6 +89,9 @@ namespace IngameScript
         }
 
         public void MoveBack()
+            => MoveBack(null);
+
+        private void MoveBack(object _)
         {
             if (_navigationStack.Count <= 1) // First item is Root.
                 return;
@@ -119,7 +125,7 @@ namespace IngameScript
             _activeGroup.LabelChanged -= Handle_GroupTitleChanged;
             _activeGroup.ChildrenChanged -= Handle_ListChanged;
             _activeGroup.ChildLabelChanged -= Handle_ItemChanged;
-            _activeGroup.Close();
+            _activeGroup.Close(_displayContext);
             _activeGroup = null;
 
             BuildCurrentView();
@@ -128,7 +134,7 @@ namespace IngameScript
         private void OpenGroup(IMenuGroup group)
         {
             _navigationStack.Add(group);
-            group.Open();
+            group.Open(_displayContext);
             group.LabelChanged += Handle_GroupTitleChanged;
             group.ChildrenChanged += Handle_ListChanged;
             group.ChildLabelChanged += Handle_ItemChanged;

@@ -126,9 +126,9 @@ namespace GridOS.UnitTests
             // Act
             TestDelegate act = () =>
             {
-                menuGroup.Open();
-                menuGroup.Open();
-                menuGroup.Open();
+                menuGroup.Open(null);
+                menuGroup.Open(null);
+                menuGroup.Open(null);
             };
 
             Assert.DoesNotThrow(act, $"Calling {nameof(MenuGroup.Open)}() multiple times should not throw, to support opening groups in multiple displays."); // Granted, this is a very lousy way to handle it.
@@ -142,7 +142,7 @@ namespace GridOS.UnitTests
             // Act
             TestDelegate act = () =>
             {
-                menuGroup.Close();
+                menuGroup.Close(null);
             };
 
             Assert.Throws<Exception>(act, "Closing before Open is expected to throw exception.");

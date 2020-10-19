@@ -43,7 +43,7 @@ namespace IngameScript
             ChildrenChanged?.Invoke(this);
         }
 
-        public void Open()
+        public void Open(object context)
         {
             _openedBy++;
 
@@ -52,7 +52,7 @@ namespace IngameScript
                 Opened?.Invoke(this);
         }
 
-        public void Close()
+        public void Close(object context)
         {
             if (_openedBy == 0)
                 throw new Exception("Group is not open.");

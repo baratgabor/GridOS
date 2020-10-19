@@ -17,7 +17,7 @@
             Label = $"Logging level: {_diagnostics.LoggingLevel}";
         }
 
-        private void SwitchLoggingLevel()
+        private void SwitchLoggingLevel(object _)
         {
             LogLevel newLogLevel;
             switch (_diagnostics.LoggingLevel)
