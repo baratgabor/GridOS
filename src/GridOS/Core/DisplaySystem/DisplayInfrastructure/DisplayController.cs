@@ -38,8 +38,8 @@ namespace IngameScript
                 _selectCommand = new CommandItem($"{Name}Select", OnSelect);
 
                 _menu = new Menu(
-                    new MenuModel(menuRoot),
                     config);
+                    new MenuModel(menuRoot, this),
                 _breadcrumb = new Breadcrumb(config);
                 _menu.NavigationPathChanged += _breadcrumb.OnPathChanged;
 
