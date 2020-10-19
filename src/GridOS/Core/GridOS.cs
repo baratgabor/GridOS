@@ -42,6 +42,8 @@ namespace IngameScript
                 _commandDispatcher.AddCommand(new CommandItem("EnableUpdates", CommandHandler_EnableUpdates));
 
                 _displayOrchestrator.RegisterMenuItem(new SettingsMenu(_diagnostics));
+
+                TryExecuteCustomData(_p.Me.CustomData);
             }
 
             /// <summary>
@@ -127,6 +129,17 @@ namespace IngameScript
             public void RegisterTextSurface(IMyTextSurface textSurface)
             {
                 _displayOrchestrator.RegisterTextSurface(textSurface);
+            }
+
+            private void TryExecuteCustomData(string customData)
+            {
+                if (customData == string.Empty)
+                    return;
+
+                foreach (var line in customData.Split(new[] { Environment.NewLine, "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    _commandDispatcher.TryDispatch(line.Trim());
+                }
             }
 
             private void CommandHandler_AddLcd(CommandItem sender, string param)
