@@ -19,7 +19,7 @@ namespace IngameScript
         //
         // Summary:
         //     Gets a reference to the currently running programmable block.
-        public IMyProgrammableBlock Me { get; protected set; }
+        public IMyProgrammableBlock Me { get; set; }
         //
         // Summary:
         //     Gets the amount of in-game time elapsed from the previous run.

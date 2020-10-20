@@ -31,7 +31,7 @@ namespace IngameScript
                     Console.WriteLine("\r\nNumber of draws:\r\n" + _numOfDraws + "\r\n");
                 };
 
-                GridOS gridOS = new GridOS(new MyGridProgram() { Runtime = new FakeRuntimeInfo() });
+                GridOS gridOS = new GridOS(new MyGridProgram() { Runtime = new FakeRuntimeInfo(), Me = new FakeProgrammableBlock() });
                 gridOS.RegisterModule(new TestModule());
                 gridOS.RegisterTextSurface(_fakeDisplay);
                 gridOS.Main(string.Empty, UpdateType.None);
