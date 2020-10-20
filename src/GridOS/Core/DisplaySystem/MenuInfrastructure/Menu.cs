@@ -100,9 +100,9 @@ namespace IngameScript
                 BuildContent();
 
             // Second line from the top is designated for scrolling upwards.
-            if (_selectedLineIndex == 1)
+            if (_selectedLineIndex == 1 &&
+                (_selectedMenuItemIndex > 1 || _menuLines[0].LineIndex > 0)) // At least 1 line is available above viewport.
             {
-                // TODO: Add condition not to scroll when there are no items above viewport. Currently the arraycopy in BuildContent corrects this.
                 if (ScrollUp())
                 {
                     _isStateDirty = true;
