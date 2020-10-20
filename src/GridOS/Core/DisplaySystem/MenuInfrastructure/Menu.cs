@@ -265,7 +265,6 @@ namespace IngameScript
         private void BuildContent()
         {
             _menuContent.Clear();
-            Array.Clear(_menuLines, 0, _menuLines.Length);
 
             var itemList = _model.CurrentView;
             var itemCount = itemList.Count;
@@ -275,7 +274,7 @@ namespace IngameScript
             // Step 1: Fill viewport upwards from above the selected menu item (if necessary).
             if (_selectedMenuItemIndex > 0)
             {
-                insertionIndex = selectedMenuItemRenderStartIndex - 1;
+                insertionIndex = selectedMenuItemRenderStartIndex;
                 if (selectedMenuItemRenderStartIndex > 0)
                 {
                     for (int itemIndex = _selectedMenuItemIndex - 1; itemIndex >= 0; itemIndex--)
@@ -284,26 +283,30 @@ namespace IngameScript
 
                         for (int lineIndex = lines.Count - 1; lineIndex >= 0; lineIndex--)
                         {
-                            if (insertionIndex < 0)
+                            if (insertionIndex == 0)
                             {
                                 itemIndex = -1;
                                 break;
                             }
 
-                            _menuLines[insertionIndex] = lines[lineIndex];
                             insertionIndex--;
+                            _menuLines[insertionIndex] = lines[lineIndex];
                         }
                     }
                 }
+
+                // Step 2: If Step 1 resulted in empty lines at the top of the menu, move everything up. Only when we don't know how long the menu is above our selected element.
+                if (insertionIndex > 0)
+                {
+                    Array.Copy(_menuLines, insertionIndex, _menuLines, 0, _lineHeight - insertionIndex);
+                    _selectedLineIndex -= insertionIndex;
+                    selectedMenuItemRenderStartIndex -= insertionIndex;
+                }
             }
 
-            // Step 2: If Step 1 resulted in empty lines at the top of the menu, move everything up. Only when we don't know how long the menu is above our selected element.
-            if (insertionIndex > 0)
-            {
-                Array.Copy(_menuLines, insertionIndex, _menuLines, 0, _lineHeight - insertionIndex);
-                _selectedLineIndex -= insertionIndex;
-                selectedMenuItemRenderStartIndex -= insertionIndex;
-            }
+            // Clear old menu lines either from the top, or from below the range where we just copied to above.
+            var clearableRangeStart = Math.Max(0, selectedMenuItemRenderStartIndex);
+            Array.Clear(_menuLines, clearableRangeStart, _menuLines.Length - clearableRangeStart);
 
             // Step 3: Fill menu lines downwards starting from the selected item. Only this executes if selection is at the top (or offsetted above the top).
             insertionIndex = selectedMenuItemRenderStartIndex;

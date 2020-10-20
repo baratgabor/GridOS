@@ -114,6 +114,7 @@ namespace GridOS.UnitTests
         [Test]
         public void Navigating_ForwardNavigation_ShouldResetLineSelection()
         {
+            mockModel.Setup(x => x.GetIndexOf(It.IsAny<IMenuItem>())).Returns(-1); // Makes menu think that it navigated forward in the tree, not backward.
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
             sut.MoveDown(); // Selection moved down.
             sut.MoveDown();
