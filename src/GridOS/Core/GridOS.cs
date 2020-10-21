@@ -32,8 +32,8 @@ namespace IngameScript
             Action<UpdateFrequency> _updateFrequencySetter = (x) => _p.Runtime.UpdateFrequency = x;
 
             _commandDispatcher = new CommandDispatcher();
-            _updateDispatcher = new UpdateDispatcher_v1((ILogger)_diagnostics, _updateFrequencyGetter, _updateFrequencySetter);
             _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _diagnostics, _executionEvents);
+            _updateDispatcher = new FastUpdateDispatcher((ILogger)_diagnostics, _updateFrequencyGetter, _updateFrequencySetter);
 
             _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
             _commandDispatcher.AddCommand(new CommandItem("DisableUpdates", CommandHandler_DisableUpdates));
