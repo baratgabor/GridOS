@@ -21,15 +21,20 @@ namespace GridOS.Benchmarks
         }
     }
 
+    [MemoryDiagnoser]
     public class Benchmarks
     {
-        private readonly UpdateDispatcher_v1 v1 = new UpdateDispatcher_v1(new NullLogger(), () => UpdateFrequency.None, (_) => { });
-        private readonly FastUpdateDispatcher fast = new FastUpdateDispatcher(new NullLogger(), () => UpdateFrequency.None, (_) => { });
-        private readonly UpdateDispatcher_v2 v2 = new UpdateDispatcher_v2(new NullLogger(), () => UpdateFrequency.None, (_) => { });
+        private UpdateDispatcher_v1 v1;
+        private FastUpdateDispatcher fast;
+        private UpdateDispatcher_v2 v2;
 
         [GlobalSetup]
         public void GlobalSetup()
         {
+            v1 = new UpdateDispatcher_v1(new NullLogger(), () => UpdateFrequency.None, (_) => { });
+            fast = new FastUpdateDispatcher(new NullLogger(), () => UpdateFrequency.None, (_) => { });
+            v2 = new UpdateDispatcher_v2(new NullLogger(), () => UpdateFrequency.None, (_) => { });
+
             AddModules(v1);
             AddModules(fast);
             AddModules(v2);
