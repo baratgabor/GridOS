@@ -97,7 +97,7 @@ namespace IngameScript
         {
             var listCount = list.Count;
 
-            _logger.Log(LogLevel.Debug, "- Executing update list: Once.\r\nModules in list: {0}.", listCount);
+            _logger.Log(LogLevel.Debug, "- Executing update list: {0}.\r\nModules in list: {1}.", updateType, listCount);
 
             for (int i = 0; i < listCount; i++)
             {
