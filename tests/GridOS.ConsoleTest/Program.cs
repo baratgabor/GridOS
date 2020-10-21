@@ -69,7 +69,7 @@ namespace IngameScript
         {
             public string ModuleDisplayName => "Test Module";
 
-            public ObservableUpdateFrequency Frequency => new ObservableUpdateFrequency(UpdateFrequency.Update100);
+            public ObservableUpdateFrequency Frequency => new ObservableUpdateFrequency(UpdateFrequency.Update100, this);
 
             public IEnumerable<IMenuItem> MenuItems => _menuItems;
             private readonly List<IMenuItem> _menuItems = new List<IMenuItem>();

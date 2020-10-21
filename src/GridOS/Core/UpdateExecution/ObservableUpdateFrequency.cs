@@ -7,13 +7,17 @@ namespace IngameScript
     /// </summary>
     public class ObservableUpdateFrequency
     {
-        private UpdateFrequency _updateFrequency;
         public UpdateType UpdateTypeEquivalent { get; private set; }
-        public event Action<ObservableUpdateFrequency, UpdateFrequency, UpdateFrequency> UpdateFrequencyChanged;
+        public delegate void FrequencyChangeHandler(IUpdateSubscriber sender, UpdateFrequency oldFrequency, UpdateFrequency newFrequency);
+        public event FrequencyChangeHandler UpdateFrequencyChanged;
 
-        public ObservableUpdateFrequency(UpdateFrequency initialUpdateFrequency)
+        private UpdateFrequency _updateFrequency;
+        private readonly IUpdateSubscriber _updateSubscriber;
+
+        public ObservableUpdateFrequency(UpdateFrequency initialUpdateFrequency, IUpdateSubscriber updateSubscriber)
         {
             _updateFrequency = initialUpdateFrequency;
+            _updateSubscriber = updateSubscriber;
             UpdateTypeEquivalent = ConvertUpdateFrequency(_updateFrequency);
         }
 
@@ -30,7 +34,7 @@ namespace IngameScript
             UpdateFrequency oldUpdateFrequency = _updateFrequency;
             _updateFrequency = newUpdateFrequency;
             UpdateTypeEquivalent = ConvertUpdateFrequency(_updateFrequency);
-            UpdateFrequencyChanged?.Invoke(this, oldUpdateFrequency, newUpdateFrequency);
+            UpdateFrequencyChanged?.Invoke(_updateSubscriber, oldUpdateFrequency, newUpdateFrequency);
         }
 
         private UpdateType ConvertUpdateFrequency(UpdateFrequency updateFrequency)

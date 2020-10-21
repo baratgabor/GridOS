@@ -49,11 +49,11 @@ namespace IngameScript
 
         public void Remove(IUpdateSubscriber module)
         {
-            var ModuleListKeyValue = _moduleLists.FirstOrDefault(moduleList => moduleList.Value.Contains(module));
+            var moduleListEntry = _moduleLists.FirstOrDefault(moduleList => moduleList.Value.Contains(module));
 
-            if (ModuleListKeyValue.Equals(default(KeyValuePair<UpdateType, List<IModule>>)))
+            if (!moduleListEntry.Equals(default(KeyValuePair<UpdateType, IUpdateSubscriber>)))
             {
-                Remove(module, ModuleListKeyValue.Value, ModuleListKeyValue.Key);
+                Remove(module, moduleListEntry.Value, moduleListEntry.Key);
             }
         }
 
@@ -130,15 +130,12 @@ namespace IngameScript
             _updateFrequencySetter(NewUpdateFrequency);
         }
 
-        private void HandleModuleUpdateFrequencyChanges(ObservableUpdateFrequency obsUpdFreqOfModule, UpdateFrequency oldUpdateFrequency, UpdateFrequency newUpdateFrequency)
+        private void HandleModuleUpdateFrequencyChanges(IUpdateSubscriber module, UpdateFrequency oldUpdateFrequency, UpdateFrequency newUpdateFrequency)
         {
             // TODO: Make sure the logic is correct here, and executes per expectations in all scenarios...
 
             // Get module's old UpdateType from its old UpdateFrequency
             UpdateType oldUpdateType = ConvertUpdateFrequency(oldUpdateFrequency);
-
-            // Find module based on its UpdateFrequency property (which is an object)
-            IUpdateSubscriber module = _moduleLists[oldUpdateType].Find((x) => x.Frequency == obsUpdFreqOfModule);
                 
             // Remove module from the old update tier list, and remove the list too if it became empty
             Remove(module, _moduleLists[oldUpdateType], oldUpdateType);
@@ -246,7 +243,7 @@ namespace IngameScript
             _updateFrequencySetter(NewUpdateFrequency);
         }
 
-        private void HandleModuleUpdateFrequencyChanges(ObservableUpdateFrequency obsUpdFreqOfModule, UpdateFrequency oldUpdateFrequency, UpdateFrequency newUpdateFrequency)
+        private void HandleModuleUpdateFrequencyChanges(IUpdateSubscriber module, UpdateFrequency oldUpdateFrequency, UpdateFrequency newUpdateFrequency)
         {
             // Yep, we don't need any of the passed data here.
             UpdateMasterUpdateFrequency();

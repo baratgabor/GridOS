@@ -3,8 +3,13 @@ namespace IngameScript
     /// <summary>
     /// Specifies a GridOS module class as a subscriber to recurring execution, with the specified update type (frequency).
     /// </summary>
-    interface IUpdateSubscriber
+    public interface IUpdateSubscriber
     {
+        /// <summary>
+        /// The name of the module.
+        /// </summary>
+        string ModuleDisplayName { get; }
+
         /// <summary>
         /// The frequency of the recurring execution.
         /// </summary>

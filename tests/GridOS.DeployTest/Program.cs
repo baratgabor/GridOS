@@ -81,7 +81,7 @@ namespace IngameScript
             public IEnumerable<IMenuItem> MenuItems => menuItems;
             public string ModuleDisplayName => "TestModule1";
 
-            public ObservableUpdateFrequency Frequency => new ObservableUpdateFrequency(UpdateFrequency.Update100);
+            public ObservableUpdateFrequency Frequency => new ObservableUpdateFrequency(UpdateFrequency.Update100, this);
 
             private readonly MenuItem _updatingMenuItem = new MenuItem("Updating");
             private readonly Random _rnd = new Random();
