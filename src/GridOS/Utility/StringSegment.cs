@@ -20,11 +20,14 @@ namespace IngameScript
 
         public StringSegment(string text, int start, int length)
         {
-            if (start > text.Length - 1)
-                throw new Exception(nameof(start));
+            if (length < 0)
+                throw new Exception($"{nameof(length)} must be zero or positive.");
+
+            if (start < 0 || start > text.Length - 1)
+                throw new Exception($"{nameof(start)} must be a valid index.");
 
             if (start + length > text.Length)
-                throw new Exception(nameof(length));
+                throw new Exception($"{nameof(length)}+{nameof(length)} must be a valid index.");
 
             _string = text;
             Start = start;
