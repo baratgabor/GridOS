@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace IngameScript
@@ -19,7 +20,7 @@ namespace IngameScript
         private readonly IDisplayConfig _config;
         private readonly IMyTextSurface _surface;
         private readonly StringBuilder _buffer = new StringBuilder();
-        private readonly char[] _wordDelimiters = new[] { ' ', '-' };
+        private readonly char[] _wordDelimiters = new[] { ' ', '-', '\n' };
 
         public TextSurfaceWordWrapper(IDisplayConfig config)
         {
@@ -34,59 +35,68 @@ namespace IngameScript
 
         public IEnumerable<StringSegment> WordWrap(string input, float maxWidthCorrection)
         {
-            _buffer.Clear();
             var fontSize = _config.FontSize;
             var fontName = _config.FontName;
-            var maxWidth = _config.OutputWidth;
+            var lineWidth = _config.OutputWidth + maxWidthCorrection;
+            var spaceWidth = _surface.MeasureStringInPixels(_buffer.Clear().Append(' '), fontName, fontSize).X;
 
-            int lastBreakableIndex = 0;
-            int lastLineBreakIndex = 0;
-            bool yieldLastBreakable = false;
-
-            while (true)
+            int lastWord = 0, nextWord, lastBreak = 0, inputLength = input.Length;
+            var spaceLeft = lineWidth;
+           
+            while(lastWord < inputLength)
             {
-                int nextBreakableIndex = input.IndexOfAny(_wordDelimiters, lastBreakableIndex);
+                float wordWidth;
+                nextWord = input.IndexOfAny(_wordDelimiters, lastWord);
 
-                if (nextBreakableIndex == -1)
+                if(nextWord == -1)
                 {
-                    lastBreakableIndex = input.Length;
-                    yieldLastBreakable = true;
+                    nextWord = inputLength;
+                }
+                else if (input[nextWord] == '\n') // This is native newline handling... going nuts. Please kill me or tell me there is a cleaner way.
+                {
+                    _buffer.Clear().Append(input, lastWord, nextWord - lastWord);
+                    wordWidth = _surface.MeasureStringInPixels(_buffer, fontName, fontSize).X + spaceWidth;
+                    if (wordWidth > spaceLeft)
+                    {   // Last word before newline doesn't fit; we need an extra line.
+                        yield return new StringSegment(input, lastBreak, lastWord - lastBreak);
+                        lastBreak = lastWord;
+                    }   
+
+                    // Return the current line until the newline, excluding \r if present.
+                    yield return new StringSegment(input, lastBreak,
+                        input.ElementAtOrDefault(nextWord - 1) == '\r'
+                        ? nextWord - 1 - lastBreak
+                        : nextWord - lastBreak);
+
+                    spaceLeft = lineWidth;
+                    lastBreak = lastWord = nextWord + 1; // Jump over the \n we found.
+
+                    if (lastBreak >= inputLength)
+                    {   // If the string ends with a newline, we add an empty line, because probably this was the user's intention.
+                        yield return new StringSegment(input, inputLength - 1, 0);
+                        yield break;
+                    }
+                    else continue;
+                }
+
+                _buffer.Clear().Append(input, lastWord, nextWord - lastWord);
+                wordWidth = _surface.MeasureStringInPixels(_buffer, fontName, fontSize).X + spaceWidth;
+
+                if (wordWidth > spaceLeft)
+                {
+                    yield return new StringSegment(input, lastBreak, lastWord - lastBreak);
+                    lastBreak = lastWord;
+                    spaceLeft = lineWidth - wordWidth;
                 }
                 else
                 {
-                    _buffer.Append(input, lastBreakableIndex, nextBreakableIndex - lastBreakableIndex + 1);
-                    var lineWidth = _surface.MeasureStringInPixels(_buffer, fontName, fontSize).X;
-
-                    if (lineWidth > maxWidth + maxWidthCorrection)
-                    {
-                        yieldLastBreakable = true;
-                    }
+                    spaceLeft -= wordWidth;
                 }
 
-                if (yieldLastBreakable)
-                {
-                    var newLineIndex = input.IndexOf(Environment.NewLine, lastLineBreakIndex, lastBreakableIndex - lastLineBreakIndex);
-                    if (newLineIndex > -1)
-                    {
-                        yield return new StringSegment(input, lastLineBreakIndex, newLineIndex - lastLineBreakIndex);
-                        lastLineBreakIndex = newLineIndex + Environment.NewLine.Length;
-                        nextBreakableIndex = newLineIndex + Environment.NewLine.Length - 1;
-                    }
-                    else
-                    {
-                        yield return new StringSegment(input, lastLineBreakIndex, lastBreakableIndex - lastLineBreakIndex);
-                        lastLineBreakIndex = lastBreakableIndex;
-                    }
-
-                    _buffer.Clear();
-                    if (lastLineBreakIndex == input.Length)
-                        break;
-
-                    yieldLastBreakable = false;
-                }
-
-                lastBreakableIndex = nextBreakableIndex + 1;
+                lastWord = nextWord + 1;
             }
+
+            yield return new StringSegment(input, lastBreak, inputLength - lastBreak);
         }
     }
 }
