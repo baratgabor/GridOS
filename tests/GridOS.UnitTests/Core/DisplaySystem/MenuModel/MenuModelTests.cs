@@ -33,11 +33,11 @@ namespace GridOS.UnitTests
             groupInRoot.AddChild(itemInGroup);
 
             commandInRootAction = null;
-            commandInRoot = new MenuCommand("MenuCommandInRoot", (_) => commandInRootAction()); // Action wrapped in lambda; Overridable in test cases.
+            commandInRoot = new MenuCommand("MenuCommandInRoot", () => commandInRootAction()); // Action wrapped in lambda; Overridable in test cases.
             menuRoot.AddChild(commandInRoot);
 
             commandInGroupAction = null;
-            commandInGroup = new MenuCommand("MenuCommandInGroup", (_) => commandInGroupAction()); // Action wrapped in lambda; Overridable in test cases.
+            commandInGroup = new MenuCommand("MenuCommandInGroup", () => commandInGroupAction()); // Action wrapped in lambda; Overridable in test cases.
             groupInRoot.AddChild(commandInGroup);
         }
 

@@ -76,7 +76,7 @@ namespace IngameScript
 
             if (item is IMenuCommand)
             {
-                (item as IMenuCommand).Execute(_displayContext);
+                (item as IMenuCommand).Execute();
                 return true;
             }
 

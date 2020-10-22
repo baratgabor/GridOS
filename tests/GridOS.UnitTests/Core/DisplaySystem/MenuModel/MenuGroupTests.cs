@@ -19,7 +19,7 @@ namespace GridOS.UnitTests
             // Act
             menuGroup.AddChild(child);
 
-            Assert.AreEqual(child, menuGroup.GetChildren().FirstOrDefault());
+            Assert.AreEqual(child, menuGroup.GetChildren(null).FirstOrDefault());
         }
 
         [Test]
@@ -47,7 +47,7 @@ namespace GridOS.UnitTests
             // Act
             menuGroup.AddChild(child);
 
-            Assert.AreEqual(1, menuGroup.GetChildren().Count(), "An already added child item must not be added the second time.");
+            Assert.AreEqual(1, menuGroup.GetChildren(null).Count(), "An already added child item must not be added the second time.");
             Assert.AreEqual(0, called, "Notification must not be sent if child already present in group.");
         }
 
@@ -65,7 +65,7 @@ namespace GridOS.UnitTests
             // Act
             menuGroup.RemoveChild(child2);
 
-            CollectionAssert.AreEqual(new List<IMenuItem>() { child1, child3 }, menuGroup.GetChildren());
+            CollectionAssert.AreEqual(new List<IMenuItem>() { child1, child3 }, menuGroup.GetChildren(null));
         }
 
         [Test]

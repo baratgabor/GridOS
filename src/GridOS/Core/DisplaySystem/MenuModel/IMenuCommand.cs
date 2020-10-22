@@ -20,7 +20,6 @@ namespace IngameScript
         /// <summary>
         /// Executes the command that is bound to the menu item.
         /// </summary>
-        /// <param name="context">Identifies which display instance this operation belongs to.</param>
-        void Execute(object context);
+        void Execute();
     }
 }
