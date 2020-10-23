@@ -35,11 +35,13 @@ namespace IngameScript
             _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _diagnostics, _executionEvents);
             _updateDispatcher = new FastUpdateDispatcher((ILogger)_diagnostics, _updateFrequencyGetter, _updateFrequencySetter);
 
+            // TODO: Remove 'help' menu. The only reason it's still here is that it's ideal for testing word wrapping and scrolling.
+            _displayOrchestrator.RegisterMenuItem(new HelpMenu());
+            _displayOrchestrator.RegisterMenuItem(new SettingsMenu(_diagnostics));
+
             _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
             _commandDispatcher.AddCommand(new CommandItem("DisableUpdates", CommandHandler_DisableUpdates));
             _commandDispatcher.AddCommand(new CommandItem("EnableUpdates", CommandHandler_EnableUpdates));
-
-            _displayOrchestrator.RegisterMenuItem(new SettingsMenu(_diagnostics));
 
             TryExecuteCustomData(_p.Me.CustomData);
         }

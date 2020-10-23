@@ -23,7 +23,7 @@ namespace IngameScript
         public MenuGroup(string label) : base(label)
         { }
 
-        public void AddChild(IMenuItem item)
+        public virtual void AddChild(IMenuItem item)
         {
             if (_children.Contains(item))
                 return;
@@ -33,7 +33,7 @@ namespace IngameScript
             ChildrenChanged?.Invoke(this);
         }
 
-        public void RemoveChild(IMenuItem item)
+        public virtual void RemoveChild(IMenuItem item)
         {
             if (!_children.Contains(item))
                 return;
@@ -43,7 +43,7 @@ namespace IngameScript
             ChildrenChanged?.Invoke(this);
         }
 
-        public void Open(object context)
+        public virtual void Open(IMenuInstance menuInstance = null)
         {
             _openedBy++;
 
@@ -52,7 +52,7 @@ namespace IngameScript
                 Opened?.Invoke(this);
         }
 
-        public void Close(object context)
+        public virtual void Close(IMenuInstance menuInstance = null)
         {
             if (_openedBy == 0)
                 throw new Exception("Group is not open.");
@@ -64,12 +64,12 @@ namespace IngameScript
                 Closed?.Invoke(this);
         }
 
-        public IEnumerable<IMenuItem> GetChildren()
+        public virtual IEnumerable<IMenuItem> GetChildren(IMenuInstance menuInstance = null)
         {
             return _children;
         }
 
-        protected void HandleChildrenLabelChanges(IMenuItem item)
+        protected virtual void HandleChildrenLabelChanges(IMenuItem item)
         {
             // TODO: Consider if this limitation is needed. The class doesn't communicate this fact towards consumers, and it complicates notification logic.
             //if (_openedBy <= 0)

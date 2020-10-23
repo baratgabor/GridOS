@@ -9,6 +9,9 @@
     <Import_RootNamespace>GridOS</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\BackgroundColorCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\FontColorCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\FontSizeCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\LogLevelCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\SettingsMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\CommandExecution\ICommandDispatcher.cs" />
@@ -21,20 +24,23 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\IGlobalEvents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\WordWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\AffixConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\StaticConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\_Interfaces.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\MainConfig.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayInfrastructure\IDisplayContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\IMenuInstanceServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\Menu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayInfrastructure\IView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\MenuLineGenerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\MenuLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\NavigationPayload.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuModel\IMenuInstance.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuModel\IMenuModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuModel\MenuModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\ICommandPublisher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IMenuContentPublisher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IUpdateSubscriber.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\ReadOnlyListExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\StringHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\ObservableT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\UpdateExecution\ObservableUpdateFrequency.cs" />

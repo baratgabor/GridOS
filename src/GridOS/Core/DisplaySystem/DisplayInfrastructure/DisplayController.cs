@@ -6,9 +6,11 @@ namespace IngameScript
     /// Knows how to instantiate and wire together the full stack of classes needed for a working view system.
     /// Sets up and mediates the execution of display related commands.
     /// </summary>
-    class DisplayController : IDisposable, IDisplayContext
+    class DisplayController : IDisposable, IMenuInstanceServices
     {
         public string Name { get; }
+        public IDisplayConfig DisplayConfig { get; }
+        public IMenuPresentationConfig MenuConfig { get; }
 
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly IDiagnosticService _diagnostics;
@@ -24,6 +26,8 @@ namespace IngameScript
         public DisplayController(string name, ICommandDispatcher commandDispatcher, MainConfig config, IDiagnosticService diagnostics, IView view, IMenuGroup menuRoot, IGlobalEvents globalEvents)
         {
             Name = name;
+            MenuConfig = config;
+            DisplayConfig = config;
             _view = view;
             _diagnostics = diagnostics;
             _commandDispatcher = commandDispatcher;

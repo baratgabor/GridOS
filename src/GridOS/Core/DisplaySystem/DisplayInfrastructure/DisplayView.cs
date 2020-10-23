@@ -53,16 +53,16 @@ namespace IngameScript
             _controls.Clear();
         }
 
-        public void Redraw()
+        public void Redraw(bool flush = false)
         {
-            if (!_contentDirty)
+            if (!flush && !_contentDirty)
                 return;
 
             _content.Clear();
 
             for (int i = 0; i < _controls.Count; i++)
             {
-                _content.Append(_controls[i].GetContent());
+                _content.Append(_controls[i].GetContent(flush));
                 _content.AppendLine();
             }
 
@@ -119,19 +119,21 @@ namespace IngameScript
             _config.FontSize = fontSize;
             SetupSurface();
             AdaptToSurface();
-            Redraw();
+            Redraw(flush: true);
         }
 
         public void SetFontColor(Color color)
         {
             _config.FontColor = color;
             SetupSurface();
+            Redraw(flush: true);
         }
 
         public void SetBackgroundColor(Color color)
         {
             _config.BackgroundColor = color;
             SetupSurface();
+            Redraw(flush: true);
         }
     }
 }

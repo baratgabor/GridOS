@@ -15,29 +15,38 @@ namespace IngameScript
         protected StringBuilder _buffer = new StringBuilder();
         protected string _padding = String.Empty;
         protected IBreadcrumbConfig _config;
+        protected IEnumerable<string> _lastPath;
 
         public Breadcrumb(IBreadcrumbConfig config)
         {
-            // TODO: consider whether this needs to be updated when config changes
             _padding = new String(config.PaddingChar, config.PaddingLeft);
             _config = config;
         }
 
         public StringBuilder GetContent(bool FlushCache = false)
         {
-            // Need to ignore flush request here, since we don't have any means of pulling new data
+            if (FlushCache)
+                BuildContent(_lastPath);
+
             return _buffer;
         }
 
         public void OnPathChanged(IEnumerable<string> path)
-        { 
+        {
+            BuildContent(path);
+            RedrawRequired?.Invoke(this);
+        }
+
+        protected void BuildContent(IEnumerable<string> path)
+        {
+            _lastPath = path;
             _buffer.Clear();
 
             _buffer.Append(_config.SeparatorLineTop);
             _buffer.AppendLine();
 
             _buffer.Append(_padding);
-                
+
             foreach (var name in path)
             {
                 _buffer.Append(name);
@@ -50,9 +59,7 @@ namespace IngameScript
 
             _buffer.AppendLine();
             _buffer.Append(_config.SeparatorLineBottom);
-
             // TODO: Implement path string shortening if it exceeds a certain length (i.e. line length)
-            RedrawRequired?.Invoke(this);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Hosting;
 using System.Text;
 
 namespace IngameScript
@@ -741,5 +742,35 @@ namespace IngameScript
         // Summary:
         //     Gets or sets the green component value of this Color.
         public byte G { get; set; }
+
+        public static Color Lighten(Color inColor, double inAmount)
+        {
+            return inColor;
+        }
+
+        public static Color Darken(Color inColor, double inAmount)
+        {
+            return inColor;
+        }
+
+        public static Color Multiply(Color value, float scale)
+        {
+            return new Color()
+            {
+                R = (byte)(value.R * scale),
+                G = (byte)(value.G * scale),
+                B = (byte)(value.B * scale)
+            };
+        }
+
+        public static bool operator ==(Color a, Color b)
+        {
+            return a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
+        }
+
+        public static bool operator !=(Color a, Color b)
+        {
+            return !(a == b);
+        }
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace IngameScript
+﻿using System;
+
+namespace IngameScript
 {
-    interface IDisplayConfig
+    public interface IDisplayConfig
     {
         float FontSize { get; }
         string FontName { get;}
@@ -12,9 +14,11 @@
         float OutputWidth { get; }
         float OutputHeight { get; }
         int OutputLineCapacity { get; }
+
+        event Action<string> SettingChanged;
     }
 
-    interface IMenuPresentationConfig
+    public interface IMenuPresentationConfig
     {
         int MenuLines { get; }
         int PaddingLeft { get; }
@@ -24,9 +28,11 @@
         AffixConfig Prefixes_Unselected { get; }
         AffixConfig Prefixes_Selected { get; }
         AffixConfig Suffixes { get; }
+
+        event Action<string> SettingChanged;
     }
 
-    interface IBreadcrumbConfig
+    public interface IBreadcrumbConfig
     {
         string PathSeparator { get; }
         string SeparatorLineTop { get; }

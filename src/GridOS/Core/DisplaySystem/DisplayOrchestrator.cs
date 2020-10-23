@@ -29,7 +29,6 @@ namespace IngameScript
             _commandDispatcher = commandDispatcher;
             _diagnostics = diagnostics;
             _globalEvents = globalEvents;
-            _menuRoot.AddChild(new HelpMenu());
         }
 
         public void RegisterTextSurface(IMyTextSurface textSurface)

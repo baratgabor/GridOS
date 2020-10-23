@@ -41,6 +41,8 @@ namespace IngameScript
         /// </summary>
         public IEnumerable<string> NavigationPath => _navigationStack.Select(x => x.Label);
 
+        public IMenuInstanceServices MenuInstanceServices { get; }
+
         private readonly List<IMenuItem> _currentView;
         private readonly IMenuGroup _rootGroup;
         private IMenuGroup _activeGroup;
@@ -49,12 +51,10 @@ namespace IngameScript
         private readonly MenuCommand _backCommandTop;
         private readonly MenuCommand _backCommandBottom; // Separate instance; top and bottom back command shouldn't evaluate to equal.
 
-        private readonly IDisplayContext _displayContext;
-
-        public MenuModel(IMenuGroup menuRoot, IDisplayContext displayContext)
+        public MenuModel(IMenuGroup menuRoot, IMenuInstanceServices menuServices)
         {
             _rootGroup = menuRoot;
-            _displayContext = displayContext;
+            MenuInstanceServices = menuServices;
             _currentView = new List<IMenuItem>();
             _backCommandTop = new MenuCommand("Back «", MoveBack);
             _backCommandBottom = new MenuCommand("Back «", MoveBack);
@@ -125,7 +125,7 @@ namespace IngameScript
             _activeGroup.LabelChanged -= Handle_GroupTitleChanged;
             _activeGroup.ChildrenChanged -= Handle_ListChanged;
             _activeGroup.ChildLabelChanged -= Handle_ItemChanged;
-            _activeGroup.Close(_displayContext);
+            _activeGroup.Close(this);
             _activeGroup = null;
 
             BuildCurrentView();
@@ -134,7 +134,7 @@ namespace IngameScript
         private void OpenGroup(IMenuGroup group)
         {
             _navigationStack.Add(group);
-            group.Open(_displayContext);
+            group.Open(this);
             group.LabelChanged += Handle_GroupTitleChanged;
             group.ChildrenChanged += Handle_ListChanged;
             group.ChildLabelChanged += Handle_ItemChanged;
@@ -153,7 +153,7 @@ namespace IngameScript
             if (_activeGroup != _rootGroup)
                 _currentView.Add(_backCommandTop);
 
-            _currentView.AddRange(_activeGroup.GetChildren());
+            _currentView.AddRange(_activeGroup.GetChildren(this));
 
             if (_activeGroup.ShowBackCommandAtBottom)
                 _currentView.Add(_backCommandBottom);

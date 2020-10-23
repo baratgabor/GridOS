@@ -32,7 +32,7 @@ namespace IngameScript
         /// <summary>
         /// Stores each line of the menu with all necessary metadata.
         /// </summary>
-        private readonly MenuLine[] _menuLines;
+        private MenuLine[] _menuLines;
 
         /// <summary>
         /// Stores the final string representation of the menu.
@@ -42,32 +42,31 @@ namespace IngameScript
         /// <summary>
         /// Specifies how many menu lines to produce. If menu content is shorter, it will be padded by empty lines.
         /// </summary>
-        private readonly int _lineHeight;
+        private int _lineHeight;
         private const int MinimumLineHeight = 3;
 
         private readonly IMenuModel _model;
+        private readonly IMenuPresentationConfig _config;
         private readonly MenuLineGenerator _lineGenerator;
 
         public Menu(IMenuModel model, IMenuPresentationConfig config, IWordWrapper wordWrapper)
         {
             _model = model;
-
-            if (config.MenuLines < MinimumLineHeight)
-            {
-                throw new Exception($"The minimum supported number of displayed menu lines is {MinimumLineHeight}. Configuration setting '{nameof(IMenuPresentationConfig.MenuLines)}' is currently set to {config.MenuLines}.");
-            }
-
-            _lineHeight = config.MenuLines;
-            _lineGenerator = new MenuLineGenerator(config, wordWrapper);
-            _menuLines = new MenuLine[_lineHeight];
-
             model.CurrentViewChanged += OnListChanged;
             model.MenuItemChanged += OnItemChanged;
             model.NavigatedTo += OnNavigatedTo;
+
+            _config = config;
+            config.SettingChanged += OnConfigChanged;
+
+            _lineGenerator = new MenuLineGenerator(config, wordWrapper);
+
+            SetUpMenuLinesCount();
         }
 
         public void Dispose()
         {
+            _config.SettingChanged -= OnConfigChanged;
             _model.CurrentViewChanged -= OnListChanged;
             _model.MenuItemChanged -= OnItemChanged;
             _model.NavigatedTo -= OnNavigatedTo;
@@ -100,8 +99,11 @@ namespace IngameScript
                 BuildContent();
 
             // Second line from the top is designated for scrolling upwards.
-            if (_selectedLineIndex == 1 &&
-                (_selectedMenuItemIndex > 1 || _menuLines[0].LineIndex > 0)) // At least 1 line is available above viewport.
+
+            var lineAboveViewport = _selectedMenuItemIndex > 1 
+                || _menuLines[0].LineIndex > 0 
+                || (_menuLines[1].BackingMenuItem == _menuLines[2].BackingMenuItem && _selectedMenuItemIndex == 1);
+            if (_selectedLineIndex == 1 && lineAboveViewport)
             {
                 if (ScrollUp())
                 {
@@ -258,6 +260,25 @@ namespace IngameScript
             RedrawRequired?.Invoke(this);
         }
 
+        private void OnConfigChanged(string settingName)
+        {
+            if (settingName == nameof(_config.MenuLines))
+                SetUpMenuLinesCount();
+        }
+
+        private void SetUpMenuLinesCount()
+        {
+            _lineHeight = _config.MenuLines;
+            if (_lineHeight < MinimumLineHeight)
+                throw new Exception($"The minimum supported number of displayed menu lines is {MinimumLineHeight}. Configuration setting '{nameof(IMenuPresentationConfig.MenuLines)}' is currently set to {_config.MenuLines}.");
+
+            if (_selectedLineIndex > _lineHeight - 1)
+                _selectedLineIndex = _lineHeight - 2;
+
+            _menuLines = new MenuLine[_lineHeight];
+            _isStateDirty = true;
+        }
+
         /// This appears to be fairly overcomplicated, but it's the cost of optimization.
         /// With this way of rendering, the time complexity of rendering is decoupled from the actual length of the menu.
         /// Simple sequential, top to bottom viewport filling wasn't an option, because when navigating backwards, we need to select the previously opened group in the list (preferably not at the top of the viewport), without knowing how long the predecing part of the menu is.
@@ -268,8 +289,17 @@ namespace IngameScript
 
             var itemList = _model.CurrentView;
             var itemCount = itemList.Count;
-            var selectedMenuItemRenderStartIndex = _selectedLineIndex - _selectedMenuItemOffset;
-            var insertionIndex = selectedMenuItemRenderStartIndex;
+
+            int selectedMenuItemRenderStartIndex, insertionIndex;
+            if (_selectedMenuItemIndex == 0)
+            {
+                selectedMenuItemRenderStartIndex = 0;
+                _selectedLineIndex = _selectedMenuItemOffset;
+            }
+            else
+            {
+                selectedMenuItemRenderStartIndex = _selectedLineIndex - _selectedMenuItemOffset;
+            }
 
             // Step 1: Fill viewport upwards from above the selected menu item (if necessary).
             if (_selectedMenuItemIndex > 0)

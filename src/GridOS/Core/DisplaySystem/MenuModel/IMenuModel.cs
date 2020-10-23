@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace IngameScript
 {
-    public interface IMenuModel
+    public interface IMenuModel : IMenuInstance
     {
         string CurrentTitle { get; }
         IReadOnlyList<IMenuItem> CurrentView { get; }

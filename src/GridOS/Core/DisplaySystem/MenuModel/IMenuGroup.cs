@@ -22,7 +22,7 @@ namespace IngameScript
         /// <summary>
         /// Returns the list of children.
         /// </summary>
-        IEnumerable<IMenuItem> GetChildren();
+        IEnumerable<IMenuItem> GetChildren(IMenuInstance menuInstance = null);
 
         /// <summary>
         /// Notifies when the list of children are altered.
@@ -38,7 +38,7 @@ namespace IngameScript
         /// Marks this group as opened. This allows us to notify any components that are interested to know when the group is opened.
         /// </summary>
         /// <param name="context">Identifies which display instance this operation belongs to.</param>
-        void Open(object context);
+        void Open(IMenuInstance menuInstance = null);
 
         /// <summary>
         /// Notifies when the group is opened.
@@ -49,7 +49,7 @@ namespace IngameScript
         /// Marks this group as closed. This allows us to notify any components that are interested to know when the group is closed.
         /// </summary>
         /// <param name="context">Identifies which display instance this operation belongs to.</param>
-        void Close(object context);
+        void Close(IMenuInstance menuInstance = null);
 
         /// <summary>
         /// Notifies when the group is closed.
