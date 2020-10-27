@@ -142,13 +142,38 @@ namespace IngameScript
             }
         }
 
+        // TODO: GridOS class shouldn't contain low-level logic, move this somewhere else.
         private void CommandHandler_AddLcd(CommandItem sender, string param)
         {
-            IMyTerminalBlock textSurface = _p.GridTerminalSystem.GetBlockWithName(param);
-            if ((textSurface == null) || !(textSurface is IMyTextSurface))
+            int surfaceIndex = 0;
+
+            {   // Extract optional surface index
+                int delimiter = param.IndexOf(' ');
+                if (delimiter > -1)
+                {
+                    if (int.TryParse(
+                        param.Substring(delimiter + 1, param.Length - (delimiter + 1)), out surfaceIndex))
+                    {
+                        surfaceIndex = Math.Max(0, 
+                            int.Parse(param.Substring(delimiter + 1, param.Length - (delimiter + 1)))
+                            - 1);
+                    }
+
+                    param = param.Substring(0, delimiter);
+                }
+            }
+
+            IMyTerminalBlock target = _p.GridTerminalSystem.GetBlockWithName(param);
+            
+            if (target == null)
                 return;
 
-            RegisterTextSurface(textSurface as IMyTextSurface);
+            if (target is IMyTextSurface)
+                RegisterTextSurface((IMyTextSurface)target);
+
+            if (target is IMyTextSurfaceProvider)
+                RegisterTextSurface(
+                    ((IMyTextSurfaceProvider)target).GetSurface(surfaceIndex));
         }
 
         private void CommandHandler_DisableUpdates(CommandItem sender, string param)
