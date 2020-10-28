@@ -87,7 +87,7 @@ namespace IngameScript
         //
         // Summary:
         //     Creates a new draw frame where you can add sprites to be rendered.
-        //MySpriteDrawFrame DrawFrame();
+        MySpriteDrawFrame DrawFrame();
         //
         // Summary:
         //     Gets a list of available fonts

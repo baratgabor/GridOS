@@ -26,6 +26,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)IMyGridProgramRuntimeInfo.debug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IMyTextSurfaceProvider.debug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MyDetectedEntityInfo.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MySprite.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MySpriteCollection.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MySpriteDrawFrame.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RectangleF.debug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UpdateFrequency.debug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UpdateType.debug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Vector2.debug.cs" />
