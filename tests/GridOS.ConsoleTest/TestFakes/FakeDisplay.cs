@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace IngameScript
@@ -7,6 +8,7 @@ namespace IngameScript
     internal class FakeDisplay : IMyTextSurface
     {
         public event Action<string> TextWritten;
+        private List<MySprite> _spritesReceived = new List<MySprite>();
 
         public float FontSize { get; set; }
 
@@ -110,6 +112,22 @@ namespace IngameScript
                 X = text.Length * fakeCharWidth,
                 Y = fakeCharHeight // Assumes no newlines in text.
             };
+        }
+
+        public MySpriteDrawFrame DrawFrame()
+        {
+            // TODO: This makes the assumption that 'draw frame' is supposed to be requested only once per frame. Would be more robust to wire some "frame start" notification into this fake class.
+            _spritesReceived.Clear();
+
+            return new MySpriteDrawFrame(
+                spriteReceiver: (sprite) => _spritesReceived.Add(sprite),
+
+                // Simply extract text from text type sprites.
+                disposeReceiver: () => TextWritten?.Invoke(
+                    string.Join(Environment.NewLine,
+                    _spritesReceived
+                        .Where(s => s.Type == SpriteType.TEXT)
+                        .Select(s => s.Data)))); 
         }
     }
 }
