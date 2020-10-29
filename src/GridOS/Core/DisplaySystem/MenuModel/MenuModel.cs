@@ -166,6 +166,7 @@ namespace IngameScript
 
         private void Handle_ListChanged(IMenuItem _)
         {
+            BuildCurrentView();
             CurrentViewChanged?.Invoke(CurrentView);
         }
 
