@@ -10,14 +10,12 @@ namespace IngameScript
     class GridOS
     {
         private readonly MyGridProgram _p;
-        private readonly GlobalEventDispatcher _executionEvents;
+        private readonly GlobalEventDispatcher _eventDispatcher;
         private readonly IDiagnosticServiceController _diagnostics;
 
         private readonly IUpdateDispatcher _updateDispatcher;
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly DisplayOrchestrator _displayOrchestrator;
-
-        private const string _systemName = "GridOS Experimental";
 
         // Main module storage
         private readonly List<IModule> _moduleList = new List<IModule>();
@@ -26,19 +24,20 @@ namespace IngameScript
         {
             p.Me.CustomName = "GridOS";
             _p = p;
-            _executionEvents = new GlobalEventDispatcher();
-            _diagnostics = new GridProgramDiagnostics(_p) { LoggingLevel = LogLevel.Debug };
+            _eventDispatcher = new GlobalEventDispatcher();
+            _diagnostics = new GridProgramDiagnostics(_p, _eventDispatcher) { LoggingLevel = LogLevel.Information };
 
             Func<UpdateFrequency> _updateFrequencyGetter = () => _p.Runtime.UpdateFrequency;
             Action<UpdateFrequency> _updateFrequencySetter = (x) => _p.Runtime.UpdateFrequency = x;
 
-            _commandDispatcher = new CommandDispatcher();
-            _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _diagnostics, _executionEvents);
+            _commandDispatcher = new CommandDispatcher(_diagnostics);
+            _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _diagnostics, _eventDispatcher);
             _updateDispatcher = new FastUpdateDispatcher((ILogger)_diagnostics, _updateFrequencyGetter, _updateFrequencySetter);
 
             // TODO: Remove 'help' menu. The only reason it's still here is that it's ideal for testing word wrapping and scrolling.
             _displayOrchestrator.RegisterMenuItem(new HelpMenu());
             _displayOrchestrator.RegisterMenuItem(new SettingsMenu(_diagnostics));
+            _displayOrchestrator.RegisterMenuItem(new LogMenu(_eventDispatcher));
 
             _commandDispatcher.AddCommand(new CommandItem("AddLcd", CommandHandler_AddLcd));
             _commandDispatcher.AddCommand(new CommandItem("DisableUpdates", CommandHandler_DisableUpdates));
@@ -88,7 +87,7 @@ namespace IngameScript
         public void Main(string argument, UpdateType updateType)
         {
             _diagnostics.RecordExecution(logExecutionStats: true);
-            _executionEvents.ExecutionStarted();
+            _eventDispatcher.OnExecutionStarted();
 
             // Dispatch updates.
             if (updateType >= UpdateType.Update1)
@@ -99,7 +98,7 @@ namespace IngameScript
                 }
                 catch (Exception e)
                 {
-                    _diagnostics.Log(LogLevel.Error, $"Error dispatching update type '{updateType}'. Message: {e.Message}");
+                    _diagnostics.Log(LogLevel.Error, $"Unhandled error in Update Dispatcher.\r\nUpdate type: '{updateType}'. Message: {e.Message}");
                 }
             }
                 
@@ -112,11 +111,11 @@ namespace IngameScript
                 }
                 catch (Exception e)
                 {
-                    _diagnostics.Log(LogLevel.Error, $"Error processing argument '{argument}'. Message: {e.Message}");
+                    _diagnostics.Log(LogLevel.Error, $"Unhandled error in Command Dispatcher.\r\nInput argument: '{argument}'. Message: {e.Message}");
                 }
             }
 
-            _executionEvents.ExecutionFinishing();
+            _eventDispatcher.OnExecutionFinishing();
         }
 
         /// <summary>
@@ -165,16 +164,20 @@ namespace IngameScript
             }
 
             IMyTerminalBlock target = _p.GridTerminalSystem.GetBlockWithName(param);
-            
+
             if (target == null)
+            {
+                _diagnostics.Log(LogLevel.Error, "Command 'AddLcd' received. Couldn't add LCD. Target '{0}' not found.", param);
                 return;
+            }
 
             if (target is IMyTextSurface)
                 RegisterTextSurface((IMyTextSurface)target);
-
-            if (target is IMyTextSurfaceProvider)
+            else if (target is IMyTextSurfaceProvider)
                 RegisterTextSurface(
                     ((IMyTextSurfaceProvider)target).GetSurface(surfaceIndex));
+            else
+                _diagnostics.Log(LogLevel.Error, "Command 'AddLcd' received. Couldn't add LCD. Target '{0}' is neither a text surface, nor a surface provider.", param);
         }
 
         private void CommandHandler_DisableUpdates(CommandItem sender, string param)

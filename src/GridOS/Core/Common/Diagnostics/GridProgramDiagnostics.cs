@@ -12,10 +12,12 @@ namespace IngameScript
         public long NumberOfRuns { get; private set; }
 
         private readonly MyGridProgram _program;
+        private readonly GlobalEventDispatcher _eventDispatcher;
 
-        public GridProgramDiagnostics(MyGridProgram program)
+        public GridProgramDiagnostics(MyGridProgram program, GlobalEventDispatcher eventDispatcher)
         {
             _program = program;
+            _eventDispatcher = eventDispatcher;
         }
 
         /// <summary>
@@ -26,7 +28,7 @@ namespace IngameScript
             if (logLevel < LoggingLevel)
                 return;
 
-            _program.Echo(message);
+            LogInternal(message, logLevel);
         }
 
         public void Log(LogLevel logLevel, StringBuilder message)
@@ -34,7 +36,7 @@ namespace IngameScript
             if (logLevel < LoggingLevel)
                 return;
 
-            Log(message.ToString());
+            LogInternal(message.ToString(), logLevel);
         }
 
         public void Log(LogLevel logLevel, StringSegment message)
@@ -42,7 +44,7 @@ namespace IngameScript
             if (logLevel < LoggingLevel)
                 return;
 
-            Log(message.ToString());
+            LogInternal(message.ToString(), logLevel);
         }
 
         public void RecordExecution(bool logExecutionStats)
@@ -54,19 +56,6 @@ namespace IngameScript
                 LogExecutionStatistics();
         }
 
-        private void Log(string message)
-        {
-            _program.Echo(message);
-        }
-
-        private void LogExecutionStatistics()
-        {
-            if (LoggingLevel > LogLevel.Information)
-                return;
-
-            _program.Echo(string.Format("Execution no. {0}.\r\nAverage Execution Time: {1:G3}ms", NumberOfRuns, AverageRunTimeMs));
-        }
-
         public void Log(LogLevel logLevel, string formatString, object arg0, object arg1 = null, object arg2 = null)
         {
             if (logLevel < LoggingLevel)
@@ -74,7 +63,35 @@ namespace IngameScript
 
             var formattedString = string.Format(formatString, arg0, arg1, arg2);
 
-            Log(formattedString);
+            LogInternal(formattedString, logLevel);
+        }
+
+        private void LogInternal(string message, LogLevel logLevel)
+        {
+            switch (logLevel)
+            {
+                case LogLevel.Error:
+                    _eventDispatcher.OnErrorLogged(message);
+                    break;
+                case LogLevel.Warning:
+                    _eventDispatcher.OnWarningLogged(message);
+                    break;
+                case LogLevel.Information:
+                    _eventDispatcher.OnInformationLogged(message);
+                    break;
+                case LogLevel.Debug:
+                    _eventDispatcher.OnDebugLogged(message);
+                    break;
+                default:
+                    break;
+            }
+
+            _program.Echo(message);
+        }
+
+        private void LogExecutionStatistics()
+        {
+            _program.Echo(string.Format("Execution no. {0}.\r\nAverage Execution Time: {1:G3}ms", NumberOfRuns, AverageRunTimeMs));
         }
     }
 }

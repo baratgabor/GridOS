@@ -9,6 +9,8 @@
     <Import_RootNamespace>GridOS</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\LogMenu\LogMenu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\LogMenu\Modules\LogList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\BackgroundColorCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\FontColorCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\FontSizeCommand.cs" />
@@ -20,8 +22,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\IDiagnosticServiceController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\ILogger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\LogLevel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\GlobalEventDispatcher.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\IGlobalEvents.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Events\GlobalEventDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Events\IGlobalEvents.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Events\ILoggingEvents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\WordWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\AffixConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\StaticConfig.cs" />

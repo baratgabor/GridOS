@@ -54,6 +54,7 @@ namespace IngameScript
             if ((moduleUpdateFrequency & UpdateFrequency.Update100) != 0)
                 _subscribers_update100.Add(module);
 
+            _logger.Log(LogLevel.Information, "Update Dispatcher has registered module '{0}' for update type '{1}'.", module.ModuleDisplayName, module.Frequency.UpdateTypeEquivalent);
             UpdateMasterUpdateFrequency();
         }
 
@@ -70,6 +71,7 @@ namespace IngameScript
             _subscribers_update10.Remove(module);
             _subscribers_update100.Remove(module);
 
+            _logger.Log(LogLevel.Information, "Update Dispatcher has removed module '{0}'.", module.ModuleDisplayName);
             UpdateMasterUpdateFrequency();
         }
 
@@ -78,7 +80,7 @@ namespace IngameScript
             if (updateType < UpdateType.Update1)
                 return;
 
-            _logger.Log(LogLevel.Debug, "{0} UpdateDispatcher reports:\r\n", _progress.Get());
+            _logger.Log(LogLevel.Debug, "{0} Update Dispatcher reports:\r\n", _progress.Get());
 
             if ((updateType & UpdateType.Once) != 0)
                 ExecuteList(_subscribers_once, updateType, clearListAfterExecution: true);
@@ -109,7 +111,7 @@ namespace IngameScript
                 }
                 catch(Exception e)
                 {
-                    _logger.Log(LogLevel.Error, "Error updating module {0}. Message: {1}.", module.ModuleDisplayName, e.Message);
+                    _logger.Log(LogLevel.Error, "Error updating module '{0}'.\r\nMessage:\r\n{1}.", module.ModuleDisplayName, e.Message);
                 }
             }
 
@@ -134,12 +136,12 @@ namespace IngameScript
                 newUpdateFrequency |= UpdateFrequency.Update100;
 
             _updateFrequencySetter(newUpdateFrequency);
-            _logger.Log(LogLevel.Debug, "Master update frequency changed to '{0}'.", newUpdateFrequency);
+            _logger.Log(LogLevel.Information, "Master update frequency changed to '{0}'.", newUpdateFrequency);
         }
 
         private void HandleModuleUpdateFrequencyChanges(IUpdateSubscriber module, UpdateFrequency oldFrequency, UpdateFrequency newFrequency)
         {
-            _logger.Log(LogLevel.Debug, "UpdateDispatcher: Changing update frequency of module '{0}', from '{1}' to '{2}'.", module.ModuleDisplayName, oldFrequency, newFrequency);
+            _logger.Log(LogLevel.Information, "UpdateDispatcher: Changing update frequency of module '{0}', from '{1}' to '{2}'.", module.ModuleDisplayName, oldFrequency, newFrequency);
 
             if (oldFrequency > 0)
             {

@@ -8,7 +8,13 @@ namespace IngameScript
     /// </summary>
     class CommandDispatcher : ICommandDispatcher
     {
+        private readonly ILogger _logger;
         private Dictionary<string, CommandItem> _commands = new Dictionary<string, CommandItem>();
+
+        public CommandDispatcher(ILogger logger)
+        {
+            _logger = logger;
+        }
 
         public ICommandDispatcher AddCommand(CommandItem command)
         {
@@ -88,6 +94,10 @@ namespace IngameScript
             if (_commands.TryGetValue(commandName, out command))
             {
                 command.Execute(command, parameter);
+            }
+            else
+            {
+                _logger.Log(LogLevel.Error, "Command Dispatcher has found no '{0}' command to execute. Original input argument: '{1}'", commandName, argument);
             }
         }
     }
