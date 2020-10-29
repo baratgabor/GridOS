@@ -24,6 +24,7 @@ namespace IngameScript
 
         public GridOS(MyGridProgram p)
         {
+            p.Me.CustomName = "GridOS";
             _p = p;
             _executionEvents = new GlobalEventDispatcher();
             _diagnostics = new GridProgramDiagnostics(_p) { LoggingLevel = LogLevel.Debug };

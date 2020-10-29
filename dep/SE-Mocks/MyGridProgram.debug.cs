@@ -15,7 +15,7 @@ namespace IngameScript
         // Summary:
         //     Provides access to the grid terminal system as viewed from this programmable
         //     block.
-        public IMyGridTerminalSystem GridTerminalSystem { get; protected set; }
+        public IMyGridTerminalSystem GridTerminalSystem { get; set; }
         //
         // Summary:
         //     Gets a reference to the currently running programmable block.

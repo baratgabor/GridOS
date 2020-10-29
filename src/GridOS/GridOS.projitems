@@ -40,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IMenuContentPublisher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\ModuleSupport\IUpdateSubscriber.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\GridService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\ReadOnlyListExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\StringHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\ObservableT.cs" />
