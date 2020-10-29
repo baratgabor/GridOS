@@ -148,7 +148,7 @@ namespace IngameScript
             int surfaceIndex = 0;
 
             {   // Extract optional surface index
-                int delimiter = param.IndexOf(' ');
+                int delimiter = param.LastIndexOf(' ');
                 if (delimiter > -1)
                 {
                     if (int.TryParse(
