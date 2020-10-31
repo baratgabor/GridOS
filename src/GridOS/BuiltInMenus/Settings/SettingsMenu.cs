@@ -12,10 +12,8 @@ namespace IngameScript
     {
         protected Dictionary<IMenuInstance, List<IMenuItem>> _contextualChildren = new Dictionary<IMenuInstance, List<IMenuItem>>();
 
-        public SettingsMenu(IDiagnosticServiceController diagnostics) : base("")
-        {
-            Label = "Settings";
-            
+        public SettingsMenu(IDiagnosticServiceController diagnostics) : base("Preferences")
+        {           
             AddChild(new LogLevelCommand(diagnostics));
         }
 
