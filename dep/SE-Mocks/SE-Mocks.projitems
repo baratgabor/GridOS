@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)IMyProgrammableBlock.debug.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMyWarhead.debug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MyGridProgram.debug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IMotorStator.debug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IMyCameraBlock.debug.cs" />
