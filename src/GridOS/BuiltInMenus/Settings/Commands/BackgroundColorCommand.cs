@@ -1,35 +1,18 @@
-﻿namespace IngameScript
+﻿using System.Collections.Generic;
+
+namespace IngameScript
 {
-    class BackgroundColorCommand : MenuCommand
+    class BackgroundColorCommand : ConfigurationCommand<Color>
     {
-        private readonly IMenuInstanceServices _menuServices;
+        protected override IReadOnlyList<NamedOption<Color>> OptionsList => StaticConfig.BackgroundColors.AsList2;
+        protected override string LabelFormatString => "Background color: {0}";
 
-        private int _selectedColorIndex;
+        public BackgroundColorCommand(IMenuInstanceServices menuServices) : base(menuServices)
+        {}
 
-        public BackgroundColorCommand(IMenuInstanceServices menuServices) : base("", null)
-        {
-            _command = SwitchColor;
-            _menuServices = menuServices;
-
-            SetLabel();
-        }
-
-        private void SetLabel()
-        {
-            Label = $"Background color: {StaticConfig.BackgroundColors[_selectedColorIndex].Name}";
-        }
-
-        private void SwitchColor()
-        {
-            _selectedColorIndex = ++_selectedColorIndex % StaticConfig.BackgroundColors.Count;
-            SetLabel();
-            _menuServices.SetBackgroundColor(StaticConfig.BackgroundColors[_selectedColorIndex].Color);
-        }
-
-        struct ColorSetting
-        {
-            public string Name;
-            public Color Color;
-        }
+        protected override Color GetInitialValue()
+            => _menuServices.DisplayConfig.BaseBackgroundColor;
+        protected override void SetNewValue(Color value)
+            => _menuServices.SetBackgroundColor(value);
     }
 }

@@ -1,37 +1,16 @@
-﻿namespace IngameScript
+﻿using System.Collections.Generic;
+
+namespace IngameScript
 {
-    class FontColorCommand : MenuCommand
+    class FontColorCommand : ConfigurationCommand<Color>
     {
-        private readonly IMenuInstanceServices _menuServices;
+        protected override IReadOnlyList<NamedOption<Color>> OptionsList => StaticConfig.FontColors.AsList2;
+        protected override string LabelFormatString => "Font color: {0}";
 
-        private int _selectedIndex;
+        public FontColorCommand(IMenuInstanceServices menuService) : base(menuService)
+        {}
 
-        public FontColorCommand(IMenuInstanceServices menuServices) : base("", null)
-        {
-            _command = SwitchFontColor;
-            _menuServices = menuServices;
-
-            SetLabel();
-        }
-        
-        private void SetLabel()
-        {
-            Label = $"Font color: {StaticConfig.FontColors[_selectedIndex].Name}";
-        }
-
-        private void SwitchFontColor()
-        {
-            _selectedIndex = ++_selectedIndex % StaticConfig.FontColors.Count;
-            var color = StaticConfig.FontColors[_selectedIndex].Color;
-            Color.Multiply(color, 0.5f);
-            SetLabel();
-            _menuServices.SetFontColor(color);
-        }
-
-        struct ColorSetting
-        {
-            public string Name;
-            public Color Color;
-        }
+        protected override Color GetInitialValue() => _menuServices.DisplayConfig.BaseFontColor;
+        protected override void SetNewValue(Color value) => _menuServices.SetFontColor(value);
     }
 }

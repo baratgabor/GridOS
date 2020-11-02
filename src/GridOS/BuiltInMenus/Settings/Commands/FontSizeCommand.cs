@@ -1,35 +1,19 @@
-﻿namespace IngameScript
+﻿using System.Collections.Generic;
+
+namespace IngameScript
 {
-    class FontSizeCommand : MenuCommand
+    class FontSizeCommand : ConfigurationCommand<float>
     {
-        private readonly IDisplayConfig _displayConfig;
-        private readonly IMenuInstanceServices _menuServices;
-        private int _selectedIndex;
+        protected override IReadOnlyList<NamedOption<float>> OptionsList => StaticConfig.FontSizes.AsList;
+        protected override string LabelFormatString => "Font size: {0}";
 
-        public FontSizeCommand(IMenuInstanceServices menuServices) : base("", null)
-        {
-            _menuServices = menuServices;
-            _displayConfig = menuServices.DisplayConfig;
+        public FontSizeCommand(IMenuInstanceServices menuServices) : base(menuServices)
+        {}
 
-            _command = SwitchFontSize;
-            SetLabel(_displayConfig.FontSize);
+        protected override float GetInitialValue()
+            => _menuServices.DisplayConfig.BaseFontSize;
 
-            _selectedIndex = StaticConfig.FontSizes.IndexOf(_displayConfig.FontSize);
-            if (_selectedIndex == -1) _selectedIndex = 0;
-        }
-
-        private void SetLabel(float fontSize)
-        {
-            Label = $"Font size: {fontSize * 100}%";
-        }
-
-        private void SwitchFontSize()
-        {
-            _selectedIndex = ++_selectedIndex % StaticConfig.FontSizes.Count;
-            var newFontSize = StaticConfig.FontSizes[_selectedIndex];
-            
-            SetLabel(newFontSize);
-            _menuServices.SetFontSize(newFontSize);
-        }
+        protected override void SetNewValue(float value)
+            => _menuServices.SetFontSize(value);
     }
 }

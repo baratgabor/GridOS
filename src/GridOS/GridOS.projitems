@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\LogMenu\LogMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\LogMenu\Modules\LogList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\BackgroundColorCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\Base\ConfigurationCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\FontColorCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\FontSizeCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\LogLevelCommand.cs" />
@@ -27,6 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Events\ILoggingEvents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\WordWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\AffixConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\NamedOption.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\StaticConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\_Interfaces.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\MainConfig.cs" />
