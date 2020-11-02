@@ -10,5 +10,6 @@
         void SetFontSize(float fontSize);
         void SetFontColor(Color color);
         void SetBackgroundColor(Color color);
+        void SetFontType(string fontName);
     }
 }

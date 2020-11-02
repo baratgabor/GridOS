@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace IngameScript
+﻿namespace IngameScript
 {
     interface IView
     {
@@ -8,6 +6,7 @@ namespace IngameScript
         void RemoveControl(IControl control);
         void ClearControls();
         void Redraw(bool flush = false);
+        void SetFontType(string fontName);
         void SetFontSize(float fontSize);
         void SetFontColor(Color color);
         void SetBackgroundColor(Color color);

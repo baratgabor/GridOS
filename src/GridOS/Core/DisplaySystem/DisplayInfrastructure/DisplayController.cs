@@ -59,6 +59,9 @@ namespace IngameScript
             _menu.PushUpdate();
         }
 
+        public void SetFontType(string fontName)
+            => _view.SetFontType(fontName);
+
         public void SetFontSize(float fontSize)
             => _view.SetFontSize(fontSize);
 

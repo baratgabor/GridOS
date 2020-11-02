@@ -41,6 +41,7 @@ namespace IngameScript
         {
             var services = menuInstance.MenuInstanceServices;
             return new List<IMenuItem>() {
+                new FontTypeCommand(services),
                 new FontSizeCommand(services),
                 new FontColorCommand(services),
                 new BackgroundColorCommand(services)
