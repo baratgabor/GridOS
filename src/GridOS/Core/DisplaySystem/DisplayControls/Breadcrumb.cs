@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using System;
 
 namespace IngameScript
 {
@@ -8,22 +7,26 @@ namespace IngameScript
     /// Creates a formatted string representation of position inside a hierarchical tree.
     /// Should receive updated path data through <see cref="OnPathChanged(List{string})"/>.
     /// </summary>
-    class Breadcrumb : IControl
+    class Breadcrumb : Control
     {
-        public event Action<IControl> RedrawRequired;
-
         protected StringBuilder _buffer = new StringBuilder();
-        protected string _padding = String.Empty;
         protected IBreadcrumbConfig _config;
         protected IEnumerable<string> _lastPath;
 
         public Breadcrumb(IBreadcrumbConfig config)
         {
-            _padding = new String(config.PaddingChar, config.PaddingLeft);
             _config = config;
+
+            TextColor = new Color(255, 255, 235, 120);
+            BackgroundColor = new Color(0, 0, 0, 80);
+            FontSize = 0.7f;
+            PaddingUnit = SizeUnit.Em;
+            Padding = new Thickness(0.7f, 0.5f, 0, 0.5f);
+            Width = 100;
+            WidthUnit = SizeUnit.Percent;
         }
 
-        public StringBuilder GetContent(bool FlushCache = false)
+        public override StringBuilder GetContent(bool FlushCache = false)
         {
             if (FlushCache)
                 BuildContent(_lastPath);
@@ -34,18 +37,13 @@ namespace IngameScript
         public void OnPathChanged(IEnumerable<string> path)
         {
             BuildContent(path);
-            RedrawRequired?.Invoke(this);
+            OnRedrawRequired();
         }
 
         protected void BuildContent(IEnumerable<string> path)
         {
             _lastPath = path;
             _buffer.Clear();
-
-            _buffer.Append(_config.SeparatorLineTop);
-            _buffer.AppendLine();
-
-            _buffer.Append(_padding);
 
             foreach (var name in path)
             {
@@ -56,10 +54,6 @@ namespace IngameScript
             }
 
             _buffer.Length -= 3; // Trim trailing path separator.
-
-            _buffer.AppendLine();
-            _buffer.Append(_config.SeparatorLineBottom);
-            // TODO: Implement path string shortening if it exceeds a certain length (i.e. line length)
         }
     }
 }

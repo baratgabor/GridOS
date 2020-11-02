@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using System;
+using System.Linq;
 
 namespace IngameScript
 {
@@ -12,14 +13,14 @@ namespace IngameScript
         protected IMyTextSurface _surface;
 
         protected bool _contentDirty = true;
-        protected StringBuilder _content = new StringBuilder();
-        protected List<IControl> _controls = new List<IControl>();
 
-        protected const char _lineSeparatorCharTop = '.';
-        protected const char _lineSeparatorCharBottom = '˙';
+        protected List<KeyValuePair<IControl, List<MySprite>>> _content = new List<KeyValuePair<IControl, List<MySprite>>>();
+
         protected MainConfig _config;
 
         protected RectangleF _viewport;
+
+        private StringBuilder _buffer = new StringBuilder();
 
         public DisplayView(IMyTextSurface surface, MainConfig config)
         {
@@ -32,27 +33,30 @@ namespace IngameScript
 
         public DisplayView AddControl(IControl control)
         {
-            _controls.Add(control);
+            if (_content.Any(x => x.Key == control))
+                throw new Exception("Control instance already added.");
+
             control.RedrawRequired += OnRedrawRequired;
+            _content.Add(new KeyValuePair<IControl, List<MySprite>>(control, new List<MySprite>()));
             return this;
         }
 
-        // TODO: Consider control disposal mechanisms? Or what's the assumption when we remove a control?
         public void RemoveControl(IControl control)
         {
-            if (_controls.Contains(control))
+            var controlIndex = _content.FindIndex(x => x.Key == control);
+            if (controlIndex > -1)
             {
                 control.RedrawRequired -= OnRedrawRequired;
-                _controls.Remove(control);
+                _content.RemoveAt(controlIndex);
             }
         }
 
         public void ClearControls()
         {
-            foreach (var c in _controls)
-                c.RedrawRequired -= OnRedrawRequired;
+            foreach (var kvp in _content)
+                kvp.Key.RedrawRequired -= OnRedrawRequired;
 
-            _controls.Clear();
+            _content.Clear();
         }
 
         public void Redraw(bool flush = false)
@@ -60,45 +64,141 @@ namespace IngameScript
             if (!flush && !_contentDirty)
                 return;
 
-            _content.Clear();
-
-            for (int i = 0; i < _controls.Count; i++)
+            using (var frame = _surface.DrawFrame())
             {
-                _content.Append(_controls[i].GetContent(flush));
-                _content.AppendLine();
+                {   // Add background.
+                    frame.Add(new MySprite()
+                    {
+                        Type = SpriteType.TEXTURE,
+                        Data = "SquareSimple",
+                        Color = _config.BaseBackgroundColor,
+                        Alignment = TextAlignment.CENTER,
+                        Position = _viewport.Center,
+                        Size = _surface.SurfaceSize
+                    });
+
+                    frame.Add(new MySprite()
+                    {
+                        Type = SpriteType.TEXTURE,
+                        Data = "Grid",
+                        Color = new Color(0, 0, 0, 170),
+                        Alignment = TextAlignment.CENTER,
+                        Position = _viewport.Center,
+                        Size = _surface.SurfaceSize
+                    });
+                }
+
+                // As a simplification, we're implementing automatic vertical stacking. +1 is to mitigate a visual artifact on the bottom of the screen when the top line is drawn onto.
+                // TODO: Implement separate layout elements for vertical and horizontal stacking.
+                var verticalWritingPosition = _viewport.Position.Y + 1;
+
+                for (int i = 0; i < _content.Count; i++)
+                {
+                    var controlEntry = _content[i];
+                    if (controlEntry.Key.Visible)
+                    {
+                        // TODO: Add dirty flag to controls, and if not dirty, use cached.
+                        verticalWritingPosition = GenerateSpritesForControl(controlEntry.Key, controlEntry.Value, verticalWritingPosition);
+                        frame.AddRange(controlEntry.Value);
+                    }
+                }
             }
-
-            _content.Length -= Environment.NewLine.Length; // Trim last newline.
-
-            WriteContentAsSprite(_content.ToString());
 
             _contentDirty = false;
         }
 
-        private void WriteContentAsSprite(string content)
+        /// <summary>
+        /// Generates sprites for the specified control in the specified list.
+        /// </summary>
+        /// <returns>Returns the resulting vertical writing position after the control is rendered.</returns>
+        private float GenerateSpritesForControl(IControl control, List<MySprite> targetList, float verticalWritingPosition)
         {
-            using (var frame = _surface.DrawFrame())
+            targetList.Clear();
+
+            var content = control.GetContent();
+            var fontName = string.IsNullOrEmpty(control.FontName) ? _config.BaseFontName : control.FontName;
+            var fontSize = control.FontSize * _config.BaseFontSize;
+            var emSize = _surface.MeasureStringInPixels(_buffer.Clear().Append('X'), fontName, fontSize).Y;
+            var contentSize = _surface.MeasureStringInPixels(content, fontName, fontSize);
+
+            var actualPadding = CalculateThickness(control.Padding, control.PaddingUnit, emSize, _viewport.Size.X, _viewport.Size.Y);
+            var paddedContentSize = actualPadding + contentSize;
+
+            var controlSize = new Vector2()
             {
-                frame.Add(new MySprite()
+                X = Math.Max(CalculateSize(control.Width, control.WidthUnit, emSize, _viewport.Size.X), paddedContentSize.X),
+                Y = Math.Max(CalculateSize(control.Height, control.HeightUnit, emSize, _viewport.Size.Y), paddedContentSize.Y)
+            };
+
+            var controlTopLeft = new Vector2(0, verticalWritingPosition) + control.Offset;
+            var contentTopLeft = new Vector2(controlTopLeft.X + actualPadding.Left, controlTopLeft.Y + actualPadding.Top);
+
+            // Add background if color is different than base background color
+            if (control.BackgroundColor != null && control.BackgroundColor != _config.BaseBackgroundColor)
+            {
+                targetList.Add(new MySprite()
                 {
                     Type = SpriteType.TEXTURE,
                     Data = "SquareSimple",
-                    Color = _config.BackgroundColor,
-                    Alignment = TextAlignment.CENTER,
-                    Position = _viewport.Center,
-                    Size = _surface.SurfaceSize
-                });
-
-                frame.Add(new MySprite()
-                {
-                    Type = SpriteType.TEXT,
-                    Data = content,
-                    RotationOrScale = _config.FontSize,
-                    Color = _config.FontColor,
+                    Color = control.BackgroundColor,
                     Alignment = TextAlignment.LEFT,
-                    FontId = _config.FontName,
-                    Position = _viewport.Position
+                    Size = controlSize,
+                    Position = new Vector2(controlTopLeft.X, controlTopLeft.Y + (controlSize.Y / 2))
                 });
+            }
+
+            // Add text content
+            targetList.Add(new MySprite()
+            {
+                Type = SpriteType.TEXT,
+                Data = content.ToString(),
+                Color = control.TextColor ?? _config.BaseFontColor,
+                Alignment = control.TextAlignment,
+                RotationOrScale = control.FontSize * _config.BaseFontSize,
+                FontId = fontName,
+                Position = contentTopLeft
+            });
+
+            return verticalWritingPosition + controlSize.Y;
+        }
+
+        public float CalculateSize(float baseValue, SizeUnit sizeUnit, float emSize, float viewportSize)
+        {
+            switch (sizeUnit)
+            {
+                case SizeUnit.Em:
+                    return baseValue * emSize;
+                case SizeUnit.Px:
+                    return baseValue;
+                case SizeUnit.Dip:
+                    throw new Exception("Not implemented."); // TODO: implement.
+                case SizeUnit.Percent:
+                    return viewportSize * (baseValue / 100);
+                default:
+                    throw new Exception($"Unknown enum value '{baseValue}' encountered in enum '{baseValue.GetType().Name}'.");
+            }
+        }
+
+        public Thickness CalculateThickness(Thickness baseValue, SizeUnit sizeUnit, float emSize, float viewportWidth, float viewportHeight)
+        {
+            switch (sizeUnit)
+            {
+                case SizeUnit.Em:
+                    return baseValue * emSize;
+                case SizeUnit.Px:
+                    return baseValue;
+                case SizeUnit.Dip:
+                    throw new Exception("Not implemented."); // TODO: implement.
+                case SizeUnit.Percent:
+                    return new Thickness()
+                    {
+                        Left = viewportWidth * (baseValue.Left / 100),
+                        Right = viewportWidth / (baseValue.Right / 100),
+                        Top = viewportHeight * (baseValue.Top / 100),
+                        Bottom = viewportHeight / (baseValue.Bottom/ 100),
+                    };
+                default:
+                    throw new Exception($"Unknown enum value '{baseValue}' encountered in enum '{baseValue.GetType().Name}'.");
             }
         }
 
@@ -112,28 +212,17 @@ namespace IngameScript
             _config.OutputSurface = _surface;
             _config.OutputWidth = _surface.SurfaceSize.X;
             _config.OutputHeight = _surface.SurfaceSize.Y;
-            var charHeight = _surface.MeasureStringInPixels(_content.Clear().Append("X"), _config.FontName, _config.FontSize).Y;
-            _config.OutputLineCapacity = (int)(_config.OutputHeight / charHeight);
-
-            _config.MenuLines = Math.Max(3, _config.OutputLineCapacity - 4); // TODO: Express this properly. Header, etc. uses up 4 lines, so less is left for menu. And menu is min 3 lines.
+            _config.BaseLineHeight = _surface.MeasureStringInPixels(_buffer.Clear().Append("X"), _config.BaseFontName, _config.BaseFontSize).Y;
+            _config.BaseLineSpacing = _surface.MeasureStringInPixels(_buffer.Clear().Append("X\r\nX"), _config.BaseFontName, _config.BaseFontSize).Y - (2 * _config.BaseLineHeight);
 
             _config.PaddingLeft = 1;
-
-            _config.SeparatorLineTop = new string(
-                _lineSeparatorCharTop,
-                (int)(_config.OutputWidth / _surface.MeasureStringInPixels(
-                    _content.Clear().Append(_lineSeparatorCharTop), _config.FontName, _config.FontSize).X));
-
-            _config.SeparatorLineBottom = new string(
-                _lineSeparatorCharBottom,
-                (int)(_config.OutputWidth / _surface.MeasureStringInPixels(
-                    _content.Clear().Append(_lineSeparatorCharBottom), _config.FontName, _config.FontSize).X));
         }
 
         private void SetupSurface()
         {
             _surface.ContentType = ContentType.SCRIPT;
             _surface.Script = "";
+            _surface.PreserveAspectRatio = true;
         }
 
         private void OnRedrawRequired(IControl control)
@@ -141,12 +230,20 @@ namespace IngameScript
             _contentDirty = true;
         }
 
+        public void SetFontType(string fontName)
+        {
+            _config.BaseFontName = fontName;
+            SetupSurface();
+            AdaptToSurface();
+            Redraw(flush: true);
+        }
+
         public void SetFontSize(float fontSize)
         {
             if (fontSize < 0 || fontSize > 10)
                 throw new Exception("Font size must be between 0 and 10.");
 
-            _config.FontSize = fontSize;
+            _config.BaseFontSize = fontSize;
             SetupSurface();
             AdaptToSurface();
             Redraw(flush: true);
@@ -154,14 +251,14 @@ namespace IngameScript
 
         public void SetFontColor(Color color)
         {
-            _config.FontColor = color;
+            _config.BaseFontColor = color;
             SetupSurface();
             Redraw(flush: true);
         }
 
         public void SetBackgroundColor(Color color)
         {
-            _config.BackgroundColor = color;
+            _config.BaseBackgroundColor = color;
             SetupSurface();
             Redraw(flush: true);
         }

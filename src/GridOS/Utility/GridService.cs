@@ -19,7 +19,6 @@ namespace IngameScript
         private readonly IMyGridTerminalSystem _gts;
         private readonly List<IMyTerminalBlock> _blockBuffer;
 
-
         public GridService(IMyGridTerminalSystem gts)
         {
             _gts = gts;

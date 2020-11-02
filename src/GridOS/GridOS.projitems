@@ -30,6 +30,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\StaticConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\_Interfaces.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\MainConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayControls\Control.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayControls\Helpers\HorizontalAlignment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayControls\Helpers\Positioning.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayControls\Helpers\SizeUnit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayControls\Helpers\Thickness.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayControls\Helpers\VerticalAlignment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\IMenuInstanceServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\Menu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayInfrastructure\IView.cs" />

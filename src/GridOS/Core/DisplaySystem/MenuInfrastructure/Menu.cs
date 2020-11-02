@@ -11,9 +11,8 @@ namespace IngameScript
     /// This class has multiple responsibilities, arguably violates SRP, but this degree of feature density allows for an optimized solution to a specific problem.
     /// Also, I included plenty of comments to aid maintenability, since the code here is less self-explanatory than normally.
     /// </summary>
-    class Menu : IControl, IDisposable
+    class Menu : Control, IDisposable
     {
-        public event Action<IControl> RedrawRequired;
         public event Action<IEnumerable<string>> NavigationPathChanged;
 
         /// <summary>
@@ -51,6 +50,9 @@ namespace IngameScript
 
         public Menu(IMenuModel model, IMenuPresentationConfig config, IWordWrapper wordWrapper)
         {
+            PaddingUnit = SizeUnit.Em;
+            Padding = new Thickness(0.8f, 0.8f, 0, 0);
+
             _model = model;
             model.CurrentViewChanged += OnListChanged;
             model.MenuItemChanged += OnItemChanged;
@@ -72,7 +74,7 @@ namespace IngameScript
             _model.NavigatedTo -= OnNavigatedTo;
         }
 
-        public StringBuilder GetContent(bool FlushCache = false)
+        public override StringBuilder GetContent(bool FlushCache = false)
         {
             BuildContent();
 
@@ -82,7 +84,7 @@ namespace IngameScript
         public void PushUpdate()
         {
             NavigationPathChanged?.Invoke(_model.NavigationPath);
-            RedrawRequired?.Invoke(this);
+            OnRedrawRequired();
         }
 
         /// <summary>
@@ -108,7 +110,7 @@ namespace IngameScript
                 if (ScrollUp())
                 {
                     _isStateDirty = true;
-                    RedrawRequired?.Invoke(this);
+                    OnRedrawRequired();
                 }
             }
             // Selected line > 1 means we'll move the selection up, either by decreasing the offset, or jumping to the last line of the preceding item.
@@ -120,7 +122,7 @@ namespace IngameScript
                 _selectedLineIndex--;
 
                 _isStateDirty = true;
-                RedrawRequired?.Invoke(this);
+                OnRedrawRequired();
             }
         }
 
@@ -138,7 +140,7 @@ namespace IngameScript
                 if (ScrollDown())
                 {
                     _isStateDirty = true;
-                    RedrawRequired?.Invoke(this);
+                    OnRedrawRequired();
                 }
             }
             // Move the selected line down, but only if we have a menu item there to select.
@@ -150,7 +152,7 @@ namespace IngameScript
                 _selectedLineIndex++;
 
                 _isStateDirty = true;
-                RedrawRequired?.Invoke(this);
+                OnRedrawRequired();
             }
         }
 
@@ -226,7 +228,7 @@ namespace IngameScript
         private void OnListChanged(IEnumerable<IMenuItem> _)
         {
             _isStateDirty = true;
-            RedrawRequired?.Invoke(this);
+            OnRedrawRequired();
         }
 
         private void OnItemChanged(IMenuItem changedMenuItem)
@@ -237,7 +239,7 @@ namespace IngameScript
                 return;
 
             _isStateDirty = true;
-            RedrawRequired?.Invoke(this);
+            OnRedrawRequired();
         }
 
         private void OnNavigatedTo(NavigationPayload navPayload)
@@ -257,20 +259,19 @@ namespace IngameScript
 
             NavigationPathChanged?.Invoke(_model.NavigationPath);
             _isStateDirty = true;
-            RedrawRequired?.Invoke(this);
+            OnRedrawRequired();
         }
 
         private void OnConfigChanged(string settingName)
         {
-            if (settingName == nameof(_config.MenuLines))
+            //if (settingName == nameof(_config.))
                 SetUpMenuLinesCount();
         }
 
         private void SetUpMenuLinesCount()
         {
-            _lineHeight = _config.MenuLines;
-            if (_lineHeight < MinimumLineHeight)
-                throw new Exception($"The minimum supported number of displayed menu lines is {MinimumLineHeight}. Configuration setting '{nameof(IMenuPresentationConfig.MenuLines)}' is currently set to {_config.MenuLines}.");
+            _lineHeight = 6;
+            // TODO: Implement dynamic menu sizing in sprite GUI context.
 
             if (_selectedLineIndex > _lineHeight - 1)
                 _selectedLineIndex = _lineHeight - 2;

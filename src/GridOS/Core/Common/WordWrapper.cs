@@ -30,13 +30,13 @@ namespace IngameScript
 
         public float MeasureStringWidthInPixels(string input)
         {
-            return _surface.MeasureStringInPixels(_buffer.Clear().Append(input), _config.FontName, _config.FontSize).X;
+            return _surface.MeasureStringInPixels(_buffer.Clear().Append(input), _config.BaseFontName, _config.BaseFontSize).X;
         }
 
         public IEnumerable<StringSegment> WordWrap(string input, float maxWidthCorrection)
         {
-            var fontSize = _config.FontSize;
-            var fontName = _config.FontName;
+            var fontSize = _config.BaseFontSize;
+            var fontName = _config.BaseFontName;
             var lineWidth = _config.OutputWidth + maxWidthCorrection;
             var spaceWidth = _surface.MeasureStringInPixels(_buffer.Clear().Append(' '), fontName, fontSize).X;
 

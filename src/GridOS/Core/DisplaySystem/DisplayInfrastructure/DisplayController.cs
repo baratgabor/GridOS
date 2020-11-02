@@ -47,7 +47,7 @@ namespace IngameScript
             _menu.NavigationPathChanged += _breadcrumb.OnPathChanged;
 
             _view
-                .AddControl(new DisplayHeader(config, _diagnostics))
+                .AddControl(new DisplayHeader(_diagnostics))
                 .AddControl(_breadcrumb)
                 .AddControl(_menu);
 

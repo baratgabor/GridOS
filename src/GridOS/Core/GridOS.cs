@@ -98,10 +98,10 @@ namespace IngameScript
                 }
                 catch (Exception e)
                 {
-                    _diagnostics.Log(LogLevel.Error, $"Unhandled error in Update Dispatcher.\r\nUpdate type: '{updateType}'. Message: {e.Message}");
+                    _diagnostics.Log(LogLevel.Error, $"Unhandled error in Update Dispatcher.\r\n\r\nUpdate type:\r\n'{updateType}'\r\n\r\nMessage:\r\n{e.Message}");
                 }
             }
-                
+
             // Dispatch commands.
             if (argument != "")
             {
@@ -111,7 +111,7 @@ namespace IngameScript
                 }
                 catch (Exception e)
                 {
-                    _diagnostics.Log(LogLevel.Error, $"Unhandled error in Command Dispatcher.\r\nInput argument: '{argument}'. Message: {e.Message}");
+                    _diagnostics.Log(LogLevel.Error, $"Unhandled error in Command Dispatcher.\r\n\r\nInput argument:\r\n'{argument}'.\r\n\r\nMessage:\r\n{e.Message}\r\n\r\nStack trace:\r\n{e.StackTrace}");
                 }
             }
 
