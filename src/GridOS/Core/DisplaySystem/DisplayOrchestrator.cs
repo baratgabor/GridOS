@@ -17,7 +17,7 @@ namespace IngameScript
 
         private readonly List<IMyTextSurface> _registeredTextSurfaces = new List<IMyTextSurface>();
         private readonly List<DisplayController> _controllers = new List<DisplayController>();
-        private const string _controllerNameTemplate = "Display";
+        private const string _controllerNameTemplate = "Lcd";
         private int _controllerCounter = 0;
 
         private readonly ICommandDispatcher _commandDispatcher;
