@@ -11,6 +11,7 @@ namespace IngameScript
             public static Color Crimson = Color.Darken(Color.Crimson, 0.5f);
             public static Color Navy = Color.Darken(Color.Navy, 0.3f);
             public static Color Orchid = Color.Darken(Color.DarkOrchid, 0.4f);
+            public static Color Orange = Color.Darken(Color.Orange, 0.4f);
             public static Color Keen1 = new Color(43, 54, 61);
             public static Color Keen2 = new Color(85, 109, 117);
 
@@ -21,6 +22,7 @@ namespace IngameScript
                 new NamedOption<Color>() { Name = nameof(Crimson), Value = Crimson },
                 new NamedOption<Color>() { Name = nameof(Navy), Value = Navy },
                 new NamedOption<Color>() { Name = nameof(Orchid), Value = Orchid },
+                new NamedOption<Color>() { Name = nameof(Orange), Value = Orange },
                 new NamedOption<Color>() { Name = nameof(Keen1), Value = Keen1 },
                 new NamedOption<Color>() { Name = nameof(Keen2), Value = Keen2 },
             };
@@ -30,10 +32,10 @@ namespace IngameScript
         {
             public static Color Cyan = Color.Cyan;
             public static Color White = Color.Multiply(Color.White, 0.9f);
-            public static Color Yellow = Color.Multiply(Color.Yellow, 0.9f);
+            public static Color Organge = Color.Multiply(Color.Orange, 0.9f);
             public static Color Black = Color.Black;
             public static Color Crimson = Color.Crimson;
-            public static Color Navy = Color.Navy;
+            public static Color Blue = Color.Lighten(Color.Navy, 0.3f);
             public static Color Orchid = Color.DarkOrchid;
             public static Color Wheat = Color.Wheat;
             public static Color Keen1 = new Color(186, 238, 249);
@@ -43,10 +45,10 @@ namespace IngameScript
             {
                 new NamedOption<Color>() { Name = nameof(Cyan), Value = Cyan },
                 new NamedOption<Color>() { Name = nameof(White), Value = White },
-                new NamedOption<Color>() { Name = nameof(Yellow), Value = Yellow },
+                new NamedOption<Color>() { Name = nameof(Organge), Value = Organge },
                 new NamedOption<Color>() { Name = nameof(Black), Value = Black },
                 new NamedOption<Color>() { Name = nameof(Crimson), Value = Crimson },
-                new NamedOption<Color>() { Name = nameof(Navy), Value = Navy },
+                new NamedOption<Color>() { Name = nameof(Blue), Value = Blue },
                 new NamedOption<Color>() { Name = nameof(Orchid), Value = Orchid },
                 new NamedOption<Color>() { Name = nameof(Wheat), Value = Wheat},
                 new NamedOption<Color>() { Name = nameof(Keen1), Value = Keen1 },
