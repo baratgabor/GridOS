@@ -101,11 +101,8 @@ namespace IngameScript
                 BuildContent();
 
             // Second line from the top is designated for scrolling upwards.
-
-            var lineAboveViewport = _selectedMenuItemIndex > 1 
-                || _menuLines[0].LineIndex > 0 
-                || (_menuLines[1].BackingMenuItem == _menuLines[2].BackingMenuItem && _selectedMenuItemIndex == 1);
-            if (_selectedLineIndex == 1 && lineAboveViewport)
+            if (_selectedLineIndex == 1 && 
+                (_selectedMenuItemIndex > 1 || (_menuLines[1].LineIndex > 0 && _selectedMenuItemIndex > 0))) // = There is at least one additional line above viewport.
             {
                 if (ScrollUp())
                 {
