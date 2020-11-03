@@ -4,7 +4,7 @@ namespace IngameScript
 {
     class BackgroundColorCommand : ConfigurationCommand<Color>
     {
-        protected override IReadOnlyList<NamedOption<Color>> OptionsList => StaticConfig.BackgroundColors.AsList2;
+        protected override IReadOnlyList<NamedOption<Color>> OptionsList => StaticConfig.BackgroundColors.AsList;
         protected override string LabelFormatString => "Background color: {0}";
 
         public BackgroundColorCommand(IMenuInstanceServices menuServices) : base(menuServices)

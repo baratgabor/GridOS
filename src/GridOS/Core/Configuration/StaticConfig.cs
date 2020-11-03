@@ -9,12 +9,12 @@ namespace IngameScript
             public static Color Black = Color.Black;
             public static Color Cyan = Color.Darken(Color.Cyan, 0.7f);
             public static Color Crimson = Color.Darken(Color.Crimson, 0.5f);
-            public static Color Navy = Color.Darken(Color.Navy, 0.5f);
-            public static Color Orchid = Color.Darken(Color.DarkOrchid, 0.7f);
+            public static Color Navy = Color.Darken(Color.Navy, 0.3f);
+            public static Color Orchid = Color.Darken(Color.DarkOrchid, 0.4f);
             public static Color Keen1 = new Color(43, 54, 61);
             public static Color Keen2 = new Color(85, 109, 117);
 
-            public static IReadOnlyList<NamedOption<Color>> AsList2 = new List<NamedOption<Color>>()
+            public static IReadOnlyList<NamedOption<Color>> AsList = new List<NamedOption<Color>>()
             {
                 new NamedOption<Color>() { Name = nameof(Black), Value = Black },
                 new NamedOption<Color>() { Name = nameof(Cyan), Value = Cyan },
@@ -39,7 +39,7 @@ namespace IngameScript
             public static Color Keen1 = new Color(186, 238, 249);
             public static Color Keen2 = new Color(198, 218, 226);
 
-            public static IReadOnlyList<NamedOption<Color>> AsList2 = new List<NamedOption<Color>>()
+            public static IReadOnlyList<NamedOption<Color>> AsList = new List<NamedOption<Color>>()
             {
                 new NamedOption<Color>() { Name = nameof(Cyan), Value = Cyan },
                 new NamedOption<Color>() { Name = nameof(White), Value = White },

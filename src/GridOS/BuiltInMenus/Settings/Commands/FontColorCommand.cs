@@ -4,7 +4,7 @@ namespace IngameScript
 {
     class FontColorCommand : ConfigurationCommand<Color>
     {
-        protected override IReadOnlyList<NamedOption<Color>> OptionsList => StaticConfig.FontColors.AsList2;
+        protected override IReadOnlyList<NamedOption<Color>> OptionsList => StaticConfig.FontColors.AsList;
         protected override string LabelFormatString => "Font color: {0}";
 
         public FontColorCommand(IMenuInstanceServices menuService) : base(menuService)

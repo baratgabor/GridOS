@@ -33,7 +33,7 @@ namespace IngameScript
             Group = '»'
         };
 
-        private string baseFontName = StaticConfig.FontTypes.Default;
+        private string baseFontName = StaticConfig.FontTypes.Outlined;
         private float baseFontSize = StaticConfig.FontSizes.Percent100;
         private Color baseFontColor = StaticConfig.FontColors.White;
         private Color baseBackgroundColor = StaticConfig.BackgroundColors.Cyan;
