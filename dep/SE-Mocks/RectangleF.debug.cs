@@ -29,8 +29,8 @@ namespace IngameScript
 
         public float Y { get; set; }
         public float X { get; set; }
-        public float Right => 0;
-        public float Bottom => 0;
+        public float Right => Position.X + Size.X;
+        public float Bottom => Position.Y + Size.Y;
         public Vector2 Center => new Vector2();
         public float Height { get; set; }
         public float Width { get; set; }

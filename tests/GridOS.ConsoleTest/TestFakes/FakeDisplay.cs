@@ -28,9 +28,9 @@ namespace IngameScript
         public Color ScriptForegroundColor { get; set; }
         public Color ScriptBackgroundColor { get; set; }
 
-        public Vector2 TextureSize => new Vector2() { X = 300, Y = 150 };
+        public Vector2 TextureSize => new Vector2() { X = 400, Y = 200 };
 
-        public Vector2 SurfaceSize => new Vector2() { X = 300, Y = 150 };
+        public Vector2 SurfaceSize => new Vector2() { X = 400, Y = 100 };
 
         public TextAlignment Alignment { get; set; } = TextAlignment.LEFT;
         public Color BackgroundColor { get; set; } = Color.Black;
@@ -104,13 +104,13 @@ namespace IngameScript
 
         public Vector2 MeasureStringInPixels(StringBuilder text, string font, float scale)
         {
-            var fakeCharWidth = 10;
-            var fakeCharHeight = 10;
+            var fakeCharWidth = 10 * scale;
+            var fakeCharHeight = 10 * scale;
 
             return new Vector2()
             {
                 X = text.Length * fakeCharWidth,
-                Y = fakeCharHeight // Assumes no newlines in text.
+                Y = text.Length == 0 ? 0 : fakeCharHeight * (text.ToString().Count(x => x == '\n') + 1)
             };
         }
 
