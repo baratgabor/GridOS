@@ -17,8 +17,7 @@ namespace IngameScript
             WidthUnit = SizeUnit.Percent;
             Width = 100;
             PaddingUnit = SizeUnit.Em;
-            Padding = new Thickness(1, 0.2f, 0, 0.2f);
-
+            Padding = new Thickness(1, 0.2f, 1, 0.2f);
             TextColor = Color.Black;
             BackgroundColor = new Color(255, 255, 255, 90);
         }

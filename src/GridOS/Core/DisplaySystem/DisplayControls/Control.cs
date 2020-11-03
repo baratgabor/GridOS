@@ -42,7 +42,8 @@ namespace IngameScript
         public Color? TextColor { get; set; }
         public Color? BackgroundColor { get; set; }
 
-        public TextAlignment TextAlignment { get; set; } = TextAlignment.LEFT;
+        public VerticalAlignment VerticalAlignment { get; set; }
+        public HorizontalAlignment HorizontalAlignment { get; set; }
 
         public abstract StringBuilder GetContent(int remainingLineCapacity, bool FlushCache = false);
 

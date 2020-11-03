@@ -136,6 +136,22 @@ namespace IngameScript
                 Y = Math.Max(CalculateSize(control.Height, control.HeightUnit, emSize, _viewport.Size.Y), paddedContentSize.Y)
             };
 
+            if (controlSize.X > paddedContentSize.X)
+            {
+                if (control.HorizontalAlignment == HorizontalAlignment.Center)
+                    contentTopLeft.X += ((controlSize.X - paddingSize.Right - paddingSize.Left) * 0.5f) - contentSize.X * 0.5f;
+                else if (control.HorizontalAlignment == HorizontalAlignment.Right)
+                    contentTopLeft.X = controlTopLeft.X + controlSize.X - paddingSize.Right - contentSize.X;
+            }
+
+            if (controlSize.Y > paddedContentSize.Y)
+            {
+                if (control.VerticalAlignment == VerticalAlignment.Middle)
+                    contentTopLeft.Y += ((controlSize.Y - paddingSize.Top - paddingSize.Bottom) * 0.5f) - contentSize.Y * 0.5f;
+                else if (control.VerticalAlignment == VerticalAlignment.Bottom)
+                    contentTopLeft.Y = controlTopLeft.Y + controlSize.Y - paddingSize.Bottom - contentSize.Y;
+            }
+
             // Add background if color is different than base background color
             if (control.BackgroundColor != null && control.BackgroundColor != _config.BaseBackgroundColor)
             {
@@ -156,7 +172,7 @@ namespace IngameScript
                 Type = SpriteType.TEXT,
                 Data = content.ToString(),
                 Color = control.TextColor ?? _config.BaseFontColor,
-                Alignment = control.TextAlignment,
+                Alignment = TextAlignment.LEFT,
                 RotationOrScale = control.FontSize * _config.BaseFontSize,
                 FontId = fontName,
                 Position = contentTopLeft
