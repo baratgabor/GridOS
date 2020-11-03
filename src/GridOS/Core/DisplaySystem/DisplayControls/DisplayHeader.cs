@@ -23,7 +23,7 @@ namespace IngameScript
             BackgroundColor = new Color(255, 255, 255, 90);
         }
 
-        public override StringBuilder GetContent(bool FlushCache = false)
+        public override StringBuilder GetContent(int _, bool FlushCache = false)
         {
             _buffer.Clear();
             _buffer.Append("GridOS   ");

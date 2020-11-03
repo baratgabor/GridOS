@@ -41,6 +41,6 @@ namespace IngameScript
 
         event Action<IControl> RedrawRequired;
 
-        StringBuilder GetContent(bool FlushCache = false);
+        StringBuilder GetContent(int remainingLineCapacity, bool FlushCache = false);
     }
 }

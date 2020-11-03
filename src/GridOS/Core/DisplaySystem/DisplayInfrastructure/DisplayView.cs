@@ -115,23 +115,26 @@ namespace IngameScript
         {
             targetList.Clear();
 
-            var content = control.GetContent();
             var fontName = string.IsNullOrEmpty(control.FontName) ? _config.BaseFontName : control.FontName;
             var fontSize = control.FontSize * _config.BaseFontSize;
             var emSize = _surface.MeasureStringInPixels(_buffer.Clear().Append('X'), fontName, fontSize).Y;
+
+            var paddingSize = CalculateThickness(control.Padding, control.PaddingUnit, emSize, _viewport.Size.X, _viewport.Size.Y);
+
+            var controlTopLeft = new Vector2(0, verticalWritingPosition) + control.Offset;
+            var contentTopLeft = new Vector2(controlTopLeft.X + paddingSize.Left, controlTopLeft.Y + paddingSize.Top);
+
+            var remainingLineCapacity = (int)((_viewport.Bottom - paddingSize.Bottom - contentTopLeft.Y) / emSize);
+            var content = control.GetContent(remainingLineCapacity);
             var contentSize = _surface.MeasureStringInPixels(content, fontName, fontSize);
 
-            var actualPadding = CalculateThickness(control.Padding, control.PaddingUnit, emSize, _viewport.Size.X, _viewport.Size.Y);
-            var paddedContentSize = actualPadding + contentSize;
+            var paddedContentSize = paddingSize + contentSize;
 
             var controlSize = new Vector2()
             {
                 X = Math.Max(CalculateSize(control.Width, control.WidthUnit, emSize, _viewport.Size.X), paddedContentSize.X),
                 Y = Math.Max(CalculateSize(control.Height, control.HeightUnit, emSize, _viewport.Size.Y), paddedContentSize.Y)
             };
-
-            var controlTopLeft = new Vector2(0, verticalWritingPosition) + control.Offset;
-            var contentTopLeft = new Vector2(controlTopLeft.X + actualPadding.Left, controlTopLeft.Y + actualPadding.Top);
 
             // Add background if color is different than base background color
             if (control.BackgroundColor != null && control.BackgroundColor != _config.BaseBackgroundColor)

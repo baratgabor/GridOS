@@ -31,7 +31,7 @@ namespace IngameScript
         /// <summary>
         /// Stores each line of the menu with all necessary metadata.
         /// </summary>
-        private MenuLine[] _menuLines;
+        private MenuLine[] _menuLines = new MenuLine[MinimumLineHeight * 3];
 
         /// <summary>
         /// Stores the final string representation of the menu.
@@ -41,41 +41,35 @@ namespace IngameScript
         /// <summary>
         /// Specifies how many menu lines to produce. If menu content is shorter, it will be padded by empty lines.
         /// </summary>
-        private int _lineHeight;
+        private int _lineHeight = MinimumLineHeight;
         private const int MinimumLineHeight = 3;
 
         private readonly IMenuModel _model;
-        private readonly IMenuPresentationConfig _config;
         private readonly MenuLineGenerator _lineGenerator;
 
         public Menu(IMenuModel model, IMenuPresentationConfig config, IWordWrapper wordWrapper)
         {
             PaddingUnit = SizeUnit.Em;
-            Padding = new Thickness(0.8f, 0.8f, 0, 0);
+            Padding = new Thickness(0.8f, 0.8f, 0, 0.5f);
 
             _model = model;
             model.CurrentViewChanged += OnListChanged;
             model.MenuItemChanged += OnItemChanged;
             model.NavigatedTo += OnNavigatedTo;
 
-            _config = config;
-            config.SettingChanged += OnConfigChanged;
-
             _lineGenerator = new MenuLineGenerator(config, wordWrapper);
-
-            SetUpMenuLinesCount();
         }
 
         public void Dispose()
         {
-            _config.SettingChanged -= OnConfigChanged;
             _model.CurrentViewChanged -= OnListChanged;
             _model.MenuItemChanged -= OnItemChanged;
             _model.NavigatedTo -= OnNavigatedTo;
         }
 
-        public override StringBuilder GetContent(bool FlushCache = false)
+        public override StringBuilder GetContent(int remainingLineCapacity, bool FlushCache = false)
         {
+            SetUpMenuLineHeight(remainingLineCapacity);
             BuildContent();
 
             return _menuContent;
@@ -262,21 +256,22 @@ namespace IngameScript
             OnRedrawRequired();
         }
 
-        private void OnConfigChanged(string settingName)
+        private void SetUpMenuLineHeight(int newLineHeight)
         {
-            //if (settingName == nameof(_config.))
-                SetUpMenuLinesCount();
-        }
+            if (newLineHeight < MinimumLineHeight)
+                newLineHeight = MinimumLineHeight;
 
-        private void SetUpMenuLinesCount()
-        {
-            _lineHeight = 6;
-            // TODO: Implement dynamic menu sizing in sprite GUI context.
+            if (newLineHeight == _lineHeight)
+                return;
+
+            _lineHeight = newLineHeight;
 
             if (_selectedLineIndex > _lineHeight - 1)
                 _selectedLineIndex = _lineHeight - 2;
 
-            _menuLines = new MenuLine[_lineHeight];
+            if (_lineHeight > _menuLines.Length)
+                _menuLines = new MenuLine[_lineHeight];
+
             _isStateDirty = true;
         }
 

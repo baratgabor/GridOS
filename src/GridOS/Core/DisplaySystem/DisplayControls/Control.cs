@@ -44,7 +44,7 @@ namespace IngameScript
 
         public TextAlignment TextAlignment { get; set; } = TextAlignment.LEFT;
 
-        public abstract StringBuilder GetContent(bool FlushCache = false);
+        public abstract StringBuilder GetContent(int remainingLineCapacity, bool FlushCache = false);
 
         protected virtual void OnRedrawRequired()
         {
