@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace IngameScript
 {
+    public interface IWordWrapperController : IWordWrapper
+    {
+        IWordWrapperController SetUp(float maxLineLength, IMyTextSurface surface, string fontName, float fontSize);
+    }
+
     public interface IWordWrapper
     {
-        IEnumerable<StringSegment> WordWrap(string input, float maxWidthCorrection);
+        IEnumerable<StringSegment> WordWrap(string input, float lineWidthCorrection = 0);
         float MeasureStringWidthInPixels(string input);
     }
 
@@ -15,33 +19,37 @@ namespace IngameScript
     /// Wraps lines to fill a given text surface.
     /// </summary>
     // TODO: Replace this naive implementation with an optimized one once you're not nauseated by the though of writing word wrappers.
-    class TextSurfaceWordWrapper : IWordWrapper
+    class TextSurfaceWordWrapper : IWordWrapperController
     {
-        private readonly IDisplayConfig _config;
-        private readonly IMyTextSurface _surface;
+        private IMyTextSurface _surface;
+        private float _maxLineLength;
+        private string _fontName;
+        private float _fontSize;
+
         private readonly StringBuilder _buffer = new StringBuilder();
         private readonly char[] _wordDelimiters = new[] { ' ', '-', '\n' };
 
-        public TextSurfaceWordWrapper(IDisplayConfig config)
+        public IWordWrapperController SetUp(float maxLineLength, IMyTextSurface surface, string fontName, float fontSize)
         {
-            _config = config;
-            _surface = config.OutputSurface;
+            _maxLineLength = maxLineLength;
+            _surface = surface;
+            _fontName = fontName;
+            _fontSize = fontSize;
+            return this;
         }
 
         public float MeasureStringWidthInPixels(string input)
         {
-            return _surface.MeasureStringInPixels(_buffer.Clear().Append(input), _config.BaseFontName, _config.BaseFontSize).X;
+            return _surface.MeasureStringInPixels(_buffer.Clear().Append(input), _fontName, _fontSize).X;
         }
 
-        public IEnumerable<StringSegment> WordWrap(string input, float maxWidthCorrection)
+        public IEnumerable<StringSegment> WordWrap(string input, float lineWidthCorrection = 0)
         {
-            var fontSize = _config.BaseFontSize;
-            var fontName = _config.BaseFontName;
-            var lineWidth = _config.OutputWidth + maxWidthCorrection;
-            var spaceWidth = _surface.MeasureStringInPixels(_buffer.Clear().Append(' '), fontName, fontSize).X;
+            var spaceWidth = _surface.MeasureStringInPixels(_buffer.Clear().Append(' '), _fontName, _fontSize).X;
 
             int lastWord = 0, nextWord, lastBreak = 0, inputLength = input.Length;
-            var spaceLeft = lineWidth;
+            var lineLength = _maxLineLength + lineWidthCorrection;
+            var spaceLeft = lineLength;
            
             while(lastWord < inputLength)
             {
@@ -55,7 +63,7 @@ namespace IngameScript
                 else if (input[nextWord] == '\n') // This is native newline handling... going nuts. Please kill me or tell me there is a cleaner way.
                 {
                     _buffer.Clear().Append(input, lastWord, nextWord - lastWord);
-                    wordWidth = _surface.MeasureStringInPixels(_buffer, fontName, fontSize).X + spaceWidth;
+                    wordWidth = _surface.MeasureStringInPixels(_buffer, _fontName, _fontSize).X + spaceWidth;
                     if (wordWidth > spaceLeft)
                     {   // Last word before newline doesn't fit; we need an extra line.
                         yield return new StringSegment(input, lastBreak, lastWord - lastBreak);
@@ -68,7 +76,7 @@ namespace IngameScript
                         ? nextWord - 1 - lastBreak
                         : nextWord - lastBreak);
 
-                    spaceLeft = lineWidth;
+                    spaceLeft = lineLength;
                     lastBreak = lastWord = nextWord + 1; // Jump over the \n we found.
 
                     if (lastBreak >= inputLength)
@@ -80,13 +88,13 @@ namespace IngameScript
                 }
 
                 _buffer.Clear().Append(input, lastWord, nextWord - lastWord);
-                wordWidth = _surface.MeasureStringInPixels(_buffer, fontName, fontSize).X + spaceWidth;
+                wordWidth = _surface.MeasureStringInPixels(_buffer, _fontName, _fontSize).X + spaceWidth;
 
                 if (wordWidth > spaceLeft)
                 {
                     yield return new StringSegment(input, lastBreak, lastWord - lastBreak);
                     lastBreak = lastWord;
-                    spaceLeft = lineWidth - wordWidth;
+                    spaceLeft = lineLength - wordWidth;
                 }
                 else
                 {

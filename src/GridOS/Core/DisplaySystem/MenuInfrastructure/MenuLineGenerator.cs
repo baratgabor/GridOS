@@ -6,25 +6,25 @@ namespace IngameScript
     class MenuLineGenerator
     {
         private readonly IMenuPresentationConfig _config;
-        private readonly IWordWrapper _wordWrapper;
         private readonly string _leftPadding;
+        private readonly string _prefixTemplate;
         private readonly List<MenuLine> _menuLineBuffer = new List<MenuLine>();
         private readonly List<StringSegment> _segmentBuffer = new List<StringSegment>();
-        private readonly float _linePrefixInPixels;
 
-        public MenuLineGenerator(IMenuPresentationConfig presentationConfig, IWordWrapper wordWrapper)
+        public MenuLineGenerator(IMenuPresentationConfig presentationConfig)
         {
             _config = presentationConfig;
-            _wordWrapper = wordWrapper;
             _leftPadding = new string(_config.PaddingChar, _config.PaddingLeft);
-            _linePrefixInPixels = wordWrapper.MeasureStringWidthInPixels(_leftPadding + "  "); // TODO: Find a cleaner solution to incorporate prefix correction into line length calculation.
+            _prefixTemplate = _leftPadding + "  ";
         }
 
-        public IEnumerable<MenuLine> StreamLines(IMenuItem item)
+        public IEnumerable<MenuLine> StreamLines(IMenuItem item, IWordWrapper wordWrapper)
         {
             var lineIndex = 0;
 
-            foreach (var line in _wordWrapper.WordWrap(item.Label, -_linePrefixInPixels))
+            var prefixLength = wordWrapper.MeasureStringWidthInPixels(_prefixTemplate);
+
+            foreach (var line in wordWrapper.WordWrap(item.Label, -prefixLength))
             {
                 yield return CreateMenuLine(item, line, lineIndex);
 
@@ -32,13 +32,15 @@ namespace IngameScript
             }
         }
 
-        public IReadOnlyList<MenuLine> GetLines(IMenuItem item, int takeLast = int.MaxValue)
+        public IReadOnlyList<MenuLine> GetLines(IMenuItem item, IWordWrapper wordWrapper, int takeLast = int.MaxValue)
         {
             _menuLineBuffer.Clear();
             _segmentBuffer.Clear();
 
+            var prefixLength = wordWrapper.MeasureStringWidthInPixels(_prefixTemplate);
+
             _segmentBuffer.AddRange(
-                _wordWrapper.WordWrap(item.Label, -_linePrefixInPixels)
+                wordWrapper.WordWrap(item.Label, -prefixLength)
             );
 
             var segmentCount = _segmentBuffer.Count;

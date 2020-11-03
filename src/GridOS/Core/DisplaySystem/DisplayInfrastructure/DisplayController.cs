@@ -41,8 +41,7 @@ namespace IngameScript
 
             _menu = new Menu(
                 new MenuModel(menuRoot, this),
-                config,
-                new TextSurfaceWordWrapper(config));
+                config);
             _breadcrumb = new Breadcrumb(config);
             _menu.NavigationPathChanged += _breadcrumb.OnPathChanged;
 

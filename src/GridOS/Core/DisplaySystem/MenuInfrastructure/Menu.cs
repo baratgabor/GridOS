@@ -47,17 +47,21 @@ namespace IngameScript
         private readonly IMenuModel _model;
         private readonly MenuLineGenerator _lineGenerator;
 
-        public Menu(IMenuModel model, IMenuPresentationConfig config, IWordWrapper wordWrapper)
+        private IWordWrapper _wordWrapper;
+
+        public Menu(IMenuModel model, IMenuPresentationConfig config, IWordWrapper wordWrapper = null)
         {
             PaddingUnit = SizeUnit.Em;
-            Padding = new Thickness(0.8f, 0.8f, 0, 0.5f);
+            Padding = new Thickness(0.8f, 0.8f, 0.8f, 0.5f);
 
             _model = model;
             model.CurrentViewChanged += OnListChanged;
             model.MenuItemChanged += OnItemChanged;
             model.NavigatedTo += OnNavigatedTo;
 
-            _lineGenerator = new MenuLineGenerator(config, wordWrapper);
+            _wordWrapper = wordWrapper;
+
+            _lineGenerator = new MenuLineGenerator(config);
         }
 
         public void Dispose()
@@ -67,9 +71,10 @@ namespace IngameScript
             _model.NavigatedTo -= OnNavigatedTo;
         }
 
-        public override StringBuilder GetContent(int remainingLineCapacity, bool FlushCache = false)
+        public override StringBuilder GetContent(ContentGenerationHelper contentHelper, bool FlushCache = false)
         {
-            SetUpMenuLineHeight(remainingLineCapacity);
+            SetUpMenuLineHeight(contentHelper.RemainingLineCapacity);
+            _wordWrapper = contentHelper.WordWrapper;
             BuildContent();
 
             return _menuContent;
@@ -92,6 +97,7 @@ namespace IngameScript
 
             // Navigation requires fresh menu content to work with.
             if (_isStateDirty)
+                // TODO: BuildContent depends on fresh control-context word wrapper. This is not satisfied when BuildContent() is called due to dirty state; stale _wordWrapper is used currently. Refactor architecture to expose control context on demand.
                 BuildContent();
 
             // Second line from the top is designated for scrolling upwards.
@@ -305,7 +311,7 @@ namespace IngameScript
                 {
                     for (int itemIndex = _selectedMenuItemIndex - 1; itemIndex >= 0; itemIndex--)
                     {
-                        var lines = _lineGenerator.GetLines(itemList[itemIndex]);
+                        var lines = _lineGenerator.GetLines(itemList[itemIndex], _wordWrapper);
 
                         for (int lineIndex = lines.Count - 1; lineIndex >= 0; lineIndex--)
                         {
@@ -338,7 +344,7 @@ namespace IngameScript
             insertionIndex = selectedMenuItemRenderStartIndex;
             for (int i = _selectedMenuItemIndex; i < itemCount; i++)
             {
-                foreach (var line in _lineGenerator.StreamLines(itemList[i]))
+                foreach (var line in _lineGenerator.StreamLines(itemList[i], _wordWrapper))
                 {
                     // Menu item offsetting can result in the beginning of the item residing above-viewport. Skip writing these lines.
                     if (insertionIndex < 0)

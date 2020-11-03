@@ -14,6 +14,7 @@ namespace GridOS.UnitTests
     {
         const char menuSelectionMarker = '►';
         const int defaultLineHeight = 5;
+        ContentGenerationHelper contentHelper;
         readonly Mock<IMenuModel> mockModel = new Mock<IMenuModel>();
         readonly Mock<IWordWrapper> mockWordWrapper = new Mock<IWordWrapper>();
         MainConfig config;
@@ -40,6 +41,8 @@ namespace GridOS.UnitTests
             // Naive mock setup to return everything as single line.
             mockWordWrapper.Setup(x => x.WordWrap(It.IsAny<string>(), It.IsAny<float>()))
                 .Returns((string s, object _) => new List<StringSegment>() { new StringSegment(s, 0, s.Length) });
+
+            contentHelper = new ContentGenerationHelper(defaultLineHeight, mockWordWrapper.Object);
         }
 
         [Test]
@@ -74,7 +77,7 @@ namespace GridOS.UnitTests
             var called = 0;
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
             sut.RedrawRequired += (_) => called++;
-            sut.GetContent(defaultLineHeight); // Initializing content. Without this it will invoke the redraw request, because it cannot determine the item's visiblity. This is expected behavior.
+            sut.GetContent(contentHelper); // Initializing content. Without this it will invoke the redraw request, because it cannot determine the item's visiblity. This is expected behavior.
 
             // Act
             mockModel.Raise(x => x.MenuItemChanged += null, (object)seventhMenuItem);
@@ -118,18 +121,18 @@ namespace GridOS.UnitTests
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
             sut.MoveDown(); // Selection moved down.
             sut.MoveDown();
-            StringAssert.DoesNotStartWith(menuSelectionMarker.ToString(), sut.GetContent(defaultLineHeight).ToString(), "Arrange failed to create necessary pre-test condition. Selection was expected to be moved down from the first element.");
+            StringAssert.DoesNotStartWith(menuSelectionMarker.ToString(), sut.GetContent(contentHelper).ToString(), "Arrange failed to create necessary pre-test condition. Selection was expected to be moved down from the first element.");
 
             // Act
             mockModel.Raise(x => x.NavigatedTo += null, (object)null);
 
-            StringAssert.StartsWith(menuSelectionMarker.ToString(), sut.GetContent(defaultLineHeight).ToString(), "Line selection must be reset to top after forward navigation.");
+            StringAssert.StartsWith(menuSelectionMarker.ToString(), sut.GetContent(contentHelper).ToString(), "Line selection must be reset to top after forward navigation.");
         }
 
         [Test]
         public void Navigating_BackNavigation_ShouldRestoreLineSelection()
         {
-            var lineHeight = 10;
+            contentHelper.RemainingLineCapacity = 10;
             var expectedSelectedGroup = new MenuGroup("Group - long multi-line item to test if selection will be on the first line");
             var anotherGroup = new MenuGroup("AnotherGroup");
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() {
@@ -140,12 +143,12 @@ namespace GridOS.UnitTests
             });
             mockModel.Setup(x => x.GetIndexOf(expectedSelectedGroup)).Returns(3); // Tells SUT the position of the item in the menu.
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
-            StringAssert.StartsWith(menuSelectionMarker.ToString(), sut.GetContent(lineHeight).ToString(), "Arrange failed to create necessary pre-test condition. First line was expected to be selected.");
+            StringAssert.StartsWith(menuSelectionMarker.ToString(), sut.GetContent(contentHelper).ToString(), "Arrange failed to create necessary pre-test condition. First line was expected to be selected.");
 
             // Act
             mockModel.Raise(x => x.NavigatedTo += null, new NavigationPayload() { NavigatedFrom = expectedSelectedGroup, NavigatedTo = anotherGroup } );
 
-            var lineOfGroup = sut.GetContent(lineHeight).ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None)[3];
+            var lineOfGroup = sut.GetContent(contentHelper).ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None)[3];
             StringAssert.StartsWith(config.Prefixes_Selected.Group + " Group", lineOfGroup, "The group was expected to be selected. After navigating backwards from a previously selected group, the selection must be restored.");
         }
 
@@ -191,7 +194,7 @@ namespace GridOS.UnitTests
         [Test]
         public void MoveDown_WhenScrolling_ReachesCorrectStateAtBottom()
         {
-            var lineHeight = 3;
+            contentHelper.RemainingLineCapacity = 3;
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() {
                 new MenuItem("Item1"),
                 new MenuItem("Item2"),
@@ -207,7 +210,7 @@ namespace GridOS.UnitTests
             sut.MoveDown();
             sut.MoveDown();
 
-            var lines = sut.GetContent(lineHeight).ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            var lines = sut.GetContent(contentHelper).ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             Assert.AreEqual(3, lines.Length, "Number of lines expected to be equal to the number set in config.");
             Assert.AreEqual("Item4", lines[0].Trim(), "First menu line is expected to contain the next-to-last menu item, without anything else.");
             StringAssert.Contains(menuSelectionMarker + " Item5", lines[1], "Second menu line is expected to contain the last menu item, preceded by a selection mark.");
@@ -217,7 +220,7 @@ namespace GridOS.UnitTests
         [Test]
         public void MoveDown_WhenViewportIsLongerThanMenu_SelectionStopsAtLastMenuItem()
         {
-            var lineHeight = 10;
+            contentHelper.RemainingLineCapacity = 10;
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuItem("Item1"), new MenuItem("Item2") });
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
@@ -226,14 +229,14 @@ namespace GridOS.UnitTests
             sut.MoveDown();
             sut.MoveDown();
 
-            var lines = sut.GetContent(lineHeight).ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            var lines = sut.GetContent(contentHelper).ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             StringAssert.StartsWith(menuSelectionMarker.ToString(), lines[1], "Last menu item (in second line) must be selected even when trying to move down further.");
         }
 
         [Test]
         public void MoveDown_WhenViewportIsShorterThanMenu_SelectionStopsAtLastMenuItem()
         {
-            var lineHeight = 3;
+            contentHelper.RemainingLineCapacity = 3;
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { new MenuItem("Item1"), new MenuItem("Item2"), new MenuItem("Item3"), new MenuItem("Item4"), new MenuItem("Item5") });
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
@@ -245,13 +248,13 @@ namespace GridOS.UnitTests
             sut.MoveDown();
             sut.MoveDown();
 
-            StringAssert.Contains(menuSelectionMarker + " Item5", sut.GetContent(lineHeight).ToString(), "Last item (Item5) must be selected even when trying to move down further. This fail most likely means scrolling doesn't stop when it should.");
+            StringAssert.Contains(menuSelectionMarker + " Item5", sut.GetContent(contentHelper).ToString(), "Last item (Item5) must be selected even when trying to move down further. This fail most likely means scrolling doesn't stop when it should.");
         }
 
         [Test]
         public void MoveDown_MoveUp_WithMultiLineItems_NavigatesCorrectly()
         {
-            var lineHeight = 4; // Shorten than items/lines.
+            contentHelper.RemainingLineCapacity = 4; // Shorten than items/lines.
             mockWordWrapper.Setup(x => x.WordWrap(It.IsAny<string>(), It.IsAny<float>()))
                 .Returns((string s, object _) => s
                 .Split(new[] { ' ' }, StringSplitOptions.None)
@@ -271,37 +274,37 @@ namespace GridOS.UnitTests
             // Act/Assert. Unconventional, buy hey, it does the job.
             sut.MoveDown();
             sut.MoveDown();
-            StringAssert.Contains(menuSelectionMarker + " Line2", sut.GetContent(lineHeight).ToString(), "Line2 was expected to be selected.");
+            StringAssert.Contains(menuSelectionMarker + " Line2", sut.GetContent(contentHelper).ToString(), "Line2 was expected to be selected.");
             sut.MoveDown();
             sut.MoveDown();
             sut.MoveDown();
             sut.MoveDown();
-            StringAssert.Contains(menuSelectionMarker + " Line6", sut.GetContent(lineHeight).ToString(), "Line6 was expected to be selected.");
+            StringAssert.Contains(menuSelectionMarker + " Line6", sut.GetContent(contentHelper).ToString(), "Line6 was expected to be selected.");
             sut.MoveDown();
             sut.MoveDown();
             sut.MoveDown();
             sut.MoveDown();
-            StringAssert.Contains(menuSelectionMarker + " LineA", sut.GetContent(lineHeight).ToString(), "LineA was expected to be selected.");
+            StringAssert.Contains(menuSelectionMarker + " LineA", sut.GetContent(contentHelper).ToString(), "LineA was expected to be selected.");
             sut.MoveUp();
             sut.MoveUp();
             sut.MoveUp();
-            StringAssert.Contains(menuSelectionMarker + " Line7", sut.GetContent(lineHeight).ToString(), "Line7 was expected to be selected.");
+            StringAssert.Contains(menuSelectionMarker + " Line7", sut.GetContent(contentHelper).ToString(), "Line7 was expected to be selected.");
             sut.MoveUp();
             sut.MoveUp();
             sut.MoveUp();
             sut.MoveUp();
-            StringAssert.Contains(menuSelectionMarker + " Line3", sut.GetContent(lineHeight).ToString(), "Line3 was expected to be selected.");
+            StringAssert.Contains(menuSelectionMarker + " Line3", sut.GetContent(contentHelper).ToString(), "Line3 was expected to be selected.");
         }
 
         [Test]
         public void GetContent_WithBlankMenu_ShouldStillReturnCorrectNumberOfEmptyLines()
         {
-            var lineHeight = 5;
+            contentHelper.RemainingLineCapacity = 5;
             mockModel.Setup(x => x.CurrentView).Returns(new List<IMenuItem>() { /* Blank */ });
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
-            var result = sut.GetContent(lineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             Assert.AreEqual(5, lines.Length);
@@ -315,7 +318,7 @@ namespace GridOS.UnitTests
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             Assert.AreEqual($"{menuSelectionMarker} First", lines.First());
@@ -328,9 +331,10 @@ namespace GridOS.UnitTests
         public void GetContent_WithDifferingLineHeights_AlwaysReturnsExpectedNumberOfLines(int expectedLineNumber)
         {
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
+            contentHelper.RemainingLineCapacity = expectedLineNumber;
 
             // Act
-            var result = sut.GetContent(expectedLineNumber).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             Assert.AreEqual(expectedLineNumber, lines.Length);
@@ -342,7 +346,7 @@ namespace GridOS.UnitTests
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             Assert.AreEqual(menuSelectionMarker, lines.First().Trim()[0]);
@@ -356,7 +360,7 @@ namespace GridOS.UnitTests
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             Assert.AreEqual('~', result[0], "Selected item must have the correct marker/prefix.");
         }
@@ -369,7 +373,7 @@ namespace GridOS.UnitTests
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             Assert.AreEqual('~', result[0], "Selected command must have the correct marker/prefix.");
         }
@@ -382,7 +386,7 @@ namespace GridOS.UnitTests
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             Assert.AreEqual('~', result[0], "Selected group must have the correct marker/prefix.");
         }
@@ -396,7 +400,7 @@ namespace GridOS.UnitTests
 
             // Act
             sut.MoveDown(); // Unselects first item.
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             Assert.AreEqual('~', result[0], "Non-selected item must have the correct marker/prefix.");
         }
@@ -410,7 +414,7 @@ namespace GridOS.UnitTests
 
             // Act
             sut.MoveDown(); // Unselects first item.
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             Assert.AreEqual('~', result[0], "Non-selected command must have the correct marker/prefix.");
         }
@@ -424,7 +428,7 @@ namespace GridOS.UnitTests
 
             // Act
             sut.MoveDown(); // Unselects first item.
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             Assert.AreEqual('~', result[0], "Non-selected group must have the correct marker/prefix.");
         }
@@ -437,7 +441,7 @@ namespace GridOS.UnitTests
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             var firstLine = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None).First();
             StringAssert.EndsWith("Item %", firstLine, "Menu line must end with the item name followed by the suffix.");
@@ -451,7 +455,7 @@ namespace GridOS.UnitTests
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             var firstLine = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None).First();
             StringAssert.EndsWith("Group %", firstLine, "Menu line must end with the group name followed by the suffix.");
@@ -465,7 +469,7 @@ namespace GridOS.UnitTests
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             var firstLine = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None).First();
             StringAssert.EndsWith("Command %", firstLine, "Menu line must end with the command name followed by the suffix.");
@@ -479,7 +483,7 @@ namespace GridOS.UnitTests
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
 
             // Act
-            var result = sut.GetContent(defaultLineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             var firstLine = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None).First();
             StringAssert.EndsWith("Item", firstLine, "Suffix must be removed (no trailing spaces) for items that have no suffix set.");
@@ -491,16 +495,16 @@ namespace GridOS.UnitTests
         [TestCase(4)]
         public void GetContent_UnderAllConditions_SelectedLineShouldStartWithSelectionMarker (int expectedSelectedLineIndex)
         {
-            var lineHeight = 20;
+            contentHelper.RemainingLineCapacity = 20;
             var sut = new Menu(mockModel.Object, config, mockWordWrapper.Object);
-            sut.GetContent(lineHeight);
+            sut.GetContent(contentHelper);
             for (int i = 0; i < expectedSelectedLineIndex; i++)
             {
                 sut.MoveDown(); // Moving down means that the next line should be selected.
             }
 
             // Act
-            var result = sut.GetContent(lineHeight).ToString();
+            var result = sut.GetContent(contentHelper).ToString();
 
             var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             Assert.AreEqual(menuSelectionMarker, lines[expectedSelectedLineIndex].Trim()[0]);

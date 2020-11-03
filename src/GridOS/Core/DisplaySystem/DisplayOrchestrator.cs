@@ -48,7 +48,8 @@ namespace IngameScript
                     _diagnostics,
                     new DisplayView(
                         textSurface,
-                        config),
+                        config,
+                        new TextSurfaceWordWrapper()),
                     _menuRoot,
                     _globalEvents)
                 );

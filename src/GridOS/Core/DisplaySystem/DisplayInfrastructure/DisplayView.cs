@@ -13,19 +13,19 @@ namespace IngameScript
         protected IMyTextSurface _surface;
 
         protected bool _contentDirty = true;
-
-        protected List<KeyValuePair<IControl, List<MySprite>>> _content = new List<KeyValuePair<IControl, List<MySprite>>>();
-
-        protected MainConfig _config;
-
         protected RectangleF _viewport;
 
-        private StringBuilder _buffer = new StringBuilder();
+        protected readonly List<KeyValuePair<IControl, List<MySprite>>> _content = new List<KeyValuePair<IControl, List<MySprite>>>();
+        protected readonly IWordWrapperController _wordWrapper;
+        protected readonly MainConfig _config;
 
-        public DisplayView(IMyTextSurface surface, MainConfig config)
+        private readonly StringBuilder _buffer = new StringBuilder();
+
+        public DisplayView(IMyTextSurface surface, MainConfig config, IWordWrapperController wordWrapper)
         {
             _surface = surface;
             _config = config;
+            _wordWrapper = wordWrapper;
 
             SetupSurface();
             AdaptToSurface();
@@ -123,16 +123,20 @@ namespace IngameScript
 
             var controlTopLeft = new Vector2(0, verticalWritingPosition) + control.Offset;
             var contentTopLeft = new Vector2(controlTopLeft.X + paddingSize.Left, controlTopLeft.Y + paddingSize.Top);
+            var controlWidth = CalculateSize(control.Width, control.WidthUnit, emSize, _viewport.Size.X);
 
             var remainingLineCapacity = (int)((_viewport.Bottom - paddingSize.Bottom - contentTopLeft.Y) / emSize);
-            var content = control.GetContent(remainingLineCapacity);
+            var maxLineLength = controlWidth > 0
+                ? controlWidth - paddingSize.Left - paddingSize.Right
+                : _viewport.Size.X - paddingSize.Left - paddingSize.Right;
+            var content = control.GetContent(new ContentGenerationHelper(remainingLineCapacity, _wordWrapper.SetUp(maxLineLength, _surface, fontName, fontSize)));
             var contentSize = _surface.MeasureStringInPixels(content, fontName, fontSize);
 
             var paddedContentSize = paddingSize + contentSize;
 
             var controlSize = new Vector2()
             {
-                X = Math.Max(CalculateSize(control.Width, control.WidthUnit, emSize, _viewport.Size.X), paddedContentSize.X),
+                X = Math.Max(controlWidth, paddedContentSize.X),
                 Y = Math.Max(CalculateSize(control.Height, control.HeightUnit, emSize, _viewport.Size.Y), paddedContentSize.Y)
             };
 

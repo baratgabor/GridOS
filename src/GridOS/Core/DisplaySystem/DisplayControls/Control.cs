@@ -45,7 +45,7 @@ namespace IngameScript
         public VerticalAlignment VerticalAlignment { get; set; }
         public HorizontalAlignment HorizontalAlignment { get; set; }
 
-        public abstract StringBuilder GetContent(int remainingLineCapacity, bool FlushCache = false);
+        public abstract StringBuilder GetContent(ContentGenerationHelper contentHelper, bool FlushCache = false);
 
         protected virtual void OnRedrawRequired()
         {

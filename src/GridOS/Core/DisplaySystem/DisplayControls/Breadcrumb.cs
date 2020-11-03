@@ -26,7 +26,7 @@ namespace IngameScript
             WidthUnit = SizeUnit.Percent;
         }
 
-        public override StringBuilder GetContent(int _, bool FlushCache = false)
+        public override StringBuilder GetContent(ContentGenerationHelper _, bool FlushCache = false)
         {
             if (FlushCache)
                 BuildContent(_lastPath);
