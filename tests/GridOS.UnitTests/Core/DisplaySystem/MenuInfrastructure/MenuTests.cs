@@ -17,14 +17,14 @@ namespace GridOS.UnitTests
         ContentGenerationHelper contentHelper;
         readonly Mock<IMenuModel> mockModel = new Mock<IMenuModel>();
         readonly Mock<IWordWrapper> mockWordWrapper = new Mock<IWordWrapper>();
-        MainConfig config;
+        BaseConfig config;
         readonly MenuItem firstMenuItem = new MenuItem("Item1");
         readonly MenuItem seventhMenuItem = new MenuItem("item7");
 
         [SetUp]
         public void SetUp()
         {
-            config = new MainConfig() { SelectionMarker = menuSelectionMarker, PaddingLeft = 0 };
+            config = new BaseConfig() { SelectionMarker = menuSelectionMarker, PaddingLeft = 0 };
 
             mockModel.Setup(x => x.CurrentView)
                 .Returns(new List<IMenuItem>() {

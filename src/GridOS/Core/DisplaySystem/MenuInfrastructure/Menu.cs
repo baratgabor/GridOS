@@ -5,13 +5,13 @@ using System;
 
 namespace IngameScript
 {
-    /// <summary>s
+    /// <summary>
     /// Draws a scrollable menu, and exposes menu navigation commands. Very deliberately not layered into traditional full content creation + offsetting, for performance reasons.
     /// This implementation efficiently fills only the menu lines displayed in the viewport, skipping the processing of all other out-of-viewport elements.
     /// This class has multiple responsibilities, arguably violates SRP, but this degree of feature density allows for an optimized solution to a specific problem.
     /// Also, I included plenty of comments to aid maintenability, since the code here is less self-explanatory than normally.
     /// </summary>
-    class Menu : Control, IDisposable
+    class Menu : Control
     {
         public event Action<IEnumerable<string>> NavigationPathChanged;
 
@@ -64,7 +64,7 @@ namespace IngameScript
             _lineGenerator = new MenuLineGenerator(config);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             _model.CurrentViewChanged -= OnListChanged;
             _model.MenuItemChanged -= OnItemChanged;

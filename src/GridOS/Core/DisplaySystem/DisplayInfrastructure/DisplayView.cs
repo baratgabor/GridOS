@@ -10,18 +10,17 @@ namespace IngameScript
     /// </summary>
     class DisplayView : IView
     {
-        protected IMyTextSurface _surface;
-
         protected bool _contentDirty = true;
         protected RectangleF _viewport;
 
         protected readonly List<KeyValuePair<IControl, List<MySprite>>> _content = new List<KeyValuePair<IControl, List<MySprite>>>();
         protected readonly IWordWrapperController _wordWrapper;
-        protected readonly MainConfig _config;
+        protected readonly IMyTextSurface _surface;
+        protected readonly BaseConfig _config;
 
         private readonly StringBuilder _buffer = new StringBuilder();
 
-        public DisplayView(IMyTextSurface surface, MainConfig config, IWordWrapperController wordWrapper)
+        public DisplayView(IMyTextSurface surface, BaseConfig config, IWordWrapperController wordWrapper)
         {
             _surface = surface;
             _config = config;
@@ -29,6 +28,12 @@ namespace IngameScript
 
             SetupSurface();
             AdaptToSurface();
+        }
+
+        public void Dispose()
+        {
+            ClearControls();
+            DecommissionSurface();
         }
 
         public DisplayView AddControl(IControl control)
@@ -47,14 +52,18 @@ namespace IngameScript
             if (controlIndex > -1)
             {
                 control.RedrawRequired -= OnRedrawRequired;
+                control.Dispose();
                 _content.RemoveAt(controlIndex);
             }
         }
 
         public void ClearControls()
         {
-            foreach (var kvp in _content)
-                kvp.Key.RedrawRequired -= OnRedrawRequired;
+            foreach (var control in _content.Select(x => x.Key))
+            {
+                control.RedrawRequired -= OnRedrawRequired;
+                control.Dispose();
+            }
 
             _content.Clear();
         }
@@ -98,7 +107,7 @@ namespace IngameScript
                     if (controlEntry.Key.Visible)
                     {
                         // TODO: Add dirty flag to controls, and if not dirty, use cached.
-                        verticalWritingPosition = GenerateSpritesForControl(controlEntry.Key, controlEntry.Value, verticalWritingPosition);
+                        verticalWritingPosition = DrawControl(controlEntry.Key, controlEntry.Value, verticalWritingPosition);
                         frame.AddRange(controlEntry.Value);
                     }
                 }
@@ -111,7 +120,7 @@ namespace IngameScript
         /// Generates sprites for the specified control in the specified list.
         /// </summary>
         /// <returns>Returns the resulting vertical writing position after the control is rendered.</returns>
-        private float GenerateSpritesForControl(IControl control, List<MySprite> targetList, float verticalWritingPosition)
+        private float DrawControl(IControl control, List<MySprite> targetList, float verticalWritingPosition)
         {
             targetList.Clear();
 
@@ -246,6 +255,12 @@ namespace IngameScript
             _surface.ContentType = ContentType.SCRIPT;
             _surface.Script = "";
             _surface.PreserveAspectRatio = true;
+        }
+
+        private void DecommissionSurface()
+        {
+            _surface.ContentType = ContentType.TEXT_AND_IMAGE;
+            _surface.WriteText(string.Empty);
         }
 
         private void OnRedrawRequired(IControl control)

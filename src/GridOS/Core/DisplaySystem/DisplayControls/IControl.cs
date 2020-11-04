@@ -3,7 +3,7 @@ using System;
 
 namespace IngameScript
 {
-    interface IControl
+    interface IControl : IDisposable
     {
         bool Visible { get; set; }
 
@@ -29,7 +29,7 @@ namespace IngameScript
 
         Thickness Border { get; set; }
         SizeUnit BorderUnit { get; set; }
-        Color BorderColor { get; set; }
+        Color? BorderColor { get; set; }
 
         string FontName { get; set; }
         float FontSize { get; set; }

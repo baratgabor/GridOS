@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace IngameScript
 {
     // TODO: Finalize setting change notification implementation. Decide what way to go with configuration; separate static from per display instance. Try to move defaults to some plain DTO.
-    class MainConfig : IMenuPresentationConfig, IBreadcrumbConfig, IDisplayConfig
+    class BaseConfig : IMenuPresentationConfig, IBreadcrumbConfig, IDisplayConfig
     {
         public string PathSeparator { get; set; } = "›";
 

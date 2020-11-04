@@ -9,69 +9,62 @@ namespace IngameScript
     /// </summary>
     class DisplayOrchestrator
     {
-        // TODO: Now that the menu system is dynamic... need to think about whether we need to dispose stuff when an item is removed.
-        // What to do if non-empty item is removed? Remove all children, or put them somewhere else? How to react if we're displaying items below a group node that is removed?
+        private const string _controllerNameTemplate = "Lcd";
 
-        // Root group displayed by default, parent of all other items/groups
+        // All menu content.
         private readonly IMenuGroup _menuRoot = new MenuGroup("Main");
 
-        private readonly List<IMyTextSurface> _registeredTextSurfaces = new List<IMyTextSurface>();
-        private readonly List<DisplayController> _controllers = new List<DisplayController>();
-        private const string _controllerNameTemplate = "Lcd";
+        // All displays used by the system, along with the corresponding controller.
+        private readonly Dictionary<IMyTextSurface, DisplayController> _registeredSurfaces = new Dictionary<IMyTextSurface, DisplayController>();
+        
+        private readonly ICommandDispatcher _commandDispatcher;
+        private readonly IGlobalEvents _globalEvents;
+        private readonly ILogger _logger;
         private int _controllerCounter = 0;
 
-        private readonly ICommandDispatcher _commandDispatcher;
-        private readonly IDiagnosticService _diagnostics;
-        private readonly IGlobalEvents _globalEvents;
-
-        public DisplayOrchestrator(ICommandDispatcher commandDispatcher, IDiagnosticService diagnostics, IGlobalEvents globalEvents)
+        public DisplayOrchestrator(ICommandDispatcher commandDispatcher, IGlobalEvents globalEvents, ILogger logger)
         {
             _commandDispatcher = commandDispatcher;
-            _diagnostics = diagnostics;
             _globalEvents = globalEvents;
+            _logger = logger;
         }
 
         public void RegisterTextSurface(IMyTextSurface textSurface)
         {
-            if (_registeredTextSurfaces.Contains(textSurface))
+            if (_registeredSurfaces.ContainsKey(textSurface))
                 return;
+
+            DisplayController controller = null;
 
             try
             {
-                var config = new MainConfig();
+                var instanceConfig = new BaseConfig();
 
-                _controllers.Add(
-                new DisplayController(
+                controller = new DisplayController(
                     NextControllerName(),
                     _commandDispatcher,
-                    config,
-                    _diagnostics,
-                    new DisplayView(
-                        textSurface,
-                        config,
-                        new TextSurfaceWordWrapper()),
+                    instanceConfig,
                     _menuRoot,
-                    _globalEvents)
-                );
+                    _globalEvents, 
+                    textSurface);
+
+                _registeredSurfaces.Add(textSurface, controller);
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message + "\n" + e.StackTrace);
+                _logger.Log(LogLevel.Error, $"Display Orchestrator failed to add LCD '{textSurface.DisplayName}' to the system.\r\n\r\nMessage: {e.Message}\r\n\r\nStack trace: {e.StackTrace}");
+                controller?.Dispose();
             }
-
-            _registeredTextSurfaces.Add(textSurface);
         }
 
         public void UnregisterTextSurface(IMyTextSurface textSurface)
         {
-            if (!_registeredTextSurfaces.Contains(textSurface))
-                return;
-
-            // TODO: Create proper removal infrastructure. CHECK REFERENCING to see if disposal is needed.
-            int sharedIndex = _registeredTextSurfaces.IndexOf(textSurface);
-            _controllers.Remove(_controllers[sharedIndex]);
-
-            _registeredTextSurfaces.Remove(textSurface);
+            DisplayController controller;
+            if (_registeredSurfaces.TryGetValue(textSurface, out controller))
+            {
+                controller.Dispose();
+                _registeredSurfaces.Remove(textSurface);
+            }
         }
 
         public void RegisterMenuItem(IMenuItem item)
@@ -82,11 +75,6 @@ namespace IngameScript
         private string NextControllerName()
         {
             return $"{_controllerNameTemplate}{++_controllerCounter}";
-        }
-
-        public void ClearAll()
-        {
-            _registeredTextSurfaces.ForEach(x => x.WriteText(""));
         }
     }
 }

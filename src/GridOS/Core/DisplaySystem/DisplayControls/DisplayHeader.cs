@@ -7,12 +7,9 @@ namespace IngameScript
     {
         protected readonly StringBuilder _buffer = new StringBuilder();
         protected readonly ProgressIndicator2 _spinner = new ProgressIndicator2();
-        protected readonly IDiagnosticService _diagnostics;
 
-        public DisplayHeader(IDiagnosticService diagnostics)
+        public DisplayHeader()
         {
-            _diagnostics = diagnostics;
-
             FontSize = 0.6f;
             WidthUnit = SizeUnit.Percent;
             Width = 100;
@@ -21,6 +18,9 @@ namespace IngameScript
             TextColor = Color.Black;
             BackgroundColor = new Color(255, 255, 255, 90);
         }
+
+        public override void Dispose()
+        {}
 
         public override StringBuilder GetContent(ContentGenerationHelper _, bool FlushCache = false)
         {

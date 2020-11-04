@@ -26,6 +26,9 @@ namespace IngameScript
             WidthUnit = SizeUnit.Percent;
         }
 
+        public override void Dispose()
+        {}
+
         public override StringBuilder GetContent(ContentGenerationHelper _, bool FlushCache = false)
         {
             if (FlushCache)

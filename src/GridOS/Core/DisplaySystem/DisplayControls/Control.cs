@@ -34,7 +34,7 @@ namespace IngameScript
 
         public SizeUnit BorderUnit { get; set; }
         public Thickness Border { get; set; }
-        public Color BorderColor { get; set; } = Color.Transparent;
+        public Color? BorderColor { get; set; }
 
         public string FontName { get; set; } = null;
         public float FontSize { get; set; } = 1f;
@@ -51,5 +51,7 @@ namespace IngameScript
         {
             RedrawRequired?.Invoke(this);
         }
+
+        public abstract void Dispose();
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace IngameScript
+﻿using System;
+
+namespace IngameScript
 {
-    interface IView
+    interface IView : IDisposable
     {
         DisplayView AddControl(IControl control);
         void RemoveControl(IControl control);

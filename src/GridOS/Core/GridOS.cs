@@ -31,7 +31,7 @@ namespace IngameScript
             Action<UpdateFrequency> _updateFrequencySetter = (x) => _p.Runtime.UpdateFrequency = x;
 
             _commandDispatcher = new CommandDispatcher(_diagnostics);
-            _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _diagnostics, _eventDispatcher);
+            _displayOrchestrator = new DisplayOrchestrator(_commandDispatcher, _eventDispatcher, _diagnostics);
             _updateDispatcher = new FastUpdateDispatcher((ILogger)_diagnostics, _updateFrequencyGetter, _updateFrequencySetter);
 
             // TODO: Remove 'help' menu. The only reason it's still here is that it's ideal for testing word wrapping and scrolling.
@@ -133,7 +133,7 @@ namespace IngameScript
 
         private void TryExecuteCustomData(string customData)
         {
-            if (customData == string.Empty)
+            if (string.IsNullOrWhiteSpace(customData))
                 return;
 
             foreach (var line in customData.Split(new[] { Environment.NewLine, "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries))
@@ -157,9 +157,9 @@ namespace IngameScript
                         surfaceIndex = Math.Max(0, 
                             int.Parse(param.Substring(delimiter + 1, param.Length - (delimiter + 1)))
                             - 1);
-                    }
 
-                    param = param.Substring(0, delimiter);
+                        param = param.Substring(0, delimiter);
+                    }
                 }
             }
 
