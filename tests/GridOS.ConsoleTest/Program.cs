@@ -54,13 +54,13 @@ namespace IngameScript
                     switch (k.Key)
                     {
                         case ConsoleKey.DownArrow:
-                            gridOS.Main("Display1Down", UpdateType.None);
+                            gridOS.Main("Lcd1Down", UpdateType.None);
                             break;
                         case ConsoleKey.UpArrow:
-                            gridOS.Main("Display1Up", UpdateType.None);
+                            gridOS.Main("Lcd1Up", UpdateType.None);
                             break;
                         case ConsoleKey.Enter:
-                            gridOS.Main("Display1Select", UpdateType.None);
+                            gridOS.Main("Lcd1Select", UpdateType.None);
                             break;
                         case ConsoleKey.Escape:
                             return;
