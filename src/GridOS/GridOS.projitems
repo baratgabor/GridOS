@@ -30,6 +30,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\WordWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\AffixConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\NamedOption.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\Sprites.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\StaticConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\_Interfaces.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Configuration\BaseConfig.cs" />
@@ -40,6 +41,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayControls\Helpers\SizeUnit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayControls\Helpers\Thickness.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayControls\Helpers\VerticalAlignment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayControls\Helpers\Visibility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\IMenuInstanceServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\MenuInfrastructure\Menu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\DisplaySystem\DisplayInfrastructure\IView.cs" />

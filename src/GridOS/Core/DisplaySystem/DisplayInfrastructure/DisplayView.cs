@@ -76,40 +76,35 @@ namespace IngameScript
             using (var frame = _surface.DrawFrame())
             {
                 {   // Add background.
-                    frame.Add(new MySprite()
-                    {
-                        Type = SpriteType.TEXTURE,
-                        Data = "SquareSimple",
-                        Color = _config.BaseBackgroundColor,
-                        Alignment = TextAlignment.CENTER,
-                        Position = _viewport.Center,
-                        Size = _surface.SurfaceSize
-                    });
+                    frame.Add(DrawRect(
+                        position: _viewport.Position,
+                        size: _surface.SurfaceSize,
+                        color: _config.BaseBackgroundColor
+                    ));
 
-                    frame.Add(new MySprite()
-                    {
-                        Type = SpriteType.TEXTURE,
-                        Data = "Grid",
-                        Color = new Color(0, 0, 0, 170),
-                        Alignment = TextAlignment.CENTER,
-                        Position = _viewport.Center,
-                        Size = _surface.SurfaceSize
-                    });
+                    frame.Add(DrawRect(
+                        position: _viewport.Position,
+                        size: _surface.SurfaceSize,
+                        color: _config.BaseBackgroundColor,
+                        spriteName: Sprites.GridTexture
+                    ));
                 }
 
                 // As a simplification, we're implementing automatic vertical stacking. +1 is to mitigate a visual artifact on the bottom of the screen when the top line is drawn onto.
                 // TODO: Implement separate layout elements for vertical and horizontal stacking.
                 var verticalWritingPosition = _viewport.Position.Y + 1;
 
-                for (int i = 0; i < _content.Count; i++)
+                foreach (var entry in _content)
                 {
-                    var controlEntry = _content[i];
-                    if (controlEntry.Key.Visible)
-                    {
-                        // TODO: Add dirty flag to controls, and if not dirty, use cached.
-                        verticalWritingPosition = DrawControl(controlEntry.Key, controlEntry.Value, verticalWritingPosition);
-                        frame.AddRange(controlEntry.Value);
-                    }
+                    var control = entry.Key;
+                    if (control.Visibility == Visibility.NotRendered)
+                        continue;
+
+                    var spriteList = entry.Value;
+
+                    // TODO: Add dirty flag to controls, and if not dirty, use cached.
+                    verticalWritingPosition = DrawControl(control, spriteList, verticalWritingPosition);
+                    frame.AddRange(spriteList);
                 }
             }
 
@@ -120,24 +115,29 @@ namespace IngameScript
         /// Generates sprites for the specified control in the specified list.
         /// </summary>
         /// <returns>Returns the resulting vertical writing position after the control is rendered.</returns>
-        private float DrawControl(IControl control, List<MySprite> targetList, float verticalWritingPosition)
+        private float DrawControl(IControl control, List<MySprite> spriteList, float verticalWritingPosition)
         {
-            targetList.Clear();
+            spriteList.Clear();
+
+            var viewportWidth = _viewport.Size.X;
+            var viewportHeight = _viewport.Size.Y;
 
             var fontName = string.IsNullOrEmpty(control.FontName) ? _config.BaseFontName : control.FontName;
             var fontSize = control.FontSize * _config.BaseFontSize;
             var emSize = _surface.MeasureStringInPixels(_buffer.Clear().Append('X'), fontName, fontSize).Y;
 
-            var paddingSize = CalculateThickness(control.Padding, control.PaddingUnit, emSize, _viewport.Size.X, _viewport.Size.Y);
+            var paddingSize = CalculateThickness(control.Padding, control.PaddingUnit, emSize, viewportWidth, viewportHeight);
+            var borderSize = CalculateThickness(control.Border, control.BorderUnit, emSize, viewportWidth, viewportHeight);
+            var marginSize = CalculateThickness(control.Margin, control.MarginUnit, emSize, viewportWidth, viewportHeight);
 
-            var controlTopLeft = new Vector2(0, verticalWritingPosition) + control.Offset;
-            var contentTopLeft = new Vector2(controlTopLeft.X + paddingSize.Left, controlTopLeft.Y + paddingSize.Top);
-            var controlWidth = CalculateSize(control.Width, control.WidthUnit, emSize, _viewport.Size.X);
+            var controlTopLeft = new Vector2(0 + marginSize.Left, verticalWritingPosition + marginSize.Top);
+            var contentTopLeft = new Vector2(controlTopLeft.X + borderSize.Left + paddingSize.Left, controlTopLeft.Y + borderSize.Top + paddingSize.Top);
+            var controlWidth = CalculateSize(control.Width, control.WidthUnit, emSize, viewportWidth);
 
-            var remainingLineCapacity = (int)((_viewport.Bottom - paddingSize.Bottom - contentTopLeft.Y) / emSize);
+            var remainingLineCapacity = (int)((_viewport.Bottom - paddingSize.Bottom - borderSize.Bottom - contentTopLeft.Y) / emSize);
             var maxLineLength = controlWidth > 0
                 ? controlWidth - paddingSize.Left - paddingSize.Right
-                : _viewport.Size.X - paddingSize.Left - paddingSize.Right;
+                : viewportWidth - paddingSize.Left - paddingSize.Right;
             var content = control.GetContent(new ContentGenerationHelper(remainingLineCapacity, _wordWrapper.SetUp(maxLineLength, _surface, fontName, fontSize)));
             var contentSize = _surface.MeasureStringInPixels(content, fontName, fontSize);
 
@@ -146,8 +146,9 @@ namespace IngameScript
             var controlSize = new Vector2()
             {
                 X = Math.Max(controlWidth, paddedContentSize.X),
-                Y = Math.Max(CalculateSize(control.Height, control.HeightUnit, emSize, _viewport.Size.Y), paddedContentSize.Y)
+                Y = Math.Max(CalculateSize(control.Height, control.HeightUnit, emSize, viewportHeight), paddedContentSize.Y)
             };
+            var borderedControlSize = borderSize + controlSize;
 
             if (controlSize.X > paddedContentSize.X)
             {
@@ -165,33 +166,37 @@ namespace IngameScript
                     contentTopLeft.Y = controlTopLeft.Y + controlSize.Y - paddingSize.Bottom - contentSize.Y;
             }
 
-            // Add background if color is different than base background color
-            if (control.BackgroundColor != null && control.BackgroundColor != _config.BaseBackgroundColor)
+            if (control.Visibility == Visibility.Visible)
             {
-                targetList.Add(new MySprite()
+                if (!borderSize.IsZero && control.BorderColor != null)
                 {
-                    Type = SpriteType.TEXTURE,
-                    Data = "SquareSimple",
-                    Color = control.BackgroundColor,
+                    DrawBorders(control.BorderColor.Value, borderSize, controlTopLeft, borderedControlSize, spriteList);
+                }
+
+                // Add background if color is different than base background color
+                if (control.BackgroundColor != null && control.BackgroundColor != _config.BaseBackgroundColor)
+                {
+                    spriteList.Add(DrawRect(
+                        size: borderedControlSize,
+                        position: new Vector2(controlTopLeft.X, controlTopLeft.Y),
+                        color: control.BackgroundColor.Value
+                    ));
+                }
+
+                // Add text content
+                spriteList.Add(new MySprite()
+                {
+                    Type = SpriteType.TEXT,
+                    Data = content.ToString(),
+                    Color = control.TextColor ?? _config.BaseFontColor,
                     Alignment = TextAlignment.LEFT,
-                    Size = controlSize,
-                    Position = new Vector2(controlTopLeft.X, controlTopLeft.Y + (controlSize.Y / 2))
+                    RotationOrScale = control.FontSize * _config.BaseFontSize,
+                    FontId = fontName,
+                    Position = contentTopLeft
                 });
             }
 
-            // Add text content
-            targetList.Add(new MySprite()
-            {
-                Type = SpriteType.TEXT,
-                Data = content.ToString(),
-                Color = control.TextColor ?? _config.BaseFontColor,
-                Alignment = TextAlignment.LEFT,
-                RotationOrScale = control.FontSize * _config.BaseFontSize,
-                FontId = fontName,
-                Position = contentTopLeft
-            });
-
-            return verticalWritingPosition + controlSize.Y;
+            return verticalWritingPosition + borderedControlSize.Y + marginSize.Vertical;
         }
 
         public float CalculateSize(float baseValue, SizeUnit sizeUnit, float emSize, float viewportSize)
@@ -225,13 +230,58 @@ namespace IngameScript
                     return new Thickness()
                     {
                         Left = viewportWidth * (baseValue.Left / 100),
-                        Right = viewportWidth / (baseValue.Right / 100),
+                        Right = viewportWidth * (baseValue.Right / 100),
                         Top = viewportHeight * (baseValue.Top / 100),
-                        Bottom = viewportHeight / (baseValue.Bottom/ 100),
+                        Bottom = viewportHeight * (baseValue.Bottom/ 100),
                     };
                 default:
                     throw new Exception($"Unknown enum value '{baseValue}' encountered in enum '{baseValue.GetType().Name}'.");
             }
+        }
+
+        private void DrawBorders(Color borderColor, Thickness borderSize, Vector2 topLeftCorner, Vector2 rectangleSize, List<MySprite> spriteList)
+        {
+            // Correction to avoid overlapping border sprites on corners.
+            var horizontalBorderWidth = rectangleSize.X - borderSize.Left - borderSize.Right;
+
+            if (borderSize.Left > 0)
+                spriteList.Add(DrawRect(
+                    position: new Vector2(topLeftCorner.X, topLeftCorner.Y),
+                    size: new Vector2(borderSize.Left, rectangleSize.Y),
+                    color: borderColor));
+
+            if (borderSize.Right > 0)
+                spriteList.Add(DrawRect(
+                    position: new Vector2(topLeftCorner.X + rectangleSize.X - borderSize.Right, topLeftCorner.Y),
+                    size: new Vector2(borderSize.Right, rectangleSize.Y),
+                    color: borderColor));
+
+            if (borderSize.Top > 0)
+                spriteList.Add(DrawRect(
+                    position: new Vector2(topLeftCorner.X + borderSize.Left, topLeftCorner.Y),
+                    size: new Vector2(horizontalBorderWidth, borderSize.Top),
+                    color: borderColor));
+
+            if (borderSize.Bottom > 0)
+                spriteList.Add(DrawRect(
+                    position: new Vector2(topLeftCorner.X + borderSize.Left, topLeftCorner.Y + rectangleSize.Y - borderSize.Bottom),
+                    size: new Vector2(horizontalBorderWidth, borderSize.Bottom),
+                    color: borderColor));
+        }
+
+        private MySprite DrawRect(Vector2 position, Vector2 size, Color color, string spriteName = Sprites.Rectangle)
+        {
+            position.Y += size.Y * 0.5f;
+
+            return new MySprite()
+            {
+                Type = SpriteType.TEXTURE,
+                Data = spriteName,
+                Alignment = TextAlignment.LEFT,
+                Color = color,
+                Position = position,
+                Size = size
+            };
         }
 
         private void AdaptToSurface()

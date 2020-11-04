@@ -5,17 +5,12 @@ namespace IngameScript
 {
     interface IControl : IDisposable
     {
-        bool Visible { get; set; }
+        Visibility Visibility { get; set; }
 
         /// <summary>
         /// Specifies how to apply the offset of the control.
         /// </summary>
         Positioning Positioning { get; set; }
-
-        /// <summary>
-        /// Offsets the control from its position, depending on the positioning specified.
-        /// </summary>
-        Vector2 Offset { get; set; }
 
         Thickness Margin { get; set; }
         SizeUnit MarginUnit { get; set; }

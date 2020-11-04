@@ -7,6 +7,10 @@
         public float Right { get; set; }
         public float Bottom { get; set; }
 
+        public bool IsZero => Left + Top + Right + Bottom == 0;
+        public float Horizontal => Left + Right;
+        public float Vertical => Top + Bottom;
+
         public Thickness(float uniformThickness)
         {
             Left = uniformThickness;

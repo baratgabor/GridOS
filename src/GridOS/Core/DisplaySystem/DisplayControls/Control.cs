@@ -10,17 +10,12 @@ namespace IngameScript
     {
         public event Action<IControl> RedrawRequired;
 
-        public bool Visible { get; set; } = true;
+        public Visibility Visibility { get; set; }
 
         /// <summary>
         /// Specifies how to apply the offset of the control.
         /// </summary>
         public Positioning Positioning { get; set; }
-        
-        /// <summary>
-        /// Offsets the control from its position, depending on the positioning specified.
-        /// </summary>
-        public Vector2 Offset { get; set; }
 
         public float Width { get; set; }
         public SizeUnit WidthUnit { get; set; }
