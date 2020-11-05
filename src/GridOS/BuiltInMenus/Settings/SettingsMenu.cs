@@ -44,7 +44,9 @@ namespace IngameScript
                 new FontTypeCommand(services),
                 new FontSizeCommand(services),
                 new FontColorCommand(services),
-                new BackgroundColorCommand(services)
+                new BackgroundColorCommand(services),
+                new TitleBarVisibilityCommand(services),
+                new BreadcrumbVisibilityCommand(services)
             };
         }
     }

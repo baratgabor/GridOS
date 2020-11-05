@@ -7,9 +7,11 @@ namespace IngameScript
     {
         protected readonly StringBuilder _buffer = new StringBuilder();
         protected readonly ProgressIndicator2 _spinner = new ProgressIndicator2();
+        protected readonly string _displayId;
 
-        public DisplayHeader()
+        public DisplayHeader(string displayId)
         {
+            _displayId = displayId;
             FontSize = 0.6f;
             WidthUnit = SizeUnit.Percent;
             Width = 100;
@@ -25,7 +27,9 @@ namespace IngameScript
         public override StringBuilder GetContent(ContentGenerationHelper _, bool FlushCache = false)
         {
             _buffer.Clear();
-            _buffer.Append("GridOS   ");
+            _buffer.Append("GridOS – ");
+            _buffer.Append(_displayId);
+            _buffer.Append(' ');
             _buffer.Append(_spinner.Get());
             return _buffer;
         }

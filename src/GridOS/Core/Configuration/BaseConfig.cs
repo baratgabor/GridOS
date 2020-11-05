@@ -53,7 +53,7 @@ namespace IngameScript
         public IMyTextSurface OutputSurface { get; set; }
         public float OutputWidth { get { return outputWidth; } set { SetAndNotify(ref outputWidth, nameof(OutputWidth), value); } }
         public float OutputHeight { get { return outputHeight; } set { SetAndNotify(ref outputHeight, nameof(OutputHeight), value); } }
-
+        public string DisplayId { get; set; }
 
         public event Action<string> SettingChanged;
         protected void SetAndNotify<T>(ref T field, string fieldName, T value)

@@ -10,7 +10,12 @@ namespace IngameScript
     {
         public event Action<IControl> RedrawRequired;
 
-        public Visibility Visibility { get; set; }
+        public Visibility Visibility
+        {
+            get { return visibility; }
+            set { visibility = value; OnRedrawRequired(); }
+        }
+        private Visibility visibility;
 
         /// <summary>
         /// Specifies how to apply the offset of the control.

@@ -8,13 +8,14 @@ namespace IngameScript
     /// </summary>
     class DisplayController : IDisposable, IMenuInstanceServices
     {
-        public string Name { get; }
+        public string DisplayId { get; }
         public IDisplayConfig DisplayConfig { get; }
         public IMenuPresentationConfig MenuConfig { get; }
 
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly IView _view;
         private readonly IGlobalEvents _globalEvents;
+        private readonly DisplayHeader _displayHeader;
         private readonly Breadcrumb _breadcrumb;
         private readonly Menu _menu;
 
@@ -22,9 +23,9 @@ namespace IngameScript
         private readonly CommandItem _downCommand;
         private readonly CommandItem _selectCommand;
 
-        public DisplayController(string name, ICommandDispatcher commandDispatcher, BaseConfig config, IMenuGroup menuRoot, IGlobalEvents globalEvents, IMyTextSurface surface)
+        public DisplayController(ICommandDispatcher commandDispatcher, BaseConfig config, IMenuGroup menuRoot, IGlobalEvents globalEvents, IMyTextSurface surface)
         {
-            Name = name;
+            DisplayId = config.DisplayId;
             MenuConfig = config;
             DisplayConfig = config;
             _globalEvents = globalEvents;
@@ -40,18 +41,19 @@ namespace IngameScript
 
                 _globalEvents.ExecutionWillFinish += DisplayTick;
 
-                _upCommand = new CommandItem($"{Name}Up", OnMoveUp);
-                _downCommand = new CommandItem($"{Name}Down", OnMoveDown);
-                _selectCommand = new CommandItem($"{Name}Select", OnSelect);
+                _upCommand = new CommandItem($"{DisplayId}Up", OnMoveUp);
+                _downCommand = new CommandItem($"{DisplayId}Down", OnMoveDown);
+                _selectCommand = new CommandItem($"{DisplayId}Select", OnSelect);
 
                 _menu = new Menu(
                     new MenuModel(menuRoot, this),
                     config);
+                _displayHeader = new DisplayHeader(DisplayId);
                 _breadcrumb = new Breadcrumb(config);
                 _menu.NavigationPathChanged += _breadcrumb.OnPathChanged;
 
                 _view
-                    .AddControl(new DisplayHeader())
+                    .AddControl(_displayHeader)
                     .AddControl(_breadcrumb)
                     .AddControl(_menu);
 
@@ -83,6 +85,28 @@ namespace IngameScript
 
         public void SetBackgroundColor(Color color)
             => _view.SetBackgroundColor(color);
+
+        public bool GetTitleBarVisiblity()
+            => _displayHeader.Visibility == Visibility.Visible;
+
+        public bool GetBreadcrumbVisiblity()
+            => _breadcrumb.Visibility == Visibility.Visible;
+
+        public void SetTitleBarVisiblity(bool visible)
+        {
+            if (visible)
+                _displayHeader.Visibility = Visibility.Visible;
+            else
+                _displayHeader.Visibility = Visibility.NotRendered;
+        }
+
+        public void SetBreadcrumbVisibility(bool visible)
+        {
+            if (visible)
+                _breadcrumb.Visibility = Visibility.Visible;
+            else
+                _breadcrumb.Visibility = Visibility.NotRendered;
+        }
 
         public void Dispose()
         {

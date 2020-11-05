@@ -4,6 +4,7 @@ namespace IngameScript
 {
     public interface IDisplayConfig
     {
+        string DisplayId { get; }
         float BaseFontSize { get; }
         string BaseFontName { get;}
 

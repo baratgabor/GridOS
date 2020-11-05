@@ -38,10 +38,12 @@ namespace IngameScript
 
             try
             {
-                var instanceConfig = new BaseConfig();
+                var instanceConfig = new BaseConfig
+                {
+                    DisplayId = NextControllerName()
+                };
 
                 controller = new DisplayController(
-                    NextControllerName(),
                     _commandDispatcher,
                     instanceConfig,
                     _menuRoot,

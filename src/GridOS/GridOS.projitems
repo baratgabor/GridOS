@@ -13,10 +13,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\LogMenu\Modules\LogList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\BackgroundColorCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\Base\ConfigurationCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\BreadcrumbVisibilityCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\FontColorCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\FontSizeCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\FontTypeCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\LogLevelCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\Commands\TitleBarVisibilityCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInMenus\Settings\SettingsMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\CommandExecution\ICommandDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\Common\Diagnostics\GridProgramDiagnostics.cs" />

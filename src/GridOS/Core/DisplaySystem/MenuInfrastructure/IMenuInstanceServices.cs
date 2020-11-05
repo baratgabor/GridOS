@@ -11,5 +11,9 @@
         void SetFontColor(Color color);
         void SetBackgroundColor(Color color);
         void SetFontType(string fontName);
+        bool GetTitleBarVisiblity();
+        bool GetBreadcrumbVisiblity();
+        void SetTitleBarVisiblity(bool visible);
+        void SetBreadcrumbVisibility(bool visible);
     }
 }
