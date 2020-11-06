@@ -20,6 +20,11 @@ namespace IngameScript
         void RemoveChild(IMenuItem item);
 
         /// <summary>
+        /// Removes all children from this group.
+        /// </summary>
+        void ClearChildren();
+
+        /// <summary>
         /// Returns the list of children.
         /// </summary>
         IEnumerable<IMenuItem> GetChildren(IMenuInstance menuInstance = null);

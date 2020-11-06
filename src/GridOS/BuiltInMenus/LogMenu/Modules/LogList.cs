@@ -41,7 +41,7 @@ namespace IngameScript
 
         private void ResetList()
         {
-            _children.Clear();
+            ClearChildren();
             AddChild(_clearCommand);
             SetLabel();
         }

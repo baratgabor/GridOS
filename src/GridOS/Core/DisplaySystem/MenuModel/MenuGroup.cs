@@ -43,6 +43,14 @@ namespace IngameScript
             ChildrenChanged?.Invoke(this);
         }
 
+        public void ClearChildren()
+        {
+            for (int i = 0; i < _children.Count; i++)
+            {
+                RemoveChild(_children[i]);
+            }
+        }
+
         public virtual void Open(IMenuInstance menuInstance = null)
         {
             _openedBy++;
