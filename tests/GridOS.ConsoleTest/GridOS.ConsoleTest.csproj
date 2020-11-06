@@ -49,6 +49,8 @@
     <Compile Include="TestFakes\FakeProgrammableBlock.cs" />
     <Compile Include="TestFakes\FakeRuntimeInfo.cs" />
     <Compile Include="TestFakes\FakeDisplay.cs" />
+    <Compile Include="TestFakes\FakeTerminalBlock.cs" />
+    <Compile Include="TestFakes\FakeTextSurfaceProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GridOS.ConsoleTest.TestFakes;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -35,6 +36,15 @@ namespace IngameScript
                     Runtime = new FakeRuntimeInfo(),
                     Me = new FakeProgrammableBlock(),
                     GridTerminalSystem = new FakeGridTerminalSystem()
+                    {
+                        FakeBlocks = new List<IMyTerminalBlock>()
+                        {
+                            new FakeDisplay() { DisplayName = "FakeLcd1" },
+                            new FakeDisplay() { DisplayName = "FakeLcd2" },
+                            new FakeDisplay() { DisplayName = "FakeLcd3" },
+                            new FakeTextSurfaceProvider()
+                        }
+                    }
                 });
                 gridOS.RegisterModule(new TestModule());
                 gridOS.RegisterTextSurface(_fakeDisplay);

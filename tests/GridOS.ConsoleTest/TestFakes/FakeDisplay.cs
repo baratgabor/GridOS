@@ -5,7 +5,7 @@ using System.Text;
 
 namespace IngameScript
 {
-    internal class FakeDisplay : IMyTextSurface
+    internal class FakeDisplay : FakeTerminalBlock, IMyTextSurface
     {
         public event Action<string> TextWritten;
         private List<MySprite> _spritesReceived = new List<MySprite>();
@@ -19,10 +19,6 @@ namespace IngameScript
         public string Font { get; set; }
         public float ChangeInterval { get; set; }
         public byte BackgroundAlpha { get; set; }
-
-        public string Name { get; set; }
-
-        public string DisplayName { get; set; }
 
         public string CurrentlyShownImage { get; set; }
         public Color ScriptForegroundColor { get; set; }
