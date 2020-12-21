@@ -12,16 +12,30 @@
 
 ## Menu Demo
 
-A short demonstration of the menu handling capabilities, which includes: traversing tree structures, automatic word-wrapping, prefix and suffix bullet characters based on item type, auto-scrolling, and displaying navigation breadcrumbs. This demo doesn't cover other existing capabilities, e.g. executing commands and displaying automatically updating text.
+A short demonstration of the menu handling capabilities, which includes: traversing tree structures, automatic word-wrapping, prefix and suffix bullet characters based on item type, auto-scrolling, displaying navigation breadcrumbs, etc. This demo doesn't cover other existing capabilities, e.g. displaying automatically updating text.
+
+The script has been updated to utilize the game's relatively new low-level graphics API, instead of the initial text-based implementation.
 
 ![GridOS Menu system demo](docs/GridOS_Menu_Demo.gif)
+
+(Yes, it has an integrated log with customizable logging level. Every developer's dream. 😅)
 
 ## Summary
 GridOS is a modular multitasking and command handling ingame script for Space Engineers. This script provides a framework for creating separate code modules to run on a single Programmable Block.
 
 Additionally, it provides access to a highly flexible hierarchical menu system that implements intelligent automatic screen updates (when the underlying data changes), and supports showing different parts of the same menu hierarchy on different displays (additional displays can be added or removed dynamically at runtime).
 
-From time to time expect some breaking changes to the consumer-facing interfaces. I don't think anyone besides me is using this script currently, so there doesn't seem to be any reason to be careful yet.
+From time to time expect some breaking changes to the consumer-facing interfaces. I don't think anyone besides me is using this script currently, so there doesn't seem to be any reason to be careful yet. I'm taking long breaks from the project, but I'll strive to produce a release version sometimes in the future.
+
+## Current state, development focus: GUI
+
+The script has been updated to a graphical interface from the initial text-based one, utilizing Space Engineer's new low-level sprite API. This makes it somewhat more presentable and increases its customizability. I basically implemented a simple GUI system, where the screen consists of controls, and each control describes its appearance via familiar properties like colors, margin, padding and text size, supporting multiple units, e.g. screen percentage, pixel, and em (relative to the base font size).
+
+This is already quite flexible in some ways, but with this implementation controls are still essentially just text boxes, and I realized that a significantly wider range of GUI-capabilities could be well utilized. So the next step is to redesign the rendering logic to make each control draw itself. This will allow controls to contain shapes, or other nested controls, thus unlocking the ability to implement even layout elements, like stackpanels in WPF. After this feature is added, I can start implementing various utility controls, e.g. sliders and pop-ups.
+
+Subsequently I plan to implement the ability to add, remove and customize LCD panels directly in the menu system, including selecting which controls should be visible on which LCDs. This would allow, for example, to display a certain inventory content on a certain LCD, or any combination of supported controls, without the entire menu (since the menu itself is also just a control).
+
+One problem is that this project is already too complex for an in-game script (even if it runs well), and I constantly struggle with the script length limitation, especially considering that the custom code written by users will require space as well. Possibly I'll have to make this into a mod.
 
 ## Architecture
 
